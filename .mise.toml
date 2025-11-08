@@ -1,0 +1,312 @@
+# ============================================================================
+# Talos Cluster Automation with mise
+# ============================================================================
+# This file provides task automation for managing a Talos Linux Kubernetes
+# cluster with 3 control plane nodes.
+#
+# Quick Start (New Cluster):
+#   1. mise run gen-cluster     # Generate secrets + configs
+#   2. mise run init            # Initialize cluster
+#   3. mise run health          # Verify health
+#
+# Update Existing Cluster:
+#   1. mise run update          # Regenerate configs (keeps secrets)
+#   2. mise run apply           # Apply to all nodes
+#   3. mise run health          # Verify health
+# ============================================================================
+
+# === Environment Variables ===
+
+[env]
+URD_IP = "192.168.0.120"
+VERDANDI_IP = "192.168.0.121"
+SKULD_IP = "192.168.0.122"
+CONTROL_PLANE_ENDPOINT = "https://192.168.0.120:6443"
+
+# ============================================================================
+# PHASE 1: Image & Extension Management
+# ============================================================================
+# These tasks help you create custom Talos images with system extensions
+# via the Talos Image Factory.
+
+[tasks.generate-schematic]
+description = "Generate schematic ID from extensions.yaml"
+run = """
+echo "==> Generating schematic from extensions.yaml..."
+SCHEMATIC_ID=$(curl -X POST --data-binary @src/talos/extensions.yaml https://factory.talos.dev/schematics)
+
+echo ""
+echo "✓ Schematic ID: $SCHEMATIC_ID"
+echo ""
+echo "==> Download URLs:"
+echo "SecureBoot ISO:"
+echo "  https://factory.talos.dev/image/$SCHEMATIC_ID/v1.11.5/metal-amd64-secureboot.iso"
+echo ""
+echo "Installer image for image.yaml:"
+echo "  factory.talos.dev/installer-secureboot/$SCHEMATIC_ID:v1.11.5"
+echo ""
+echo "⚠️  Next steps:"
+echo "1. Download the SecureBoot ISO from the URL above"
+echo "2. Update src/talos/patches/image.yaml with the installer path"
+echo "3. Run 'mise run update' to regenerate configs with new image"
+"""
+
+# ============================================================================
+# PHASE 2: Configuration Generation (New Cluster)
+# ============================================================================
+# These tasks generate the initial cluster configuration files.
+# Only run these when setting up a NEW cluster.
+
+[tasks.gen-secrets]
+description = "Generate Talos secrets (NEW CLUSTER ONLY)"
+run = """
+if [ -f secrets.yaml ]; then
+  echo "❌ secrets.yaml already exists!"
+  echo ""
+  echo "This file contains cluster CA certificates and keys."
+  echo "Regenerating it will DESTROY your existing cluster."
+  echo ""
+  echo "To force regeneration, delete secrets.yaml first."
+  exit 1
+fi
+echo "==> Generating cluster secrets..."
+talosctl gen secrets -o secrets.yaml
+echo "✓ secrets.yaml created"
+"""
+
+[tasks.gen-config]
+description = "Generate Talos machine configs from secrets and patches"
+run = """
+if [ ! -f secrets.yaml ]; then
+  echo "❌ secrets.yaml not found!"
+  echo "Run 'mise run gen-secrets' first to create secrets for a new cluster."
+  exit 1
+fi
+
+echo "==> Generating base machine configs..."
+talosctl gen config \
+  --with-secrets secrets.yaml \
+  --config-patch-control-plane @src/talos/patches/scheduling.yaml \
+  --config-patch @src/talos/patches/image.yaml \
+  --config-patch @src/talos/patches/kubelet.yaml \
+  norns ${CONTROL_PLANE_ENDPOINT} --force
+
+echo "==> Patching node-specific configs (hostnames)..."
+talosctl machineconfig patch controlplane.yaml \
+  --patch @src/talos/patches/network-urd.yaml \
+  --output controlplane-urd.yaml
+
+talosctl machineconfig patch controlplane.yaml \
+  --patch @src/talos/patches/network-verdandi.yaml \
+  --output controlplane-verdandi.yaml
+
+talosctl machineconfig patch controlplane.yaml \
+  --patch @src/talos/patches/network-skuld.yaml \
+  --output controlplane-skuld.yaml
+
+echo ""
+echo "✓ Configuration files generated:"
+echo "  - controlplane.yaml (base config)"
+echo "  - controlplane-urd.yaml"
+echo "  - controlplane-verdandi.yaml"
+echo "  - controlplane-skuld.yaml"
+echo "  - talosconfig (CLI config)"
+"""
+
+[tasks.gen-cluster]
+description = "Generate complete cluster config (NEW CLUSTER ONLY)"
+alias = "gc"
+depends = ["gen-secrets", "gen-config"]
+
+# ============================================================================
+# PHASE 3: Configuration Updates (Existing Cluster)
+# ============================================================================
+# These tasks regenerate configs while preserving secrets.
+# Use these when modifying patches or updating images.
+
+[tasks.update]
+description = "Regenerate configs after changing patches (preserves secrets)"
+depends = ["gen-config"]
+
+# ============================================================================
+# PHASE 4: Cluster Initialization (New Cluster)
+# ============================================================================
+# These tasks bootstrap a new cluster from freshly wiped nodes.
+
+[tasks.init-cluster]
+description = "Initialize new cluster (apply + bootstrap + kubeconfig + setup)"
+alias = "init"
+run = """
+echo "╔════════════════════════════════════════════════════════════════╗"
+echo "║           Initializing Talos Cluster: norns                   ║"
+echo "╚════════════════════════════════════════════════════════════════╝"
+echo ""
+
+echo "==> [1/6] Applying configs to all nodes..."
+talosctl apply-config --insecure --nodes ${URD_IP} --file controlplane-urd.yaml
+talosctl apply-config --insecure --nodes ${VERDANDI_IP} --file controlplane-verdandi.yaml
+talosctl apply-config --insecure --nodes ${SKULD_IP} --file controlplane-skuld.yaml
+echo "✓ Configs applied"
+echo ""
+
+echo "==> [2/6] Configuring talosconfig endpoints..."
+talosctl config endpoint ${URD_IP} ${VERDANDI_IP} ${SKULD_IP} --talosconfig ./talosconfig
+echo "✓ Endpoints configured"
+echo ""
+
+echo "==> [3/6] Bootstrapping etcd on urd..."
+talosctl bootstrap --nodes ${URD_IP} --talosconfig ./talosconfig
+echo "✓ Bootstrap initiated"
+echo ""
+
+echo "==> [4/6] Waiting for cluster to be ready (30s)..."
+sleep 30
+echo "✓ Wait complete"
+echo ""
+
+echo "==> [5/6] Generating kubeconfig..."
+talosctl --nodes ${URD_IP} --talosconfig ./talosconfig kubeconfig . --force
+echo "✓ kubeconfig generated"
+echo ""
+
+echo "==> [6/6] Installing configs to home directory..."
+mkdir -p ~/.talos
+cp ./talosconfig ~/.talos/config
+echo "  ✓ talosconfig → ~/.talos/config"
+
+mkdir -p ~/.kube
+cp ./kubeconfig ~/.kube/config
+echo "  ✓ kubeconfig → ~/.kube/config"
+echo ""
+
+echo "╔════════════════════════════════════════════════════════════════╗"
+echo "║                  Cluster Initialized! 🎉                       ║"
+echo "╚════════════════════════════════════════════════════════════════╝"
+echo ""
+echo "Next steps:"
+echo "  - Run 'mise run health' to verify cluster health"
+echo "  - Run 'kubectl get nodes' to see your nodes"
+"""
+
+# ============================================================================
+# PHASE 5: Node Configuration Management (Existing Cluster)
+# ============================================================================
+# These tasks apply configuration updates to running nodes.
+
+[tasks.apply-all]
+description = "Apply configs to all nodes (existing cluster)"
+alias = "apply"
+run = """
+echo "==> Applying configs to all nodes..."
+talosctl apply-config --nodes ${URD_IP} --file controlplane-urd.yaml
+echo "  ✓ urd (${URD_IP})"
+
+talosctl apply-config --nodes ${VERDANDI_IP} --file controlplane-verdandi.yaml
+echo "  ✓ verdandi (${VERDANDI_IP})"
+
+talosctl apply-config --nodes ${SKULD_IP} --file controlplane-skuld.yaml
+echo "  ✓ skuld (${SKULD_IP})"
+
+echo ""
+echo "✓ All nodes updated"
+"""
+
+[tasks.apply-urd]
+description = "Apply config to urd only"
+run = "talosctl apply-config --nodes ${URD_IP} --file controlplane-urd.yaml"
+
+[tasks.apply-verdandi]
+description = "Apply config to verdandi only"
+run = "talosctl apply-config --nodes ${VERDANDI_IP} --file controlplane-verdandi.yaml"
+
+[tasks.apply-skuld]
+description = "Apply config to skuld only"
+run = "talosctl apply-config --nodes ${SKULD_IP} --file controlplane-skuld.yaml"
+
+# ============================================================================
+# PHASE 6: Cluster Operations & Maintenance
+# ============================================================================
+# These tasks perform operational tasks on a running cluster.
+
+[tasks.health-check]
+description = "Check cluster health (Talos + Kubernetes)"
+alias = "health"
+run = """
+echo "╔════════════════════════════════════════════════════════════════╗"
+echo "║                    Cluster Health Check                       ║"
+echo "╚════════════════════════════════════════════════════════════════╝"
+echo ""
+
+echo "=== Talos Health ==="
+talosctl --nodes ${URD_IP} health \
+  --control-plane-nodes ${URD_IP},${VERDANDI_IP},${SKULD_IP}
+
+echo ""
+echo "=== Kubernetes Nodes ==="
+kubectl get nodes -o wide
+
+echo ""
+echo "=== System Pods ==="
+kubectl get pods -A
+"""
+
+[tasks.upgrade]
+description = "Upgrade all nodes to new Talos version (requires TALOS_IMAGE env var)"
+run = """
+if [ -z "$TALOS_IMAGE" ]; then
+  echo "❌ TALOS_IMAGE environment variable not set"
+  echo ""
+  echo "Usage:"
+  echo "  TALOS_IMAGE=factory.talos.dev/installer-secureboot/<schematic>:v1.11.5 mise run upgrade"
+  echo ""
+  echo "Get the installer image from 'mise run generate-schematic'"
+  exit 1
+fi
+
+echo "==> Upgrading all nodes to: $TALOS_IMAGE"
+echo ""
+
+echo "==> Upgrading urd (${URD_IP})..."
+talosctl upgrade --nodes ${URD_IP} --image "$TALOS_IMAGE" --preserve
+echo "✓ urd upgraded"
+echo ""
+
+echo "==> Upgrading verdandi (${VERDANDI_IP})..."
+talosctl upgrade --nodes ${VERDANDI_IP} --image "$TALOS_IMAGE" --preserve
+echo "✓ verdandi upgraded"
+echo ""
+
+echo "==> Upgrading skuld (${SKULD_IP})..."
+talosctl upgrade --nodes ${SKULD_IP} --image "$TALOS_IMAGE" --preserve
+echo "✓ skuld upgraded"
+echo ""
+
+echo "✓ All nodes upgraded to $TALOS_IMAGE"
+"""
+
+# ============================================================================
+# PHASE 7: Disaster Recovery
+# ============================================================================
+# These tasks help with cluster recovery and troubleshooting.
+
+[tasks.reset-node]
+description = "Reset a specific node (requires NODE env var)"
+run = """
+if [ -z "$NODE" ]; then
+  echo "❌ NODE environment variable not set"
+  echo ""
+  echo "Usage:"
+  echo "  NODE=192.168.0.120 mise run reset-node"
+  exit 1
+fi
+
+echo "⚠️  WARNING: This will wipe all data on node $NODE"
+read -p "Are you sure? (yes/no): " confirm
+if [ "$confirm" != "yes" ]; then
+  echo "Aborted"
+  exit 0
+fi
+
+talosctl reset --nodes $NODE --graceful=false
+echo "✓ Node $NODE has been reset"
+"""

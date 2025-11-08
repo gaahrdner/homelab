@@ -1,0 +1,25 @@
+# Talos secrets and sensitive configs
+secrets.yaml
+talosconfig
+*.backup
+
+# Generated node configurations
+controlplane.yaml
+controlplane-urd.yaml
+controlplane-verdandi.yaml
+controlplane-skuld.yaml
+worker.yaml
+
+# Kubernetes config
+kubeconfig
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
