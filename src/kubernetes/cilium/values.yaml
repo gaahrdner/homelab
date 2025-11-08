@@ -1,0 +1,72 @@
+# Cilium v1.18.3 Configuration for Talos Linux Homelab
+# Documentation: https://docs.cilium.io/
+
+# ============================================================================
+# API Server Access (required for Talos)
+# ============================================================================
+k8sServiceHost: 192.168.0.120
+k8sServicePort: 6443
+
+# ============================================================================
+# IPAM Configuration
+# ============================================================================
+ipam:
+  mode: kubernetes
+
+# ============================================================================
+# Kube-Proxy Replacement
+# ============================================================================
+# Note: Will fully take effect after disabling kube-proxy in Talos config
+kubeProxyReplacement: true
+
+# ============================================================================
+# Gateway API Support
+# ============================================================================
+gatewayAPI:
+  enabled: true
+
+# ============================================================================
+# Hubble Observability
+# ============================================================================
+hubble:
+  enabled: true
+
+  relay:
+    enabled: true
+    rollOutPods: true
+
+  ui:
+    enabled: true
+    rollOutPods: true
+    ingress:
+      enabled: false  # Can expose via Gateway API instead
+
+# ============================================================================
+# Security
+# ============================================================================
+securityContext:
+  capabilities:
+    ciliumAgent:
+      - CHOWN
+      - KILL
+      - NET_ADMIN
+      - NET_RAW
+      - IPC_LOCK
+      - SYS_ADMIN
+      - SYS_RESOURCE
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETGID
+      - SETUID
+    cleanCiliumState:
+      - NET_ADMIN
+      - SYS_ADMIN
+      - SYS_RESOURCE
+
+# ============================================================================
+# Talos-Specific Settings
+# ============================================================================
+cgroup:
+  autoMount:
+    enabled: false
+  hostRoot: /sys/fs/cgroup

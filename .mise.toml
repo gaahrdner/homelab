@@ -128,6 +128,88 @@ depends = ["gen-secrets", "gen-config"]
 description = "Regenerate configs after changing patches (preserves secrets)"
 depends = ["gen-config"]
 
+[tasks.setup-networking]
+description = "Complete networking setup (Gateway API + Cilium + enable as default CNI)"
+run = """
+echo "╔════════════════════════════════════════════════════════════════╗"
+echo "║              Setting Up Cluster Networking                     ║"
+echo "╚════════════════════════════════════════════════════════════════╝"
+echo ""
+
+echo "==> [1/5] Installing Gateway API CRDs..."
+kubectl apply -f src/kubernetes/gateway-api/crds.yaml
+echo "✓ Gateway API CRDs installed"
+echo ""
+
+echo "==> [2/5] Installing Cilium with Hubble and Gateway API support..."
+helm install cilium cilium/cilium --version 1.18.3 \
+  --namespace kube-system \
+  --values src/kubernetes/cilium/values.yaml
+echo "✓ Cilium installed"
+echo ""
+
+echo "==> [3/5] Waiting for Cilium to be ready..."
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=cilium-agent -n kube-system --timeout=180s
+echo "✓ Cilium is ready"
+echo ""
+
+echo "==> [4/5] Regenerating Talos configs to disable default CNI and kube-proxy..."
+talosctl gen config \
+  --with-secrets secrets.yaml \
+  --config-patch-control-plane @src/talos/patches/scheduling.yaml \
+  --config-patch @src/talos/patches/image.yaml \
+  --config-patch @src/talos/patches/kubelet.yaml \
+  --config-patch @src/talos/patches/cilium.yaml \
+  norns ${CONTROL_PLANE_ENDPOINT} --force
+
+talosctl machineconfig patch controlplane.yaml \
+  --patch @src/talos/patches/network-urd.yaml \
+  --output controlplane-urd.yaml
+
+talosctl machineconfig patch controlplane.yaml \
+  --patch @src/talos/patches/network-verdandi.yaml \
+  --output controlplane-verdandi.yaml
+
+talosctl machineconfig patch controlplane.yaml \
+  --patch @src/talos/patches/network-skuld.yaml \
+  --output controlplane-skuld.yaml
+
+echo "✓ Configs regenerated with Cilium enabled"
+echo ""
+
+echo "==> [2/4] Applying configs to all nodes..."
+talosctl apply-config --nodes ${URD_IP} --file controlplane-urd.yaml
+talosctl apply-config --nodes ${VERDANDI_IP} --file controlplane-verdandi.yaml
+talosctl apply-config --nodes ${SKULD_IP} --file controlplane-skuld.yaml
+echo "✓ Configs applied"
+echo ""
+
+echo "==> [3/4] Rebooting all nodes to apply changes..."
+talosctl reboot --nodes ${SKULD_IP} --wait
+echo "  ✓ skuld rebooted"
+talosctl reboot --nodes ${VERDANDI_IP} --wait
+echo "  ✓ verdandi rebooted"
+talosctl reboot --nodes ${URD_IP} --wait
+echo "  ✓ urd rebooted"
+echo ""
+
+echo "==> [5/5] Verifying kube-proxy is gone..."
+sleep 10
+kubectl get pods -n kube-system | grep kube-proxy && echo "❌ kube-proxy still running!" || echo "✓ kube-proxy removed"
+echo ""
+
+echo "╔════════════════════════════════════════════════════════════════╗"
+echo "║          Networking Setup Complete! 🎉                         ║"
+echo "╚════════════════════════════════════════════════════════════════╝"
+echo ""
+echo "✓ Gateway API CRDs installed"
+echo "✓ Cilium with Hubble and Gateway API support installed"
+echo "✓ Cilium is now the sole CNI (Flannel and kube-proxy removed)"
+echo ""
+echo "Next steps:"
+echo "  - Install MetalLB for LoadBalancer support"
+"""
+
 # ============================================================================
 # PHASE 4: Cluster Initialization (New Cluster)
 # ============================================================================

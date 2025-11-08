@@ -34,6 +34,7 @@ A GitOps-managed Kubernetes homelab cluster running on Talos Linux.
 3. Generate a cluster configuration: `mise run gen-cluster`
 4. Initialize the cluster (applies configs, bootstraps, sets up kubeconfig): `mise run init`
 5. Verify the health: `mise run health`
+6. Setup networking (Gateway API, Cilium CNI, Hubble): `mise run setup-networking`
 
 ### Existing Cluster Updates
 
@@ -51,6 +52,7 @@ A GitOps-managed Kubernetes homelab cluster running on Talos Linux.
 - `patches/network-urd.yaml` - Hostname for urd node
 - `patches/network-verdandi.yaml` - Hostname for verdandi node
 - `patches/network-skuld.yaml` - Hostname for skuld node
+- `patches/cilium.yaml` - Disable default CNI and kube-proxy (applied during `mise run setup-networking`)
 
 ### System Extensions (`src/talos/extensions.yaml`)
 
