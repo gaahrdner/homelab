@@ -42,7 +42,8 @@ mise run generate-schematic   # Generate custom Talos image with extensions
 mise run gen-cluster          # Generate secrets + configs (NEW CLUSTER ONLY)
 mise run init                 # Initialize cluster (apply + bootstrap + kubeconfig)
 mise run health               # Verify cluster health
-mise run setup-networking     # Install Gateway API, Cilium CNI, Hubble (with node reboots)
+mise run setup-networking     # Install Gateway API, Cilium CNI, Hubble, L2 (with node reboots)
+mise run setup-loadbalancer   # Configure LoadBalancer IP pool (192.168.0.200-253)
 ```
 
 ### Existing Cluster Updates
@@ -82,7 +83,7 @@ The cluster uses Cilium as the CNI with the following components:
 - **Gateway API v1.2.1**: Modern ingress/routing (replaces traditional Ingress)
 - **Cilium v1.18.3**: CNI with kube-proxy replacement, eBPF-based networking
 - **Hubble**: Network observability (relay + UI)
-- **MetalLB**: LoadBalancer implementation (IP range: 192.168.0.200-253) - To be installed
+- **Cilium L2 Announcements**: LoadBalancer IP advertisement via ARP (IP range: 192.168.0.200-253)
 
 **CRITICAL: Network Setup Must Follow This Exact Order**
 
@@ -102,11 +103,13 @@ You CANNOT bootstrap a Kubernetes cluster without a working CNI. Therefore, the 
 **Automated Setup**:
 The `mise run setup-networking` command handles all 5 steps automatically. It:
 - Downloads and applies Gateway API CRDs from `src/kubernetes/gateway-api/`
-- Installs Cilium via Helm using values from `src/kubernetes/cilium/values.yaml`
+- Installs Cilium via Helm using values from `src/kubernetes/cilium/values.yaml` (includes L2 announcements)
 - Waits for Cilium to be ready
 - Regenerates Talos configs with the `cilium.yaml` patch
 - Reboots all nodes to complete the transition
 - Verifies kube-proxy removal
+
+After networking is set up, run `mise run setup-loadbalancer` to configure the LoadBalancer IP pool.
 
 ### Configuration Management
 

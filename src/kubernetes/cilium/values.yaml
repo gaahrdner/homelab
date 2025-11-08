@@ -64,6 +64,17 @@ securityContext:
       - SYS_RESOURCE
 
 # ============================================================================
+# L2 Announcements (LoadBalancer IP advertisement via ARP)
+# ============================================================================
+l2announcements:
+  enabled: true
+
+# Increase API rate limits for L2 announcements
+k8sClientRateLimit:
+  qps: 10
+  burst: 20
+
+# ============================================================================
 # Talos-Specific Settings
 # ============================================================================
 cgroup:

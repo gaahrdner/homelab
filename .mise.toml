@@ -203,11 +203,32 @@ echo "║          Networking Setup Complete! 🎉                         ║"
 echo "╚════════════════════════════════════════════════════════════════╝"
 echo ""
 echo "✓ Gateway API CRDs installed"
-echo "✓ Cilium with Hubble and Gateway API support installed"
+echo "✓ Cilium with Hubble, Gateway API, and L2 announcements installed"
 echo "✓ Cilium is now the sole CNI (Flannel and kube-proxy removed)"
 echo ""
 echo "Next steps:"
-echo "  - Install MetalLB for LoadBalancer support"
+echo "  - Configure LoadBalancer IP pool: mise run setup-loadbalancer"
+"""
+
+[tasks.setup-loadbalancer]
+description = "Configure Cilium L2 announcements for LoadBalancer IPs (192.168.0.200-253)"
+run = """
+echo "╔════════════════════════════════════════════════════════════════╗"
+echo "║        Configuring LoadBalancer IP Pool (Cilium L2)           ║"
+echo "╚════════════════════════════════════════════════════════════════╝"
+echo ""
+
+echo "==> Applying Cilium LoadBalancer IP pool and L2 announcement policy..."
+kubectl apply -f src/kubernetes/cilium-loadbalancer/ippool.yaml
+echo "✓ IP pool configured (192.168.0.200-253)"
+echo ""
+
+echo "╔════════════════════════════════════════════════════════════════╗"
+echo "║          LoadBalancer Setup Complete! 🎉                       ║"
+echo "╚════════════════════════════════════════════════════════════════╝"
+echo ""
+echo "LoadBalancer services will now receive IPs from 192.168.0.200-253"
+echo "IPs are announced via L2 (ARP) on eno* interfaces"
 """
 
 # ============================================================================

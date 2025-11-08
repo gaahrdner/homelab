@@ -1,0 +1,23 @@
+apiVersion: cilium.io/v2alpha1
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: default-pool
+spec:
+  blocks:
+  - cidr: 192.168.0.200/29  # 192.168.0.200-207 (8 IPs)
+  - cidr: 192.168.0.208/28  # 192.168.0.208-223 (16 IPs)
+  - cidr: 192.168.0.224/27  # 192.168.0.224-255 (32 IPs, but ending at .253)
+    # Total range: 192.168.0.200-253 (54 usable IPs)
+---
+apiVersion: cilium.io/v2alpha1
+kind: CiliumL2AnnouncementPolicy
+metadata:
+  name: default-l2-policy
+spec:
+  loadBalancerIPs: true
+  interfaces:
+  - ^eno.*
+  nodeSelector:
+    matchExpressions:
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists

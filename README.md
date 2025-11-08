@@ -34,7 +34,8 @@ A GitOps-managed Kubernetes homelab cluster running on Talos Linux.
 3. Generate a cluster configuration: `mise run gen-cluster`
 4. Initialize the cluster (applies configs, bootstraps, sets up kubeconfig): `mise run init`
 5. Verify the health: `mise run health`
-6. Setup networking (Gateway API, Cilium CNI, Hubble): `mise run setup-networking`
+6. Setup networking (Gateway API, Cilium CNI, Hubble, L2 announcements): `mise run setup-networking`
+7. Configure LoadBalancer IP pool: `mise run setup-loadbalancer`
 
 ### Existing Cluster Updates
 
