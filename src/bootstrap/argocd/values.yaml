@@ -1,0 +1,33 @@
+# ArgoCD v7.7.12 Configuration for Homelab
+# Documentation: https://argo-cd.readthedocs.io/
+
+global:
+  domain: argocd.homelab.local
+
+# Server configuration
+server:
+  # Expose via LoadBalancer
+  service:
+    type: LoadBalancer
+    annotations: {}
+
+  # Enable insecure mode (no TLS) for simplicity
+  # Access via http://LOADBALANCER_IP
+  extraArgs:
+    - --insecure
+
+# Disable dex (OAuth) for single-user setup
+dex:
+  enabled: false
+
+# Disable notifications controller (not needed for homelab)
+notifications:
+  enabled: false
+
+# Application controller - manages sync
+controller:
+  replicas: 1
+
+# Redis for caching
+redis:
+  enabled: true

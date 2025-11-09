@@ -37,14 +37,25 @@ This is a Kubernetes homelab cluster running on Talos Linux. The cluster is name
 All cluster management is done through `mise` tasks. Run `mise tasks` to see all available commands.
 
 ### New Cluster Setup
+
+**Required - 3 Commands:**
+
 ```bash
-mise run generate-schematic   # Generate custom Talos image with extensions
 mise run gen-cluster          # Generate secrets + configs (NEW CLUSTER ONLY)
 mise run init                 # Initialize cluster (apply + bootstrap + kubeconfig)
-mise run health               # Verify cluster health
-mise run setup-networking     # Install Gateway API, Cilium CNI, Hubble, L2 (with node reboots)
-mise run setup-loadbalancer   # Configure LoadBalancer IP pool (192.168.0.200-253)
+mise run setup-networking     # Setup Gateway API + Cilium CNI (with node reboots)
 ```
+
+**That's it!** You now have a working Kubernetes cluster with Cilium networking.
+
+**Optional - GitOps with ArgoCD:**
+
+```bash
+# First: Update src/bootstrap/argocd/root-app.yaml with your GitHub repo URL
+mise run bootstrap-gitops     # Install ArgoCD (manages apps in src/apps/)
+```
+
+**After ArgoCD is installed:** All apps in `src/apps/` are auto-synced from Git. Just `git push` to deploy.
 
 ### Existing Cluster Updates
 ```bash
@@ -102,14 +113,43 @@ You CANNOT bootstrap a Kubernetes cluster without a working CNI. Therefore, the 
 
 **Automated Setup**:
 The `mise run setup-networking` command handles all 5 steps automatically. It:
-- Downloads and applies Gateway API CRDs from `src/kubernetes/gateway-api/`
-- Installs Cilium via Helm using values from `src/kubernetes/cilium/values.yaml` (includes L2 announcements)
+- Applies Gateway API CRDs from `src/bootstrap/gateway-api/`
+- Installs Cilium via Helm using values from `src/bootstrap/cilium/values.yaml` (includes L2 announcements)
 - Waits for Cilium to be ready
 - Regenerates Talos configs with the `cilium.yaml` patch
-- Reboots all nodes to complete the transition
+- Applies configs and reboots all nodes to complete the transition
 - Verifies kube-proxy removal
 
-After networking is set up, run `mise run setup-loadbalancer` to configure the LoadBalancer IP pool.
+After `setup-networking`, you have a working cluster. LoadBalancer and application management is handled separately by ArgoCD (optional).
+
+### GitOps with ArgoCD (Optional)
+
+ArgoCD is **optional** but recommended for automatic application management. Once installed via `mise run bootstrap-gitops`, it manages all resources in `src/apps/`.
+
+**Directory Structure:**
+```
+src/
+├── bootstrap/          # One-time setup (mise manages these)
+│   ├── gateway-api/    # CRDs applied during networking setup
+│   ├── cilium/         # CNI Helm values
+│   └── argocd/         # ArgoCD installation + root app
+├── apps/               # Everything ArgoCD manages (if installed)
+│   ├── infrastructure/ # Cluster-level (LoadBalancer pools, etc.)
+│   ├── platform/       # Operators (1Password, cert-manager, etc.)
+│   └── services/       # Your applications
+└── talos/              # Talos machine configs
+```
+
+**Workflow with ArgoCD:**
+1. Add/modify manifests in `src/apps/`
+2. `git commit && git push`
+3. ArgoCD syncs automatically (or immediately via UI)
+
+**Why separate bootstrap/ from apps/?**
+- **bootstrap/**: Infrastructure requiring special handling (CNI transitions, node reboots, ArgoCD itself)
+- **apps/**: Everything else that ArgoCD can safely manage
+
+**Without ArgoCD**: You can still use the cluster normally and apply manifests with `kubectl apply` manually.
 
 ### Configuration Management
 

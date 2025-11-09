@@ -137,14 +137,14 @@ echo "╚═══════════════════════�
 echo ""
 
 echo "==> [1/5] Installing Gateway API CRDs..."
-kubectl apply -f src/kubernetes/gateway-api/crds.yaml
+kubectl apply -f src/bootstrap/gateway-api/crds.yaml
 echo "✓ Gateway API CRDs installed"
 echo ""
 
 echo "==> [2/5] Installing Cilium with Hubble and Gateway API support..."
-helm install cilium cilium/cilium --version 1.18.3 \
+helm upgrade --install cilium cilium/cilium --version 1.18.3 \
   --namespace kube-system \
-  --values src/kubernetes/cilium/values.yaml
+  --values src/bootstrap/cilium/values.yaml
 echo "✓ Cilium installed"
 echo ""
 
@@ -177,14 +177,14 @@ talosctl machineconfig patch controlplane.yaml \
 echo "✓ Configs regenerated with Cilium enabled"
 echo ""
 
-echo "==> [2/4] Applying configs to all nodes..."
+echo "==> Applying configs to all nodes..."
 talosctl apply-config --nodes ${URD_IP} --file controlplane-urd.yaml
 talosctl apply-config --nodes ${VERDANDI_IP} --file controlplane-verdandi.yaml
 talosctl apply-config --nodes ${SKULD_IP} --file controlplane-skuld.yaml
 echo "✓ Configs applied"
 echo ""
 
-echo "==> [3/4] Rebooting all nodes to apply changes..."
+echo "==> Rebooting all nodes to apply changes..."
 talosctl reboot --nodes ${SKULD_IP} --wait
 echo "  ✓ skuld rebooted"
 talosctl reboot --nodes ${VERDANDI_IP} --wait
@@ -207,7 +207,8 @@ echo "✓ Cilium with Hubble, Gateway API, and L2 announcements installed"
 echo "✓ Cilium is now the sole CNI (Flannel and kube-proxy removed)"
 echo ""
 echo "Next steps:"
-echo "  - Configure LoadBalancer IP pool: mise run setup-loadbalancer"
+echo "  - Run 'mise run health' to verify cluster health"
+echo "  - (Optional) Run 'mise run bootstrap-gitops' to install ArgoCD"
 """
 
 [tasks.setup-loadbalancer]
@@ -219,7 +220,7 @@ echo "╚═══════════════════════�
 echo ""
 
 echo "==> Applying Cilium LoadBalancer IP pool and L2 announcement policy..."
-kubectl apply -f src/kubernetes/cilium-loadbalancer/ippool.yaml
+kubectl apply -f src/apps/infrastructure/cilium-l2/ippool.yaml
 echo "✓ IP pool configured (192.168.0.200-253)"
 echo ""
 
@@ -229,6 +230,57 @@ echo "╚═══════════════════════�
 echo ""
 echo "LoadBalancer services will now receive IPs from 192.168.0.200-253"
 echo "IPs are announced via L2 (ARP) on eno* interfaces"
+"""
+
+[tasks.bootstrap-gitops]
+description = "Install ArgoCD and configure GitOps (run after setup-loadbalancer)"
+run = """
+echo "╔════════════════════════════════════════════════════════════════╗"
+echo "║              Bootstrapping GitOps with ArgoCD                  ║"
+echo "╚════════════════════════════════════════════════════════════════╝"
+echo ""
+
+echo "==> [1/4] Creating argocd namespace..."
+kubectl apply -f src/bootstrap/argocd/namespace.yaml
+echo "✓ Namespace created"
+echo ""
+
+echo "==> [2/4] Installing ArgoCD via Helm..."
+helm upgrade --install argocd argo/argo-cd --version 7.7.12 \
+  --namespace argocd \
+  --values src/bootstrap/argocd/values.yaml
+echo "✓ ArgoCD installed"
+echo ""
+
+echo "==> [3/4] Waiting for ArgoCD to be ready..."
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=argocd-server -n argocd --timeout=180s
+echo "✓ ArgoCD is ready"
+echo ""
+
+echo "==> [4/4] Creating root Application (points ArgoCD at src/apps/)..."
+echo "⚠️  NOTE: You need to update src/bootstrap/argocd/root-app.yaml with your GitHub repo URL first!"
+echo ""
+read -p "Have you updated the GitHub repo URL in root-app.yaml? (yes/no): " confirm
+if [ "$confirm" != "yes" ]; then
+  echo "Please update src/bootstrap/argocd/root-app.yaml and run this task again"
+  exit 1
+fi
+kubectl apply -f src/bootstrap/argocd/root-app.yaml
+echo "✓ Root application created"
+echo ""
+
+echo "╔════════════════════════════════════════════════════════════════╗"
+echo "║          GitOps Bootstrap Complete! 🎉                         ║"
+echo "╚════════════════════════════════════════════════════════════════╝"
+echo ""
+echo "ArgoCD is now managing all resources in src/apps/"
+echo ""
+echo "Get ArgoCD admin password:"
+echo "  kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d"
+echo ""
+echo "Access ArgoCD UI:"
+echo "  kubectl get svc -n argocd argocd-server"
+echo "  (Use the LoadBalancer IP)"
 """
 
 # ============================================================================

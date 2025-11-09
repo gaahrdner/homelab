@@ -24,18 +24,35 @@ A GitOps-managed Kubernetes homelab cluster running on Talos Linux.
 
 ### New Cluster Installation
 
-1. If you want to add additional Talos extensions, now is the time to modify `src/talos/extensions.yaml`
-2. Generate a custom Talos image schematic: `mise run generate-schematic`.
-   a. If this is a new machine, you'll need to prep the hardware and burn the ISO image, which entails:
-      i. Ensuring Secure Boot is enabled in the BIOS
-      ii. Restoring the Factory Keys
-      iii. Resetting the platform to Setup Mode.
-      iv. Booting all nodes and wiping their disks
-3. Generate a cluster configuration: `mise run gen-cluster`
-4. Initialize the cluster (applies configs, bootstraps, sets up kubeconfig): `mise run init`
-5. Verify the health: `mise run health`
-6. Setup networking (Gateway API, Cilium CNI, Hubble, L2 announcements): `mise run setup-networking`
-7. Configure LoadBalancer IP pool: `mise run setup-loadbalancer`
+#### Hardware Preparation
+
+1. If you want to add additional Talos extensions, modify `src/talos/extensions.yaml`
+2. Generate a custom Talos image schematic: `mise run generate-schematic`
+3. If this is a new machine, prep the hardware and burn the ISO image:
+   - Ensure Secure Boot is enabled in the BIOS
+   - Restore the Factory Keys
+   - Reset the platform to Setup Mode
+   - Boot all nodes and wipe their disks
+
+#### Cluster Bootstrap (3 Commands)
+
+1. **Generate cluster configuration**: `mise run gen-cluster`
+2. **Initialize the cluster**: `mise run init` (applies configs, bootstraps etcd, sets up kubeconfig)
+3. **Setup networking**: `mise run setup-networking` (Gateway API, Cilium CNI with Hubble, replaces Flannel)
+
+That's it! You now have a working Kubernetes cluster with Cilium networking.
+
+#### Optional: GitOps with ArgoCD
+
+To enable automatic application management from Git:
+
+1. Update `src/bootstrap/argocd/root-app.yaml` with your GitHub repo URL
+2. Run: `mise run bootstrap-gitops`
+
+Once ArgoCD is installed, it will automatically sync all applications in `src/apps/` including:
+- LoadBalancer IP pool configuration
+- Any platform services you add
+- Your applications
 
 ### Existing Cluster Updates
 
