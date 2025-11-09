@@ -3,6 +3,10 @@ secrets.yaml
 talosconfig
 *.backup
 
+# 1Password and Kubernetes secrets
+secrets/
+1password-credentials.json
+
 # Generated node configurations
 controlplane.yaml
 controlplane-urd.yaml

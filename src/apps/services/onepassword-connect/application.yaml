@@ -1,0 +1,63 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: onepassword-connect
+  namespace: argocd
+spec:
+  project: default
+  source:
+    chart: connect
+    repoURL: https://1password.github.io/connect-helm-charts
+    targetRevision: 1.16.0
+    helm:
+      valuesObject:
+        # Deploy the operator alongside Connect
+        operator:
+          create: true
+          # Token will be provided via existing secret
+          token:
+            key: token
+            name: onepassword-token
+
+        # Connect server configuration
+        connect:
+          # Credentials will be provided via existing secret
+          credentials:
+            name: onepassword-credentials
+            key: 1password-credentials.json
+
+          # Resource limits for homelab
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+
+        # Operator resource limits
+        operator:
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: onepassword
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
