@@ -30,9 +30,8 @@ spec:
         # Connect server configuration
         connect:
           # Credentials will be provided via existing secret
-          credentials:
-            name: onepassword-credentials
-            key: 1password-credentials.json
+          credentialsName: onepassword-credentials
+          credentialsKey: 1password-credentials.json
           # Resource limits for homelab
           resources:
             requests:
