@@ -1,0 +1,49 @@
+# cert-manager v1.19.1 Configuration for Homelab
+# Documentation: https://cert-manager.io/docs/
+
+# Install CRDs with this chart (set to false since we're applying them separately via ArgoCD)
+crds:
+  enabled: false
+
+# Global settings
+global:
+  leaderElection:
+    namespace: cert-manager
+
+# Controller settings
+replicaCount: 1
+
+# Resource limits (conservative for homelab)
+resources:
+  requests:
+    cpu: 10m
+    memory: 32Mi
+  limits:
+    cpu: 100m
+    memory: 128Mi
+
+# Webhook settings
+webhook:
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+
+# CA Injector settings
+cainjector:
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+
+# Disable Prometheus integration (enable later if you add monitoring)
+prometheus:
+  enabled: false
