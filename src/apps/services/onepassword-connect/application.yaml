@@ -18,6 +18,14 @@ spec:
           token:
             key: token
             name: onepassword-token
+          # Resource limits for homelab
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
 
         # Connect server configuration
         connect:
@@ -25,7 +33,6 @@ spec:
           credentials:
             name: onepassword-credentials
             key: 1password-credentials.json
-
           # Resource limits for homelab
           resources:
             requests:
@@ -34,16 +41,6 @@ spec:
             limits:
               cpu: 200m
               memory: 256Mi
-
-        # Operator resource limits
-        operator:
-          resources:
-            requests:
-              cpu: 10m
-              memory: 64Mi
-            limits:
-              cpu: 100m
-              memory: 128Mi
 
   destination:
     server: https://kubernetes.default.svc
