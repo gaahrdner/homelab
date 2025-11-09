@@ -8,10 +8,9 @@ This directory contains all Kubernetes resources managed by ArgoCD.
 apps/
 ├── infrastructure/      # Cluster-level infrastructure
 │   └── cilium-l2/      # LoadBalancer IP pool configuration
-├── platform/           # Platform services (operators, controllers)
-│   └── (1password, cert-manager, etc.)
-└── services/           # Your applications
-    └── (homepage, services, etc.)
+└── services/           # Everything else
+    ├── cert-manager/   # TLS certificate management
+    └── (your apps)     # Web services, databases, etc.
 ```
 
 ## How It Works
@@ -22,25 +21,18 @@ ArgoCD watches this directory and automatically syncs all resources to the clust
 - **Update an app**: Modify the manifests, commit, push
 - **Delete an app**: Remove the directory, commit, push
 
-## Application Types
+## Directory Guidelines
 
 ### Infrastructure
-Cluster-level configuration that other apps depend on:
+Cluster-level configuration that requires special handling:
 - LoadBalancer IP pools
 - Storage classes
 - Network policies
 
-### Platform
-Services that provide capabilities to other apps:
-- Secret management (1Password operator)
-- Certificate management (cert-manager)
-- Monitoring/logging
-
 ### Services
-Your actual applications:
-- Web services
-- Databases
-- Whatever you want to run
+Everything else:
+- Platform services (cert-manager, 1Password, monitoring)
+- Your applications (websites, databases, etc.)
 
 ## Sync Policy
 

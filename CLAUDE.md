@@ -134,9 +134,8 @@ src/
 │   ├── cilium/         # CNI Helm values
 │   └── argocd/         # ArgoCD installation + root app
 ├── apps/               # Everything ArgoCD manages (if installed)
-│   ├── infrastructure/ # Cluster-level (LoadBalancer pools, etc.)
-│   ├── platform/       # Operators (1Password, cert-manager, etc.)
-│   └── services/       # Your applications
+│   ├── infrastructure/ # Cluster-level (LoadBalancer pools, storage)
+│   └── services/       # Everything else (cert-manager, apps, etc.)
 └── talos/              # Talos machine configs
 ```
 
