@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     chart: ghost
-    repoURL: oci://registry-1.docker.io/bitnamicharts
+    repoURL: oci://registry-1.docker.io/bitnamicharts/ghost
     targetRevision: 25.0.5
     helm:
       valuesObject:
