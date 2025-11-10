@@ -1,0 +1,89 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: longhorn
+  namespace: argocd
+spec:
+  project: default
+  source:
+    chart: longhorn
+    repoURL: https://charts.longhorn.io
+    targetRevision: 1.10.0
+    helm:
+      valuesObject:
+        # Set Longhorn as default StorageClass
+        persistence:
+          defaultClass: true
+          defaultClassReplicaCount: 3  # 3 replicas across your 3 nodes
+          defaultFsType: ext4
+          reclaimPolicy: Delete
+          defaultDataLocality: disabled  # Can enable for better performance
+
+        # Service configuration - use ClusterIP for now
+        service:
+          ui:
+            type: ClusterIP
+          manager:
+            type: ClusterIP
+
+        # Resource limits for homelab
+        defaultSettings:
+          # Guarantee at least 20% free space on each node
+          storageMinimalAvailablePercentage: 20
+          # Use all available disks on nodes
+          createDefaultDiskLabeledNodes: true
+          # Enable automatic node/disk eviction
+          nodeDownPodDeletionPolicy: delete-both-statefulset-and-deployment-pod
+          # Replica settings
+          replicaSoftAntiAffinity: false
+          replicaAutoBalance: best-effort
+
+        # Image pull policy
+        image:
+          pullPolicy: IfNotPresent
+
+        # Longhorn UI and Manager resources
+        longhornManager:
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+
+        longhornDriver:
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+
+        longhornUI:
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: longhorn-system
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true  # Needed for CRDs
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
