@@ -230,3 +230,5 @@ CONTROL_PLANE_ENDPOINT=https://192.168.0.120:6443
 ```
 
 Use these in mise tasks or export them for shell commands.
+- wait wait, remember we are setting passwords always via 1Password connector, so if there are ever secret values prompt me to add them to the kubernetes vault so they can be synced first.
+- no you never mention claude in prs

@@ -50,6 +50,7 @@ To enable automatic application management from Git:
 2. Run: `mise run bootstrap-gitops`
 
 Once ArgoCD is installed, it will automatically sync all applications in `src/apps/` including:
+
 - LoadBalancer IP pool configuration
 - Any platform services you add
 - Your applications

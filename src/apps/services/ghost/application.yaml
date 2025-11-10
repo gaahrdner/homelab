@@ -1,0 +1,96 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ghost
+  namespace: argocd
+spec:
+  project: default
+  source:
+    chart: ghost
+    repoURL: oci://registry-1.docker.io/bitnamicharts
+    targetRevision: 22.8.5
+    helm:
+      valuesObject:
+        # Ghost Configuration
+        ghostUsername: admin
+        ghostEmail: admin@texasdust.org
+        ghostBlogTitle: Texas Dust
+        ghostHost: ""  # Will be configured when exposing via Cloudflare
+        ghostPath: /
+        ghostEnableHttps: false
+
+        # Allow empty password for now (will be configured properly later)
+        allowEmptyPassword: false
+
+        # Use existing secret for credentials (to be created)
+        existingSecret: ghost-credentials
+
+        # Resource limits
+        resourcesPreset: "small"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+
+        # Single replica for now
+        replicaCount: 1
+
+        # Service Configuration
+        service:
+          type: LoadBalancer
+          ports:
+            http: 80
+            https: 443
+
+        # Disable ingress (using LoadBalancer for now)
+        ingress:
+          enabled: false
+
+        # Persistence
+        persistence:
+          enabled: true
+          storageClass: ""  # Use default storage class
+          size: 10Gi
+          accessModes:
+            - ReadWriteOnce
+
+        # MySQL Configuration
+        mysql:
+          enabled: true
+          auth:
+            database: ghost
+            username: ghost
+            existingSecret: ghost-mysql-credentials
+          primary:
+            persistence:
+              enabled: true
+              storageClass: ""
+              size: 8Gi
+            resourcesPreset: "small"
+            resources:
+              requests:
+                cpu: 100m
+                memory: 256Mi
+              limits:
+                cpu: 500m
+                memory: 512Mi
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ghost
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
