@@ -11,6 +11,10 @@ spec:
     targetRevision: 1.10.0
     helm:
       valuesObject:
+        # Disable pre-upgrade checker for GitOps
+        preUpgradeChecker:
+          jobEnabled: false
+
         # Set Longhorn as default StorageClass
         persistence:
           defaultClass: true
