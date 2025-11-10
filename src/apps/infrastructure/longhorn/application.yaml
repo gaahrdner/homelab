@@ -29,7 +29,7 @@ spec:
         # Resource limits for homelab
         defaultSettings:
           # Guarantee at least 20% free space on each node
-          storageMinimalAvailablePercentage: 20
+          storageMinimalAvailablePercentage: "20"
           # Use all available disks on nodes
           createDefaultDiskLabeledNodes: true
           # Enable automatic node/disk eviction
