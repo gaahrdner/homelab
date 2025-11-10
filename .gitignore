@@ -1,5 +1,5 @@
 # Talos secrets and sensitive configs
-secrets.yaml
+/secrets.yaml
 talosconfig
 *.backup
 

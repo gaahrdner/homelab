@@ -8,13 +8,13 @@ spec:
   source:
     chart: ghost
     repoURL: oci://registry-1.docker.io/bitnamicharts
-    targetRevision: 22.8.5
+    targetRevision: 25.0.5
     helm:
       valuesObject:
         # Ghost Configuration
         ghostUsername: admin
         ghostEmail: admin@texasdust.org
-        ghostBlogTitle: Texas Dust
+        ghostBlogTitle: Dyakuyu Ukrainian Support Team
         ghostHost: ""  # Will be configured when exposing via Cloudflare
         ghostPath: /
         ghostEnableHttps: false
@@ -80,7 +80,7 @@ spec:
 
   destination:
     server: https://kubernetes.default.svc
-    namespace: ghost
+    namespace: texasdust
 
   syncPolicy:
     automated:
