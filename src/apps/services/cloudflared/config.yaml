@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cloudflared-config
+  namespace: cloudflared
+data:
+  config.yaml: |
+    # Tunnel configuration for texasdust.org
+    tunnel: c430d294-d821-4d3d-8eb9-11b6cd8ada5d
+    credentials-file: /etc/cloudflared/creds/token
+
+    # Metrics for Prometheus
+    metrics: 0.0.0.0:2000
+
+    # Ingress rules - order matters!
+    ingress:
+      # Route texasdust.org to Ghost service
+      - hostname: texasdust.org
+        service: http://ghost.texasdust:80
+
+      # Catch-all rule (required)
+      - service: http_status:404
