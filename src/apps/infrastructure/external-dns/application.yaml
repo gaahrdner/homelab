@@ -77,6 +77,10 @@ spec:
         # Only run one replica (webhook is stateless but no need for HA)
         replicaCount: 1
 
+        # Prometheus metrics
+        serviceMonitor:
+          enabled: true
+
   destination:
     server: https://kubernetes.default.svc
     namespace: external-dns

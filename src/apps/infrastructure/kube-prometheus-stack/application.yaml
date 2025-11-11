@@ -1,0 +1,183 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kube-prometheus-stack
+  namespace: argocd
+spec:
+  project: default
+  source:
+    chart: kube-prometheus-stack
+    repoURL: https://prometheus-community.github.io/helm-charts
+    targetRevision: 70.0.0
+    helm:
+      valuesObject:
+        # ====================================================================
+        # Prometheus Configuration
+        # ====================================================================
+        prometheus:
+          prometheusSpec:
+            # Retention configuration for homelab
+            retention: 7d
+            retentionSize: 15GB
+
+            # Storage configuration using Longhorn
+            storageSpec:
+              volumeClaimTemplate:
+                spec:
+                  storageClassName: longhorn
+                  accessModes:
+                    - ReadWriteOnce
+                  resources:
+                    requests:
+                      storage: 20Gi
+
+            # Resource limits for homelab
+            resources:
+              requests:
+                cpu: 200m
+                memory: 512Mi
+              limits:
+                cpu: 1000m
+                memory: 2Gi
+
+            # ServiceMonitor selector - discover all ServiceMonitors
+            serviceMonitorSelectorNilUsesHelmValues: false
+            podMonitorSelectorNilUsesHelmValues: false
+
+            # Enable features
+            enableAdminAPI: false
+            walCompression: true
+
+        # ====================================================================
+        # Grafana Configuration
+        # ====================================================================
+        grafana:
+          enabled: true
+
+          # Admin credentials (consider moving to 1Password)
+          adminPassword: admin
+
+          # Persistence for dashboards
+          persistence:
+            enabled: true
+            storageClassName: longhorn
+            size: 5Gi
+
+          # Resource limits
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+
+          # Expose via LoadBalancer (will get IP from cilium-l2 pool)
+          service:
+            type: LoadBalancer
+
+        # ====================================================================
+        # Alertmanager Configuration
+        # ====================================================================
+        alertmanager:
+          alertmanagerSpec:
+            # Storage for alert state
+            storage:
+              volumeClaimTemplate:
+                spec:
+                  storageClassName: longhorn
+                  accessModes:
+                    - ReadWriteOnce
+                  resources:
+                    requests:
+                      storage: 2Gi
+
+            # Resource limits
+            resources:
+              requests:
+                cpu: 10m
+                memory: 32Mi
+              limits:
+                cpu: 100m
+                memory: 128Mi
+
+        # ====================================================================
+        # Component Configuration
+        # ====================================================================
+        # Prometheus Operator
+        prometheusOperator:
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+
+        # Node Exporter (metrics from each node)
+        prometheus-node-exporter:
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+
+        # Kube State Metrics (Kubernetes object metrics)
+        kube-state-metrics:
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+
+        # ====================================================================
+        # Default Rules and Dashboards
+        # ====================================================================
+        defaultRules:
+          create: true
+          rules:
+            alertmanager: true
+            etcd: true
+            configReloaders: true
+            general: true
+            k8s: true
+            kubeApiserverAvailability: true
+            kubeApiserverSlos: true
+            kubelet: true
+            kubeProxy: true
+            kubePrometheusGeneral: true
+            kubePrometheusNodeRecording: true
+            kubernetesApps: true
+            kubernetesResources: true
+            kubernetesStorage: true
+            kubernetesSystem: true
+            kubeScheduler: true
+            kubeStateMetrics: true
+            network: true
+            node: true
+            nodeExporterAlerting: true
+            nodeExporterRecording: true
+            prometheus: true
+            prometheusOperator: true
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true  # Critical for CRD size issues
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

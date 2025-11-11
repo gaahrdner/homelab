@@ -16,6 +16,12 @@ server:
   extraArgs:
     - --insecure
 
+  # Prometheus metrics
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+
 # Disable dex (OAuth) for single-user setup
 dex:
   enabled: false
@@ -27,10 +33,25 @@ notifications:
 # Application controller - manages sync
 controller:
   replicas: 1
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+
+# Repo server
+repoServer:
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
 
 # Redis for caching
 redis:
   enabled: true
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
 
 # ArgoCD v3.x Compatibility Settings
 # These settings preserve v2.x behavior during migration

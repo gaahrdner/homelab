@@ -40,7 +40,9 @@ spec:
               cpu: 100m
               memory: 128Mi
         prometheus:
-          enabled: false
+          enabled: true
+          servicemonitor:
+            enabled: true
   destination:
     server: https://kubernetes.default.svc
     namespace: cert-manager
