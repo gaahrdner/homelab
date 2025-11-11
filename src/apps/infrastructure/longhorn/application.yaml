@@ -3,6 +3,8 @@ kind: Application
 metadata:
   name: longhorn
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-options: "PruneLast=true"
 spec:
   project: default
   source:
@@ -79,10 +81,12 @@ spec:
     namespace: longhorn-system
 
   ignoreDifferences:
-    - group: ""
-      kind: Service
+    - kind: Service
       jsonPointers:
         - /status
+        - /metadata/annotations
+        - /spec/clusterIP
+        - /spec/clusterIPs
 
   syncPolicy:
     automated:
