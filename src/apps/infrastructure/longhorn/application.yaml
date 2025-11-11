@@ -3,8 +3,6 @@ kind: Application
 metadata:
   name: longhorn
   namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-options: "PruneLast=true"
 spec:
   project: default
   source:
@@ -84,7 +82,6 @@ spec:
     - kind: Service
       jsonPointers:
         - /status
-        - /metadata/annotations
         - /spec/clusterIP
         - /spec/clusterIPs
 
@@ -95,6 +92,7 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true  # Needed for CRDs
+      - RespectIgnoreDifferences=true  # Don't sync fields in ignoreDifferences
     managedNamespaceMetadata:
       labels:
         pod-security.kubernetes.io/enforce: privileged
