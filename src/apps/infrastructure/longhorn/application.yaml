@@ -23,10 +23,10 @@ spec:
           reclaimPolicy: Delete
           defaultDataLocality: disabled  # Can enable for better performance
 
-        # Service configuration - use ClusterIP for now
+        # Service configuration - expose UI via LoadBalancer
         service:
           ui:
-            type: ClusterIP
+            type: LoadBalancer
           manager:
             type: ClusterIP
 
