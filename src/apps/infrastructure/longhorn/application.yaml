@@ -80,10 +80,8 @@ spec:
 
   ignoreDifferences:
     - kind: Service
-      jsonPointers:
-        - /status
-        - /spec/clusterIP
-        - /spec/clusterIPs
+      jqPathExpressions:
+        - .spec.ports[].nodePort
 
   syncPolicy:
     automated:
