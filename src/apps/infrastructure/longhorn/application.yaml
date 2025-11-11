@@ -78,6 +78,12 @@ spec:
     server: https://kubernetes.default.svc
     namespace: longhorn-system
 
+  ignoreDifferences:
+    - group: ""
+      kind: Service
+      jsonPointers:
+        - /status
+
   syncPolicy:
     automated:
       prune: true
