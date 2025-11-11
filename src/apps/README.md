@@ -7,11 +7,12 @@ This directory contains all Kubernetes resources managed by ArgoCD.
 ```text
 apps/
 ├── infrastructure/      # Cluster-level infrastructure
-│   └── cilium-l2/      # LoadBalancer IP pool configuration
+│   ├── cilium-l2/      # LoadBalancer IP pool configuration
+│   └── longhorn/       # Distributed block storage
 └── services/           # Everything else
     ├── cert-manager/   # TLS certificate management
     ├── onepassword-connect/  # 1Password secrets management
-    ├── ghost/          # Ghost blog for texasdust.org
+    ├── texasdust/      # Ghost blog for texasdust.org
     └── (your apps)     # Web services, databases, etc.
 ```
 
@@ -29,7 +30,8 @@ ArgoCD watches this directory and automatically syncs all resources to the clust
 
 Cluster-level configuration that requires special handling:
 
-- LoadBalancer IP pools
+- LoadBalancer IP pools (Cilium L2 announcements)
+- Distributed storage (Longhorn)
 - Storage classes
 - Network policies
 

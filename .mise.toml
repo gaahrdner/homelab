@@ -233,7 +233,7 @@ echo "IPs are announced via L2 (ARP) on eno* interfaces"
 """
 
 [tasks.bootstrap-gitops]
-description = "Install ArgoCD and configure GitOps (run after setup-loadbalancer)"
+description = "Install ArgoCD and configure GitOps (manages all apps in src/apps/)"
 run = """
 echo "╔════════════════════════════════════════════════════════════════╗"
 echo "║              Bootstrapping GitOps with ArgoCD                  ║"
@@ -246,7 +246,7 @@ echo "✓ Namespace created"
 echo ""
 
 echo "==> [2/4] Installing ArgoCD via Helm..."
-helm upgrade --install argocd argo/argo-cd --version 7.7.12 \
+helm upgrade --install argocd argo/argo-cd --version 9.1.0 \
   --namespace argocd \
   --values src/bootstrap/argocd/values.yaml
 echo "✓ ArgoCD installed"

@@ -57,7 +57,7 @@ Once ArgoCD is installed, it will automatically sync all applications in `src/ap
 
 ### Existing Cluster Updates
 
-1. If you changed extensions.yaml: `mise run generate-schematic` and update `src/talos/patches/images.yaml` with the new installer path.
+1. If you changed extensions.yaml: `mise run generate-schematic` and update `src/talos/patches/image.yaml` with the new installer path.
 2. Regenerate configs (preserves secrets!): `mise run update`
 3. Apply to all nodes: `mise run apply`
 4. Verify health: `mise run health`

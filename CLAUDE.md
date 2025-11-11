@@ -22,7 +22,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a Kubernetes homelab cluster running on Talos Linux. The cluster is named "norns" and consists of three control plane nodes (urd, verdandi, skuld) that also run workloads.
 
-**Current State**: Base Talos cluster infrastructure is configured. GitOps tooling (Flux/ArgoCD) is not yet set up.
+**Current State**: Production cluster with ArgoCD managing applications via GitOps.
 
 **Key Details:**
 - **Cluster Name**: norns
@@ -31,6 +31,11 @@ This is a Kubernetes homelab cluster running on Talos Linux. The cluster is name
 - **Control Plane Nodes**: urd (192.168.0.120), verdandi (192.168.0.121), skuld (192.168.0.122)
 - **Control Plane Endpoint**: https://192.168.0.120:6443
 - **Task Runner**: mise (configured in `.mise.toml`)
+
+**Deployed Applications:**
+- **Infrastructure**: Cilium L2 LoadBalancer, Longhorn distributed storage
+- **Platform Services**: cert-manager (TLS), 1Password Connect (secrets)
+- **Applications**: texasdust.org (Ghost blog)
 
 ## Common Commands
 
@@ -184,12 +189,25 @@ This cluster uses a custom Talos image built via the Talos Image Factory with sy
 
 ### Secrets Management
 
+**Talos Cluster Secrets**
+
 **CRITICAL**: `secrets.yaml` contains cluster CA certificates and keys.
 
 - This file is generated ONCE during initial cluster setup (`mise run gen-secrets`)
 - It is preserved across config regenerations (`mise run update` reuses existing secrets)
 - Regenerating this file will DESTROY the existing cluster
 - The gen-secrets task will refuse to run if secrets.yaml already exists
+
+**Application Secrets (1Password)**
+
+The cluster uses 1Password Connect to sync secrets from 1Password vaults into Kubernetes:
+
+- All application passwords and sensitive values are stored in 1Password
+- 1Password Connect operator syncs them as Kubernetes `OnePasswordItem` resources
+- Applications reference secrets via standard Kubernetes `Secret` objects
+- When adding new secrets, first create them in the 1Password "kubernetes" vault, then reference them in manifests
+
+**IMPORTANT**: Never hardcode secrets in manifests. Always use 1Password vault references.
 
 ### Configuration Regeneration Flow
 

@@ -1,4 +1,4 @@
-# ArgoCD v7.7.12 Configuration for Homelab
+# ArgoCD v9.1.0 (ArgoCD v3.2.0) Configuration for Homelab
 # Documentation: https://argo-cd.readthedocs.io/
 
 global:
@@ -31,3 +31,51 @@ controller:
 # Redis for caching
 redis:
   enabled: true
+
+# ArgoCD v3.x Compatibility Settings
+# These settings preserve v2.x behavior during migration
+configs:
+  cm:
+    # Preserve v2 RBAC behavior - fine-grained RBAC inheritance
+    # In v3, update/delete no longer automatically apply to sub-resources
+    # Setting this to false preserves v2 behavior
+    server.rbac.disableApplicationFineGrainedRBACInheritance: "false"
+
+    # Resource tracking method - keeping label-based for now
+    # v3 defaults to annotation-based tracking
+    # Consider migrating to annotations after confirming stability
+    application.resourceTrackingMethod: "label"
+
+    # Resource exclusions - preserve v2 behavior
+    # v3 adds default exclusions for Endpoints, EndpointSlice, Lease, and certain CRDs
+    # Since we use cert-manager and Cilium, explicitly configure exclusions
+    resource.exclusions: |
+      - apiGroups:
+        - cilium.io
+        kinds:
+        - CiliumIdentity
+        clusters:
+        - "*"
+
+  # RBAC configuration - CRITICAL for v3
+  # v3 enforces logs RBAC (no opt-out flag)
+  # Grant admin role access to logs
+  rbac:
+    policy.default: role:readonly
+    policy.csv: |
+      # Grant admin full access including logs
+      p, role:admin, logs, get, *, allow
+      p, role:admin, applications, *, *, allow
+      p, role:admin, clusters, *, *, allow
+      p, role:admin, repositories, *, *, allow
+      p, role:admin, projects, *, *, allow
+      p, role:admin, accounts, *, *, allow
+      p, role:admin, certificates, *, *, allow
+      p, role:admin, gpgkeys, *, *, allow
+
+      # Readonly role (no logs access by default)
+      p, role:readonly, applications, get, *, allow
+      p, role:readonly, projects, get, *, allow
+
+      # Bind admin user to admin role
+      g, admin, role:admin
