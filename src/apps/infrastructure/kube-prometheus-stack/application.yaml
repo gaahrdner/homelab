@@ -175,6 +175,11 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true  # Critical for CRD size issues
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+        pod-security.kubernetes.io/audit: privileged
+        pod-security.kubernetes.io/warn: privileged
     retry:
       limit: 5
       backoff:
