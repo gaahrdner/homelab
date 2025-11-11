@@ -44,6 +44,11 @@ spec:
             serviceMonitorSelectorNilUsesHelmValues: false
             podMonitorSelectorNilUsesHelmValues: false
 
+            # Additional scrape configs for Talos components (etcd, etc.)
+            additionalScrapeConfigsSecret:
+              name: additional-scrape-configs
+              key: prometheus-additional.yaml
+
             # Enable features
             enableAdminAPI: false
             walCompression: true

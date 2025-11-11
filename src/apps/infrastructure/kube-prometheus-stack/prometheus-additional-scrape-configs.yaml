@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: additional-scrape-configs
+  namespace: monitoring
+stringData:
+  prometheus-additional.yaml: |
+    # Talos etcd metrics
+    - job_name: 'talos-etcd'
+      scheme: https
+      tls_config:
+        insecure_skip_verify: true
+      static_configs:
+        - targets:
+            - '192.168.0.120:2381'  # urd
+            - '192.168.0.121:2381'  # verdandi
+            - '192.168.0.122:2381'  # skuld
+          labels:
+            component: etcd
