@@ -34,8 +34,8 @@ spec:
         defaultSettings:
           # Guarantee at least 20% free space on each node
           storageMinimalAvailablePercentage: "20"
-          # Use all available disks on nodes
-          createDefaultDiskLabeledNodes: true
+          # Automatically create default disk on all nodes at /var/lib/longhorn/
+          createDefaultDiskLabeledNodes: false
           # Enable automatic node/disk eviction
           nodeDownPodDeletionPolicy: delete-both-statefulset-and-deployment-pod
           # Replica settings
