@@ -17,17 +17,6 @@ spec:
           mode: production
           logToStdout: true
 
-        # Use external MySQL database credentials from 1Password
-        externalDatabase:
-          type: mysql
-          host: texasdust-mysql
-          port: 3306
-          name: ghost
-          user: ghost
-          password:
-            secret: ghost-mysql-credentials
-            key: mysql-password
-
         # Service Configuration - LoadBalancer for direct access
         service:
           type: LoadBalancer
@@ -57,9 +46,9 @@ spec:
           userDatabase:
             name: ghost
             user: ghost
+            existingSecret: ghost-mysql-credentials
             password:
-              secret: ghost-mysql-credentials
-              key: mysql-password
+              secretKey: mysql-password
           storage:
             className: longhorn
             requestedSize: 8Gi
