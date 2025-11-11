@@ -1,2 +1,0 @@
-# Ignore manifests directories - these are managed by child Applications
-**/manifests/
