@@ -6,59 +6,9 @@ metadata:
 spec:
   project: default
   source:
-    chart: ghost
-    repoURL: https://groundhog2k.github.io/helm-charts/
-    targetRevision: 0.174.1
-    helm:
-      valuesObject:
-        # Ghost Settings
-        settings:
-          url: "https://texasdust.org"  # Will be configured when exposing via Cloudflare
-          mode: production
-          logToStdout: true
-
-        # Service Configuration - LoadBalancer for direct access
-        service:
-          type: LoadBalancer
-          port: 80
-
-        # Disable ingress (using LoadBalancer for now)
-        ingress:
-          enabled: false
-
-        # Persistence for Ghost content
-        storage:
-          className: longhorn  # Use Longhorn storage class
-          requestedSize: 10Gi
-
-        # Resource limits
-        resources:
-          requests:
-            cpu: 100m
-            memory: 256Mi
-          limits:
-            cpu: 500m
-            memory: 512Mi
-
-        # MySQL Configuration - using built-in subchart
-        mysql:
-          enabled: true
-          userDatabase:
-            name: ghost
-            user: ghost
-            existingSecret: ghost-mysql-credentials
-            password:
-              secretKey: mysql-password
-          storage:
-            className: longhorn
-            requestedSize: 8Gi
-          resources:
-            requests:
-              cpu: 100m
-              memory: 256Mi
-            limits:
-              cpu: 500m
-              memory: 512Mi
+    repoURL: https://github.com/gaahrdner/homelab.git
+    targetRevision: HEAD
+    path: src/apps/services/texasdust/manifests
 
   destination:
     server: https://kubernetes.default.svc
