@@ -6,7 +6,7 @@ External-DNS automatically manages DNS records in your UniFi Dream Router for Ku
 
 This deployment uses:
 - **external-dns** v1.15.0 - Watches Kubernetes resources and syncs DNS
-- **UniFi webhook** v0.2.0 - Implements DNS provider for UniFi controllers
+- **UniFi webhook** v0.7.0 - Implements DNS provider for UniFi controllers
 
 ## Architecture
 
