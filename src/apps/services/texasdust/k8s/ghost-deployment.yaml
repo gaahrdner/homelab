@@ -64,12 +64,14 @@ spec:
           httpGet:
             path: /
             port: 2368
+            scheme: HTTP
           initialDelaySeconds: 60
           periodSeconds: 10
         readinessProbe:
           httpGet:
             path: /
             port: 2368
+            scheme: HTTP
           initialDelaySeconds: 30
           periodSeconds: 5
       volumes:
