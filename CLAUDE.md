@@ -33,7 +33,7 @@ This is a Kubernetes homelab cluster running on Talos Linux. The cluster is name
 - **Task Runner**: mise (configured in `.mise.toml`)
 
 **Deployed Applications:**
-- **Infrastructure**: Cilium L2 LoadBalancer, Longhorn distributed storage
+- **Infrastructure**: Cilium L2 LoadBalancer, Longhorn distributed storage, external-dns (UniFi)
 - **Platform Services**: cert-manager (TLS), 1Password Connect (secrets)
 - **Applications**: texasdust.org (Ghost blog)
 
@@ -126,6 +126,46 @@ The `mise run setup-networking` command handles all 5 steps automatically. It:
 - Verifies kube-proxy removal
 
 After `setup-networking`, you have a working cluster. LoadBalancer and application management is handled separately by ArgoCD (optional).
+
+### DNS Management with External-DNS
+
+External-DNS automatically manages internal DNS records in the UniFi Dream Router for LoadBalancer services and HTTPRoutes.
+
+**Configuration:**
+- **Provider**: UniFi webhook (v0.7.0)
+- **Domain Filter**: Only manages `.internal` domains
+- **Controller**: Dream Router at 192.168.0.1
+- **Authentication**: API key from 1Password (vault: kubernetes, item: unifi-external-dns)
+
+**How it works:**
+1. External-DNS watches Services (LoadBalancer), Ingresses, and HTTPRoutes
+2. For any resource with a `.internal` hostname, it creates DNS records in UniFi
+3. Uses TXT records to track ownership (prefix: `external-dns-`, owner: `norns-cluster`)
+
+**Example HTTPRoute with automatic DNS:**
+```yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: my-app
+spec:
+  hostnames:
+    - myapp.internal  # External-DNS will create this A record
+  parentRefs:
+    - name: internal
+      namespace: gateway
+```
+
+**Verification:**
+```bash
+# Check external-dns logs
+kubectl logs -n external-dns -l app.kubernetes.io/name=external-dns -c external-dns
+
+# Test DNS resolution (from any machine using UniFi DNS)
+nslookup myapp.internal
+```
+
+See `src/apps/infrastructure/external-dns/README.md` for detailed configuration and troubleshooting.
 
 ### GitOps with ArgoCD (Optional)
 
