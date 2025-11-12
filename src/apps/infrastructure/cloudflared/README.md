@@ -10,6 +10,8 @@ Cloudflared creates secure outbound-only connections to Cloudflare's edge networ
 Internet → Cloudflare Edge → Tunnel → cloudflared pods → Kubernetes Service
 ```
 
+**Architecture**: Locally-managed tunnel (configuration in Git, not dashboard-managed)
+
 ## Current Tunnels
 
 ### texasdust.org
@@ -17,46 +19,27 @@ Internet → Cloudflare Edge → Tunnel → cloudflared pods → Kubernetes Serv
 - **Backend**: `ghost.texasdust:80` (Ghost blog)
 - **Replicas**: 2 (for high availability)
 
-## Installation
-
-Deployed as a standard Kubernetes Deployment managed by ArgoCD.
-
 ## Configuration
 
-**Tunnel Token**: Stored in 1Password
+**Tunnel Credentials**: Stored in 1Password
 - Vault: kubernetes (mbn7rk3d5gfgofrv3a2zt2tdoe)
 - Item: cloudflare-tunnel-texasdust-org
-- Key: token
+- Key: token (contains credentials JSON)
 
 **Ingress Rules**: Defined in ConfigMap
 - Routes hostnames to internal Kubernetes services
 - Uses service DNS names (e.g., `ghost.texasdust:80`)
 - Catch-all returns 404 for unknown hosts
 
+**DNS Routing**: Cloudflare DNS CNAME
+- Record: `texasdust.org` → `af22f227-24f2-4520-8f39-90e0cc3403a9.cfargotunnel.com`
+- Proxy: Enabled (orange cloud)
+
 ## Monitoring
 
 - **Metrics Port**: 2000
 - **ServiceMonitor**: Enabled for Prometheus scraping
 - **Health Check**: `/ready` endpoint on port 2000
-
-## Adding a New Public Service
-
-1. **Create tunnel in Cloudflare Dashboard**:
-   - Zero Trust → Networks → Tunnels → Create
-   - Copy the tunnel token
-
-2. **Store token in 1Password**:
-   - Vault: kubernetes
-   - Item: `cloudflare-tunnel-<domain>`
-   - Key: `token`
-
-3. **Create deployment** (copy this directory structure):
-   - Update tunnel ID in ConfigMap
-   - Update ingress rules
-   - Update OnePasswordItem name
-   - Update Deployment secret reference
-
-4. **Commit and let ArgoCD sync**
 
 ## Verification
 
@@ -75,7 +58,8 @@ kubectl logs -n cloudflared -l app=cloudflared
 
 ## Dependencies
 
-- 1Password Connect (for token sync)
+- 1Password Connect (for credentials sync)
+- Cloudflare DNS CNAME record pointing to tunnel
 - Target service must exist and be accessible via cluster DNS
 
 ## Notes
@@ -83,4 +67,4 @@ kubectl logs -n cloudflared -l app=cloudflared
 - Cloudflared connects OUTBOUND to Cloudflare (no ingress needed)
 - LoadBalancer/HTTPRoute on the service are independent and can coexist
 - Multiple replicas provide HA but don't load balance (per Cloudflare design)
-- Tunnel token is scoped to the specific tunnel
+- Tunnel credentials are scoped to the specific tunnel

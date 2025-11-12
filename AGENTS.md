@@ -33,9 +33,9 @@ This is a Kubernetes homelab cluster running on Talos Linux. The cluster is name
 - **Task Runner**: mise (configured in `.mise.toml`)
 
 **Deployed Applications:**
-- **Infrastructure**: Cilium L2 LoadBalancer, Longhorn distributed storage, external-dns (UniFi)
-- **Platform Services**: cert-manager (TLS), 1Password Connect (secrets)
-- **Applications**: texasdust.org (Ghost blog)
+- **Infrastructure**: Cilium L2 LoadBalancer, Longhorn distributed storage, external-dns (UniFi), Cloudflare Tunnel
+- **Platform Services**: cert-manager (TLS), 1Password Connect (secrets), kube-prometheus-stack
+- **Applications**: texasdust.org (Ghost blog, exposed via Cloudflare Tunnel)
 
 ## Common Commands
 
@@ -289,6 +289,33 @@ Initial cluster setup (`mise run init`):
 4. Waits 30s for cluster initialization
 5. Generates kubeconfig from urd
 6. Installs talosconfig → `~/.talos/config` and kubeconfig → `~/.kube/config`
+
+## External Access with Cloudflare Tunnel
+
+The cluster uses Cloudflare Tunnel (cloudflared) to expose services to the public internet without opening firewall ports.
+
+**Architecture**: Locally-managed tunnels (configuration in Git, not dashboard-managed)
+
+**Setup Process**:
+1. Create tunnel locally: `cloudflared tunnel create <name>` generates credentials JSON
+2. Store credentials JSON in 1Password (kubernetes vault)
+3. Create DNS CNAME: `<domain>` → `<tunnel-id>.cfargotunnel.com` (Cloudflare dashboard)
+4. Deploy cloudflared to Kubernetes with:
+   - OnePasswordItem: syncs credentials from 1Password
+   - ConfigMap: tunnel ID + ingress rules (hostname → service mappings)
+   - Deployment: 2 replicas of cloudflared pods
+   - ServiceMonitor: Prometheus metrics
+
+**Key Points**:
+- Tunnel ID is public (visible in dashboard), credentials are secret (stored in 1Password)
+- DNS CNAME must point to `<tunnel-id>.cfargotunnel.com` for routing to work
+- Ingress rules in config.yaml control traffic routing AFTER it reaches the tunnel
+- Multiple replicas provide HA; each connects independently to Cloudflare edge
+
+**Current Tunnels**:
+- texasdust.org → ghost.texasdust:80 (Ghost blog)
+
+See `src/apps/infrastructure/cloudflared/README.md` for detailed setup.
 
 ## Important Notes
 

@@ -17,6 +17,9 @@ data:
       # Route texasdust.org to Ghost service
       - hostname: texasdust.org
         service: http://ghost.texasdust:80
+        originRequest:
+          httpHostHeader: texasdust.org
+          originServerName: texasdust.org
 
       # Catch-all rule (required)
       - service: http_status:404
