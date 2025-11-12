@@ -13,7 +13,7 @@ Internet → Cloudflare Edge → Tunnel → cloudflared pods → Kubernetes Serv
 ## Current Tunnels
 
 ### texasdust.org
-- **Tunnel ID**: c430d294-d821-4d3d-8eb9-11b6cd8ada5d
+- **Tunnel ID**: af22f227-24f2-4520-8f39-90e0cc3403a9
 - **Backend**: `ghost.texasdust:80` (Ghost blog)
 - **Replicas**: 2 (for high availability)
 

@@ -6,8 +6,8 @@ metadata:
 data:
   config.yaml: |
     # Tunnel configuration for texasdust.org
-    tunnel: c430d294-d821-4d3d-8eb9-11b6cd8ada5d
-    credentials-file: /etc/cloudflared/creds/token
+    tunnel: af22f227-24f2-4520-8f39-90e0cc3403a9
+    credentials-file: /etc/cloudflared/creds/af22f227-24f2-4520-8f39-90e0cc3403a9.json
 
     # Metrics for Prometheus
     metrics: 0.0.0.0:2000

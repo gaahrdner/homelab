@@ -58,4 +58,4 @@ spec:
           secretName: cloudflare-tunnel-texasdust-org
           items:
           - key: token
-            path: token
+            path: af22f227-24f2-4520-8f39-90e0cc3403a9.json
