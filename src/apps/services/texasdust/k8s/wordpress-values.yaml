@@ -143,13 +143,6 @@ env:
       define('WP_HOME', 'https://texasdust.org');
       define('WP_SITEURL', 'https://texasdust.org');
 
-      // Redis Object Cache configuration
-      define('WP_REDIS_CLIENT', 'phpredis');
-      define('WP_REDIS_HOST', 'valkey');
-      define('WP_REDIS_PORT', 6379);
-      define('WP_REDIS_DATABASE', 0);
-      define('WP_REDIS_PREFIX', 'wp_');
-
       // Security hardening
       define('DISALLOW_FILE_EDIT', true);
       define('FORCE_SSL_ADMIN', true);
