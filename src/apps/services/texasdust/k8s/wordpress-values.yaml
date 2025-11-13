@@ -86,10 +86,11 @@ readinessProbe:
   periodSeconds: 5
 
 # External database configuration (MariaDB)
-# Note: Password is injected via extraEnvSecrets from 1Password
+# Note: Password below is a placeholder - actual password injected via env from 1Password
 externalDatabase:
   name: wordpress
   user: wordpress
+  password: "placeholder"  # Overridden by WORDPRESS_DB_PASSWORD env var from secret
   host: mariadb
 
 # WordPress settings
