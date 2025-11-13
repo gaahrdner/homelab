@@ -21,9 +21,10 @@ image:
 podSecurityContext: {}
 
 # Container security context
+# Note: allowPrivilegeEscalation needed for FrankenPHP setcap capabilities
 securityContext:
   readOnlyRootFilesystem: false
-  allowPrivilegeEscalation: false
+  allowPrivilegeEscalation: true
   privileged: false
 
 # Service configuration
