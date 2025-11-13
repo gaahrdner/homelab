@@ -29,7 +29,7 @@ spec:
           kubernetes.io/metadata.name: cloudflared
     ports:
     - protocol: TCP
-      port: 80  # WordPress service port
+      port: 8000  # WordPress container port
   egress:
   # Allow to MariaDB
   - to:
