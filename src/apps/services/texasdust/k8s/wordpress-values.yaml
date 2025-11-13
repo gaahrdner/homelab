@@ -2,6 +2,7 @@
 # Deploys WordPress with FrankenPHP for texasdust.org nonprofit site
 # FrankenPHP: Modern PHP server (Caddy-based), faster than Apache/nginx+PHP-FPM
 # Note: replicaCount set to 1 due to ReadWriteOnce storage limitation
+# Using PHP 8.3 (latest available FrankenWP tag)
 
 replicaCount: 1
 
@@ -13,7 +14,7 @@ image:
   registry: "docker.io"
   repository: "wpeverywhere/frankenwp"
   pullPolicy: IfNotPresent
-  tag: "latest-php8.4"
+  tag: "latest-php8.3"
 
 # Pod security context (run as www-data, non-root)
 podSecurityContext:
