@@ -1,0 +1,19 @@
+---
+# Patch to add /data/caddy emptyDir volume for FrankenPHP
+# This provides writable space for Caddy's PKI and configuration
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wordpress
+  namespace: texasdust
+spec:
+  template:
+    spec:
+      containers:
+      - name: wordpress
+        volumeMounts:
+        - name: caddy-data
+          mountPath: /data/caddy
+      volumes:
+      - name: caddy-data
+        emptyDir: {}

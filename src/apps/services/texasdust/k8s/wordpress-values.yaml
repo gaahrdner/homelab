@@ -150,6 +150,9 @@ env:
     value: |
       define('WP_HOME', 'https://texasdust.org');
       define('WP_SITEURL', 'https://texasdust.org');
+  # FrankenPHP/Caddy configuration
+  - name: CADDY_GLOBAL_OPTIONS
+    value: "auto_https off"
 
 # Storage configuration (Longhorn PVC for uploads)
 storage:
