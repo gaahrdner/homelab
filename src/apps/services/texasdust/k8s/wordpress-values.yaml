@@ -73,18 +73,18 @@ startupProbe:
 livenessProbe:
   enabled: true
   initialDelaySeconds: 60
-  timeoutSeconds: 5
-  failureThreshold: 3
+  timeoutSeconds: 15
+  failureThreshold: 5
   successThreshold: 1
-  periodSeconds: 10
+  periodSeconds: 20
 
 readinessProbe:
   enabled: true
   initialDelaySeconds: 30
-  timeoutSeconds: 3
-  failureThreshold: 3
+  timeoutSeconds: 10
+  failureThreshold: 5
   successThreshold: 1
-  periodSeconds: 5
+  periodSeconds: 10
 
 # External database configuration (MariaDB)
 # Note: Password below is a placeholder - actual password injected via env from 1Password
