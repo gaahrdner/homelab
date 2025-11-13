@@ -5,6 +5,10 @@
 
 replicaCount: 1
 
+# Deployment strategy (Recreate prevents multi-attach errors with RWO storage)
+strategy:
+  type: Recreate
+
 image:
   registry: "docker.io"
   repository: "wpeverywhere/frankenwp"
