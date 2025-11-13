@@ -1,5 +1,5 @@
 # WordPress Helm Chart Values (groundhog2k/wordpress)
-# Deploys WordPress with PHP-FPM for texasdust.org nonprofit site
+# Deploys WordPress with Apache for texasdust.org nonprofit site
 
 replicaCount: 2
 
@@ -7,7 +7,7 @@ image:
   registry: "docker.io"
   repository: "wordpress"
   pullPolicy: IfNotPresent
-  tag: "6.8-php8.4-fpm"
+  tag: "6.8-php8.4-apache"
 
 # Pod security context (run as www-data, non-root)
 podSecurityContext:
@@ -16,8 +16,9 @@ podSecurityContext:
   runAsNonRoot: true
 
 # Container security context
+# Note: readOnlyRootFilesystem disabled for Apache (needs /var/run/apache2, /tmp)
 securityContext:
-  readOnlyRootFilesystem: true
+  readOnlyRootFilesystem: false
   allowPrivilegeEscalation: false
   privileged: false
   capabilities:
