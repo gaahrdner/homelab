@@ -55,10 +55,8 @@ spec:
     ports:
     - protocol: UDP
       port: 53
-  # Allow HTTPS for WordPress updates and plugins
-  - to:
-    - namespaceSelector: {}
-    ports:
+  # Allow HTTPS for WordPress updates and plugins (to any destination)
+  - ports:
     - protocol: TCP
       port: 443
 ---
