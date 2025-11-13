@@ -86,10 +86,10 @@ readinessProbe:
   periodSeconds: 5
 
 # External database configuration (MariaDB)
+# Note: Password is injected via extraEnvSecrets from 1Password
 externalDatabase:
   name: wordpress
   user: wordpress
-  password: "REPLACED_BY_SECRET"  # Will be overridden by extraEnvSecrets
   host: mariadb
 
 # WordPress settings
@@ -138,6 +138,11 @@ env:
     value: wordpress
   - name: WORDPRESS_DB_USER
     value: wordpress
+  - name: WORDPRESS_DB_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: wordpress-db-credentials
+        key: password
   - name: WORDPRESS_CONFIG_EXTRA
     value: |
       define('WP_HOME', 'https://texasdust.org');
