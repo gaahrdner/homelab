@@ -16,7 +16,7 @@ Internet → Cloudflare Edge → Tunnel → cloudflared pods → Kubernetes Serv
 
 ### texasdust.org
 - **Tunnel ID**: af22f227-24f2-4520-8f39-90e0cc3403a9
-- **Backend**: `ghost.texasdust:80` (Ghost blog)
+- **Backend**: `wordpress.texasdust:80` (WordPress nonprofit site)
 - **Replicas**: 2 (for high availability)
 
 ## Configuration
@@ -28,7 +28,7 @@ Internet → Cloudflare Edge → Tunnel → cloudflared pods → Kubernetes Serv
 
 **Ingress Rules**: Defined in ConfigMap
 - Routes hostnames to internal Kubernetes services
-- Uses service DNS names (e.g., `ghost.texasdust:80`)
+- Uses service DNS names (e.g., `wordpress.texasdust:80`)
 - Catch-all returns 404 for unknown hosts
 
 **DNS Routing**: Cloudflare DNS CNAME

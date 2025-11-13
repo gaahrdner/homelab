@@ -1,0 +1,119 @@
+---
+# Valkey deployment for WordPress object caching
+# Valkey is the open-source Redis fork with better performance and licensing
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: valkey-config
+  namespace: texasdust
+data:
+  valkey.conf: |
+    # Memory
+    maxmemory 512mb
+    maxmemory-policy allkeys-lru
+
+    # Persistence (disabled for cache-only use)
+    save ""
+    appendonly no
+
+    # Network
+    bind 0.0.0.0
+    port 6379
+    tcp-backlog 511
+    timeout 0
+    tcp-keepalive 300
+
+    # Performance
+    io-threads 4
+    io-threads-do-reads yes
+
+    # Logging
+    loglevel notice
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: valkey
+  namespace: texasdust
+  labels:
+    app: valkey
+spec:
+  type: ClusterIP
+  ports:
+  - port: 6379
+    targetPort: 6379
+    name: valkey
+  selector:
+    app: valkey
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: valkey
+  namespace: texasdust
+  labels:
+    app: valkey
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: valkey
+  template:
+    metadata:
+      labels:
+        app: valkey
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9121"
+    spec:
+      securityContext:
+        fsGroup: 999
+        runAsUser: 999
+        runAsNonRoot: true
+      containers:
+      - name: valkey
+        image: valkey/valkey:8.1-alpine
+        command:
+        - valkey-server
+        - /etc/valkey/valkey.conf
+        ports:
+        - containerPort: 6379
+          name: valkey
+        volumeMounts:
+        - name: config
+          mountPath: /etc/valkey
+        - name: data
+          mountPath: /data
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 200m
+            memory: 512Mi
+        livenessProbe:
+          tcpSocket:
+            port: 6379
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          exec:
+            command:
+            - valkey-cli
+            - ping
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+      volumes:
+      - name: config
+        configMap:
+          name: valkey-config
+      - name: data
+        emptyDir: {}  # Cache data doesn't need persistence

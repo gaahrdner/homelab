@@ -14,9 +14,9 @@ data:
 
     # Ingress rules - order matters!
     ingress:
-      # Route texasdust.org to Ghost service
+      # Route texasdust.org to WordPress service
       - hostname: texasdust.org
-        service: http://ghost.texasdust:80
+        service: http://wordpress.texasdust:80
         originRequest:
           httpHostHeader: texasdust.org
           originServerName: texasdust.org

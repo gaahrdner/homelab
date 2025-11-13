@@ -12,7 +12,7 @@ apps/
 └── services/           # Everything else
     ├── cert-manager/   # TLS certificate management
     ├── onepassword-connect/  # 1Password secrets management
-    ├── texasdust/      # Ghost blog for texasdust.org
+    ├── texasdust/      # WordPress nonprofit site for texasdust.org
     └── (your apps)     # Web services, databases, etc.
 ```
 

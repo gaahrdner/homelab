@@ -35,7 +35,7 @@ This is a Kubernetes homelab cluster running on Talos Linux. The cluster is name
 **Deployed Applications:**
 - **Infrastructure**: Cilium L2 LoadBalancer, Longhorn distributed storage, external-dns (UniFi), Cloudflare Tunnel
 - **Platform Services**: cert-manager (TLS), 1Password Connect (secrets), kube-prometheus-stack
-- **Applications**: texasdust.org (Ghost blog, exposed via Cloudflare Tunnel)
+- **Applications**: texasdust.org (WordPress nonprofit site, exposed via Cloudflare Tunnel)
 
 ## Common Commands
 
@@ -313,7 +313,7 @@ The cluster uses Cloudflare Tunnel (cloudflared) to expose services to the publi
 - Multiple replicas provide HA; each connects independently to Cloudflare edge
 
 **Current Tunnels**:
-- texasdust.org → ghost.texasdust:80 (Ghost blog)
+- texasdust.org → wordpress.texasdust:80 (WordPress nonprofit site)
 
 See `src/apps/infrastructure/cloudflared/README.md` for detailed setup.
 

@@ -5,10 +5,22 @@ metadata:
   namespace: argocd
 spec:
   project: default
-  source:
-    repoURL: https://github.com/gaahrdner/homelab.git
+  # Use multiple sources: Helm chart + supporting manifests from Git
+  sources:
+  # Source 1: WordPress Helm chart
+  - repoURL: https://groundhog2k.github.io/helm-charts/
+    chart: wordpress
+    targetRevision: 0.14.5
+    helm:
+      releaseName: wordpress
+      valueFiles:
+      - $values/src/apps/services/texasdust/k8s/wordpress-values.yaml
+
+  # Source 2: Supporting manifests (MariaDB, Valkey, secrets, etc.)
+  - repoURL: https://github.com/gaahrdner/homelab.git
     targetRevision: HEAD
     path: src/apps/services/texasdust/k8s
+    ref: values
 
   destination:
     server: https://kubernetes.default.svc
