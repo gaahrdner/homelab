@@ -1,8 +1,6 @@
 # WordPress Helm Chart Values (groundhog2k/wordpress)
-# Deploys WordPress with FrankenPHP for texasdust.org nonprofit site
-# FrankenPHP: Modern PHP server (Caddy-based), faster than Apache/nginx+PHP-FPM
+# Deploys WordPress for texasdust.org nonprofit site
 # Note: replicaCount set to 1 due to ReadWriteOnce storage limitation
-# Using PHP 8.3 (latest available FrankenWP tag)
 
 replicaCount: 1
 
@@ -12,20 +10,25 @@ strategy:
 
 image:
   registry: "docker.io"
-  repository: "wpeverywhere/frankenwp"
+  repository: "wordpress"
   pullPolicy: IfNotPresent
-  tag: "latest-php8.3"
+  tag: "6.8-php8.4-apache"
 
-# Pod security context
-# Note: FrankenPHP runs as root to bind ports and initialize, then drops to www-data
-podSecurityContext: {}
+# Pod security context (run as www-data, non-root)
+podSecurityContext:
+  fsGroup: 33
+  runAsUser: 33
+  runAsNonRoot: true
 
 # Container security context
-# Note: allowPrivilegeEscalation needed for FrankenPHP setcap capabilities
+# Note: readOnlyRootFilesystem disabled for Apache (needs /var/run/apache2, /tmp)
 securityContext:
   readOnlyRootFilesystem: false
-  allowPrivilegeEscalation: true
+  allowPrivilegeEscalation: false
   privileged: false
+  capabilities:
+    drop:
+      - ALL
 
 # Service configuration
 service:
@@ -150,9 +153,6 @@ env:
     value: |
       define('WP_HOME', 'https://texasdust.org');
       define('WP_SITEURL', 'https://texasdust.org');
-  # FrankenPHP/Caddy configuration
-  - name: CADDY_GLOBAL_OPTIONS
-    value: "auto_https off"
 
 # Storage configuration (Longhorn PVC for uploads)
 storage:
