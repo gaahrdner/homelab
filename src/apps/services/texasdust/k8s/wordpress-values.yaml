@@ -75,7 +75,7 @@ startupProbe:
   periodSeconds: 10
 
 livenessProbe:
-  enabled: false
+  enabled: true
   initialDelaySeconds: 60
   timeoutSeconds: 15
   failureThreshold: 5
@@ -83,7 +83,7 @@ livenessProbe:
   periodSeconds: 20
 
 readinessProbe:
-  enabled: false
+  enabled: true
   initialDelaySeconds: 30
   timeoutSeconds: 10
   failureThreshold: 5
@@ -103,17 +103,6 @@ settings:
   tablePrefix: "wp_"
   maxFileUploadSize: 64M
   memoryLimit: 256M
-  configExtra: |
-    // Redis Object Cache configuration
-    define('WP_REDIS_CLIENT', 'phpredis');
-    define('WP_REDIS_HOST', 'valkey');
-    define('WP_REDIS_PORT', '6379');
-    define('WP_REDIS_DATABASE', '0');
-    define('WP_REDIS_PREFIX', 'wp_');
-
-    // Security hardening
-    define('DISALLOW_FILE_EDIT', true);
-    define('FORCE_SSL_ADMIN', true);
 
 # Custom PHP configuration
 customPhpConfig: |
@@ -153,6 +142,17 @@ env:
     value: |
       define('WP_HOME', 'https://texasdust.org');
       define('WP_SITEURL', 'https://texasdust.org');
+
+      // Redis Object Cache configuration
+      define('WP_REDIS_CLIENT', 'phpredis');
+      define('WP_REDIS_HOST', 'valkey');
+      define('WP_REDIS_PORT', 6379);
+      define('WP_REDIS_DATABASE', 0);
+      define('WP_REDIS_PREFIX', 'wp_');
+
+      // Security hardening
+      define('DISALLOW_FILE_EDIT', true);
+      define('FORCE_SSL_ADMIN', true);
 
 # Storage configuration (Longhorn PVC for uploads)
 storage:
