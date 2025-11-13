@@ -1,14 +1,15 @@
 # WordPress Helm Chart Values (groundhog2k/wordpress)
-# Deploys WordPress with Apache for texasdust.org nonprofit site
+# Deploys WordPress with FrankenPHP for texasdust.org nonprofit site
+# FrankenPHP: Modern PHP server (Caddy-based), faster than Apache/nginx+PHP-FPM
 # Note: replicaCount set to 1 due to ReadWriteOnce storage limitation
 
 replicaCount: 1
 
 image:
   registry: "docker.io"
-  repository: "wordpress"
+  repository: "wpeverywhere/frankenwp"
   pullPolicy: IfNotPresent
-  tag: "6.8-php8.4-apache"
+  tag: "latest-php8.4"
 
 # Pod security context (run as www-data, non-root)
 podSecurityContext:
