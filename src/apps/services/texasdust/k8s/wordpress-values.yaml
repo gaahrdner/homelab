@@ -16,24 +16,16 @@ image:
   pullPolicy: IfNotPresent
   tag: "latest-php8.3"
 
-# Pod security context (run as www-data, non-root)
+# Pod security context (FrankenPHP needs root to bind ports, then drops privileges)
 podSecurityContext:
   fsGroup: 33
-  runAsUser: 33
-  runAsNonRoot: true
 
 # Container security context
-# Note: readOnlyRootFilesystem disabled for FrankenPHP (needs to write cache/uploads)
-# NET_BIND_SERVICE required for FrankenPHP to bind to port 80
+# Note: FrankenPHP requires root to initialize, then automatically drops to www-data
 securityContext:
   readOnlyRootFilesystem: false
   allowPrivilegeEscalation: false
   privileged: false
-  capabilities:
-    add:
-      - NET_BIND_SERVICE
-    drop:
-      - ALL
 
 # Service configuration
 service:
