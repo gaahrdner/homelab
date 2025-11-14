@@ -10,6 +10,7 @@ spec:
     repoURL: https://vmware-tanzu.github.io/helm-charts
     targetRevision: 2.31.0 # Helm chart version, typically wraps Velero application version 1.x.x
     helm:
+      # Triggering re-sync for ArgoCD
       valuesObject:
         configuration:
           provider: aws
