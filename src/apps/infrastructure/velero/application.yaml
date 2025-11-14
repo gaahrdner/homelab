@@ -8,18 +8,15 @@ spec:
   source:
     chart: velero
     repoURL: https://vmware-tanzu.github.io/helm-charts
-    targetRevision: 2.31.0 # Helm chart version, typically wraps Velero application version 1.x.x
+    targetRevision: 11.1.1 # Use latest chart
     helm:
-      # Triggering re-sync for ArgoCD
       valuesObject:
         configuration:
           provider: aws
-          # Velero application version
-          # This should match the version of the plugins used below
           velero:
             image:
               repository: velero/velero
-              tag: v1.12.2 # Velero application version
+              tag: v1.17.1 # Override to latest Velero version
           backupStorageLocation:
             name: default
             bucket: homelab-backup
@@ -36,16 +33,11 @@ spec:
             name: velero-r2-credentials # Name of the Kubernetes secret created by 1Password Connect
         initContainers:
           - name: velero-plugin-for-aws
-            image: velero/velero-plugin-for-aws:v1.7.0 # Compatible with Velero v1.12.x
+            image: velero/velero-plugin-for-aws:v1.13.0 # Compatible with Velero v1.17.x
             volumeMounts:
               - mountPath: /target
                 name: plugins
-          - name: velero-plugin-for-csi
-            image: velero/velero-plugin-for-csi:v1.9.0 # Compatible with Velero v1.9.0
-            volumeMounts:
-              - mountPath: /target
-                name: plugins
-        # Enable CSI snapshotter
+        # Enable CSI snapshotter (now integrated into Velero)
         deployNodeAgent: true
         csi:
           enable: true
