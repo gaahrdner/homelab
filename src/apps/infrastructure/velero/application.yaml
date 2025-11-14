@@ -20,18 +20,16 @@ spec:
               repository: velero/velero
               tag: v1.12.2 # Velero application version
           backupStorageLocation:
-            - name: default
-              bucket: homelab-backup
-              s3Url: https://48efe0f369d822f5035c1e179d993127.r2.cloudflarestorage.com
-              config:
-                region: auto
+            name: default
+            bucket: homelab-backup
+            s3Url: https://48efe0f369d822f5035c1e179d993127.r2.cloudflarestorage.com
+            config:
+              region: auto
           volumeSnapshotLocation:
-            - name: default
-              provider: csi
-              config:
-                # This assumes Longhorn creates a default VolumeSnapshotClass named 'longhorn'
-                # If not, you might need to specify the correct name here.
-                snapshotClass: longhorn
+            name: default
+            provider: csi
+            config:
+              snapshotClass: longhorn
         credentials:
           secretRef:
             name: velero-r2-credentials # Name of the Kubernetes secret created by 1Password Connect
