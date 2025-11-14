@@ -1,0 +1,83 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: velero
+  namespace: argocd
+spec:
+  project: default
+  source:
+    chart: velero
+    repoURL: https://vmware-tanzu.github.io/helm-charts
+    targetRevision: 2.31.0 # Helm chart version, typically wraps Velero application version 1.x.x
+    helm:
+      valuesObject:
+        configuration:
+          provider: aws
+          # Velero application version
+          # This should match the version of the plugins used below
+          velero:
+            image:
+              repository: velero/velero
+              tag: v1.12.2 # Velero application version
+          backupStorageLocation:
+            - name: default
+              bucket: homelab-backup
+              s3Url: https://48efe0f369d822f5035c1e179d993127.r2.cloudflarestorage.com
+              config:
+                region: auto
+          volumeSnapshotLocation:
+            - name: default
+              provider: csi
+              config:
+                # This assumes Longhorn creates a default VolumeSnapshotClass named 'longhorn'
+                # If not, you might need to specify the correct name here.
+                snapshotClass: longhorn
+        credentials:
+          secretRef:
+            name: velero-r2-credentials # Name of the Kubernetes secret created by 1Password Connect
+        initContainers:
+          - name: velero-plugin-for-aws
+            image: velero/velero-plugin-for-aws:v1.7.0 # Compatible with Velero v1.12.x
+            volumeMounts:
+              - mountPath: /target
+                name: plugins
+          - name: velero-plugin-for-csi
+            image: velero/velero-plugin-for-csi:v1.7.0 # Compatible with Velero v1.12.x
+            volumeMounts:
+              - mountPath: /target
+                name: plugins
+        # Enable CSI snapshotter
+        deployNodeAgent: true
+        csi:
+          enable: true
+          # Default snapshotter for CSI volumes
+          defaultVolumesnapshotClass: longhorn # Ensure this matches your Longhorn VolumeSnapshotClass
+        # Ensure Velero server has appropriate resource limits
+        podAnnotations:
+          sidecar.istio.io/inject: "false" # Disable Istio sidecar injection if Istio is present
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: velero # Velero will be installed in the 'velero' namespace
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - RespectIgnoreDifferences=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
