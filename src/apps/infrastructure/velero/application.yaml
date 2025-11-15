@@ -31,8 +31,9 @@ spec:
         # Disable the CRD upgrade hook which uses a broken image
         upgradeCRDs: false
         installCRDs: false
-        # Use extraSecretRef to inject the 1Password secret as environment variables
-        extraSecretRef: velero-r2-credentials
+        # Use an existing secret created manually, as the 1Password operator cannot create the required format.
+        credentials:
+          existingSecret: velero-credentials
         initContainers:
           - name: velero-plugin-for-aws
             image: velero/velero-plugin-for-aws:v1.13.0 # Compatible with Velero v1.17.x
