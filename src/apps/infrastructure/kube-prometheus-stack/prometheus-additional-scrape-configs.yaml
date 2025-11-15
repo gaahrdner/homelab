@@ -5,11 +5,13 @@ metadata:
   namespace: monitoring
 stringData:
   prometheus-additional.yaml: |
-    # Talos etcd metrics
+    # ================================================================
+    # Talos etcd metrics (cluster consensus and key-value operations)
+    # ================================================================
     - job_name: 'talos-etcd'
       scheme: https
       tls_config:
-        insecure_skip_verify: true
+        insecure_skip_verify: true  # TODO: Use proper CA certificate
       static_configs:
         - targets:
             - '192.168.0.120:2381'  # urd
@@ -17,3 +19,69 @@ stringData:
             - '192.168.0.122:2381'  # skuld
           labels:
             component: etcd
+
+    # ================================================================
+    # Talos kubelet metrics (pod/container metrics from each node)
+    # ================================================================
+    - job_name: 'talos-kubelet'
+      scheme: https
+      tls_config:
+        insecure_skip_verify: true  # TODO: Use proper CA certificate
+      static_configs:
+        - targets:
+            - '192.168.0.120:10250'  # urd
+            - '192.168.0.121:10250'  # verdandi
+            - '192.168.0.122:10250'  # skuld
+          labels:
+            component: kubelet
+      metrics_path: /metrics
+      honor_labels: false
+
+    # ================================================================
+    # Talos kubelet cadvisor metrics (container resource usage)
+    # ================================================================
+    - job_name: 'talos-kubelet-cadvisor'
+      scheme: https
+      tls_config:
+        insecure_skip_verify: true  # TODO: Use proper CA certificate
+      static_configs:
+        - targets:
+            - '192.168.0.120:10250'  # urd
+            - '192.168.0.121:10250'  # verdandi
+            - '192.168.0.122:10250'  # skuld
+          labels:
+            component: kubelet
+      metrics_path: /metrics/cadvisor
+      honor_labels: false
+
+    # ================================================================
+    # Kube-controller-manager metrics
+    # NOTE: Requires controlplane-metrics.yaml patch to expose on 0.0.0.0
+    # ================================================================
+    - job_name: 'kube-controller-manager'
+      scheme: https
+      tls_config:
+        insecure_skip_verify: true  # TODO: Use proper CA certificate
+      static_configs:
+        - targets:
+            - '192.168.0.120:10257'  # urd
+            - '192.168.0.121:10257'  # verdandi
+            - '192.168.0.122:10257'  # skuld
+          labels:
+            component: kube-controller-manager
+
+    # ================================================================
+    # Kube-scheduler metrics
+    # NOTE: Requires controlplane-metrics.yaml patch to expose on 0.0.0.0
+    # ================================================================
+    - job_name: 'kube-scheduler'
+      scheme: https
+      tls_config:
+        insecure_skip_verify: true  # TODO: Use proper CA certificate
+      static_configs:
+        - targets:
+            - '192.168.0.120:10259'  # urd
+            - '192.168.0.121:10259'  # verdandi
+            - '192.168.0.122:10259'  # skuld
+          labels:
+            component: kube-scheduler

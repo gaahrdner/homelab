@@ -164,8 +164,7 @@ podLabels:
   app: wordpress
   component: web
 
-# Pod annotations for Prometheus monitoring
-podAnnotations:
-  prometheus.io/scrape: "true"
-  prometheus.io/port: "9253"
-  prometheus.io/path: "/metrics"
+# Pod annotations
+podAnnotations: {}
+  # Prometheus metrics disabled - requires apache_exporter sidecar or WordPress plugin
+  # Can be enabled later by adding an exporter container to the pod

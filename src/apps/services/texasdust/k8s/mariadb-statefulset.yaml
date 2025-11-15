@@ -140,6 +140,37 @@ spec:
             drop:
             - ALL
           readOnlyRootFilesystem: false  # MariaDB needs to write to /var/lib/mysql
+
+      # MySQL exporter sidecar for Prometheus metrics
+      - name: mysqld-exporter
+        image: prom/mysqld-exporter:v0.16.0
+        ports:
+        - containerPort: 9104
+          name: metrics
+        env:
+        - name: DATA_SOURCE_NAME
+          value: "wordpress:$(MARIADB_PASSWORD)@(localhost:3306)/wordpress"
+        - name: MARIADB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: wordpress-db-credentials
+              key: password
+        resources:
+          requests:
+            cpu: 10m
+            memory: 32Mi
+          limits:
+            cpu: 100m
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 65534  # nobody user
+
       volumes:
       - name: config
         configMap:

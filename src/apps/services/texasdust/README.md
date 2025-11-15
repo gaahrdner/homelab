@@ -153,10 +153,24 @@ Key features enabled:
 
 ### Prometheus Metrics
 
-All components expose metrics:
-- **WordPress:** Port 9253 (PHP-FPM metrics)
-- **MariaDB:** Port 9104 (MySQL exporter)
-- **Valkey:** Port 9121 (Redis exporter)
+The following components expose metrics and are automatically scraped by Prometheus:
+
+- **MariaDB:** Port 9104 (mysqld-exporter sidecar)
+  - Database performance metrics
+  - Query statistics
+  - Connection pool status
+  - InnoDB metrics
+
+- **Valkey:** Port 9121 (redis-exporter sidecar)
+  - Cache hit/miss rates
+  - Memory usage
+  - Connection statistics
+  - Key statistics
+
+- **WordPress:** Not currently monitored
+  - Future: Can add apache_exporter sidecar or WordPress plugin for metrics
+
+All metrics are automatically discovered via the cluster-wide PodMonitor (prometheus.io annotations).
 
 ### Health Checks
 
