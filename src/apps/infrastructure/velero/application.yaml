@@ -28,6 +28,9 @@ spec:
               provider: csi
               config:
                 snapshotClass: longhorn
+        # Disable the CRD upgrade hook which uses a broken image
+        upgradeCRDs: false
+        installCRDs: false
         credentials:
           secretRef:
             name: velero-r2-credentials # Name of the Kubernetes secret created by 1Password Connect
