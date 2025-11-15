@@ -12,6 +12,7 @@ spec:
     helm:
       valuesObject:
         configuration:
+          features: EnableCSI
           velero:
             image:
               repository: velero/velero
