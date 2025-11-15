@@ -20,9 +20,9 @@ spec:
             - name: default
               provider: aws
               bucket: homelab-backup
-              s3Url: https://48efe0f369d822f5035c1e179d993127.r2.cloudflarestorage.com
               config:
                 region: auto
+                s3Url: https://48efe0f369d822f5035c1e179d993127.r2.cloudflarestorage.com
           volumeSnapshotLocation:
             - name: default
               provider: csi
