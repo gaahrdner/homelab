@@ -1,0 +1,151 @@
+# Paperless-ngx Helm Chart Values
+# Chart: oci://ghcr.io/gabe565/charts/paperless-ngx
+
+image:
+  repository: ghcr.io/paperless-ngx/paperless-ngx
+  pullPolicy: IfNotPresent
+  tag: 2.14.7
+
+env:
+  TZ: America/Chicago
+
+  # URL Configuration
+  PAPERLESS_URL: https://docs.internal
+
+  # Admin User (populated from 1Password)
+  PAPERLESS_ADMIN_USER:
+    valueFrom:
+      secretKeyRef:
+        name: paperless-admin
+        key: username
+  PAPERLESS_ADMIN_PASSWORD:
+    valueFrom:
+      secretKeyRef:
+        name: paperless-admin
+        key: password
+
+  # Secret Key (populated from 1Password)
+  PAPERLESS_SECRET_KEY:
+    valueFrom:
+      secretKeyRef:
+        name: paperless-secret-key
+        key: secret-key
+
+  # OCR Configuration
+  PAPERLESS_OCR_LANGUAGE: eng
+  PAPERLESS_OCR_LANGUAGES: eng
+
+  # Consumption Settings
+  PAPERLESS_CONSUMER_POLLING: "60"
+  PAPERLESS_CONSUMER_DELETE_DUPLICATES: "true"
+  PAPERLESS_CONSUMER_RECURSIVE: "true"
+
+  # Email Configuration (populated from 1Password)
+  PAPERLESS_EMAIL_TASK_CRON: "*/10 * * * *"  # Check every 10 minutes
+  PAPERLESS_CONSUMPTION_MAIL_HOST:
+    valueFrom:
+      secretKeyRef:
+        name: paperless-email
+        key: host
+  PAPERLESS_CONSUMPTION_MAIL_PORT:
+    valueFrom:
+      secretKeyRef:
+        name: paperless-email
+        key: port
+  PAPERLESS_CONSUMPTION_MAIL_USER:
+    valueFrom:
+      secretKeyRef:
+        name: paperless-email
+        key: username
+  PAPERLESS_CONSUMPTION_MAIL_PASSWORD:
+    valueFrom:
+      secretKeyRef:
+        name: paperless-email
+        key: password
+  PAPERLESS_CONSUMPTION_MAIL_SECURITY:
+    valueFrom:
+      secretKeyRef:
+        name: paperless-email
+        key: security
+  PAPERLESS_CONSUMPTION_MAIL_FROM:
+    valueFrom:
+      secretKeyRef:
+        name: paperless-email
+        key: from
+
+  # Performance
+  PAPERLESS_TASK_WORKERS: "2"
+  PAPERLESS_THREADS_PER_WORKER: "1"
+
+service:
+  main:
+    ports:
+      http:
+        port: 8000
+
+# Enable persistence for all volumes
+persistence:
+  data:
+    enabled: true
+    retain: true
+    mountPath: /usr/src/paperless/data
+    storageClass: longhorn
+    accessMode: ReadWriteOnce
+    size: 2Gi
+
+  media:
+    enabled: true
+    retain: true
+    mountPath: /usr/src/paperless/media
+    storageClass: longhorn
+    accessMode: ReadWriteOnce
+    size: 20Gi
+
+  export:
+    enabled: true
+    retain: true
+    mountPath: /usr/src/paperless/export
+    storageClass: longhorn
+    accessMode: ReadWriteOnce
+    size: 2Gi
+
+  consume:
+    enabled: true
+    retain: true
+    mountPath: /usr/src/paperless/consume
+    storageClass: longhorn
+    accessMode: ReadWriteOnce
+    size: 10Gi
+
+# PostgreSQL Database
+postgresql:
+  enabled: true
+  auth:
+    database: paperless
+    username: paperless
+    # Password generated from 1Password secret
+    existingSecret: paperless-postgresql
+    secretKeys:
+      adminPasswordKey: postgres-password
+      userPasswordKey: password
+  primary:
+    persistence:
+      enabled: true
+      storageClass: longhorn
+      size: 10Gi
+
+# Redis Cache
+redis:
+  enabled: true
+  auth:
+    enabled: true
+    # Password generated from 1Password secret
+    existingSecret: paperless-redis
+    existingSecretPasswordKey: redis-password
+  master:
+    persistence:
+      enabled: true
+      storageClass: longhorn
+      size: 1Gi
+  replica:
+    replicaCount: 0
