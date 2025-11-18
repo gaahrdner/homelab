@@ -1,0 +1,40 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: paperless-ngx
+  namespace: argocd
+spec:
+  project: default
+  # Use multiple sources: Helm chart + supporting manifests from Git
+  sources:
+  # Source 1: Paperless-ngx Helm chart
+  - repoURL: oci://ghcr.io/gabe565/charts
+    chart: paperless-ngx
+    targetRevision: 0.24.1
+    helm:
+      releaseName: paperless-ngx
+      valueFiles:
+      - $values/src/apps/services/paperless-ngx/k8s/values.yaml
+
+  # Source 2: Supporting manifests (HTTPRoute, secrets, etc.)
+  - repoURL: https://github.com/gaahrdner/homelab.git
+    targetRevision: HEAD
+    path: src/apps/services/paperless-ngx/k8s
+    ref: values
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: paperless-ngx
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
