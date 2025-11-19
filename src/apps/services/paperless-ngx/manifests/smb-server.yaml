@@ -1,0 +1,72 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: paperless-smb
+  namespace: paperless-ngx
+  labels:
+    app: paperless-smb
+spec:
+  type: LoadBalancer
+  ports:
+    - name: smb
+      port: 445
+      targetPort: 445
+      protocol: TCP
+  selector:
+    app: paperless-smb
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: paperless-smb
+  namespace: paperless-ngx
+  labels:
+    app: paperless-smb
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: paperless-smb
+  template:
+    metadata:
+      labels:
+        app: paperless-smb
+    spec:
+      containers:
+        - name: samba
+          image: dperson/samba:latest
+          ports:
+            - name: smb
+              containerPort: 445
+          env:
+            # Create a share named "paperless" at /consume, browseable, read-only: no, guest ok: yes
+            # Format: "share_name;path;browsable;read-only;guest;users;admins;writelist;comment"
+            - name: SHARE
+              value: "paperless;/consume;yes;no;yes;all;none;;ScanSnap Document Upload"
+            # Disable user authentication (guest access)
+            - name: USERID
+              value: "1000"
+            - name: GROUPID
+              value: "1000"
+          volumeMounts:
+            - name: consume
+              mountPath: /consume
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          securityContext:
+            capabilities:
+              add:
+                - CAP_NET_BIND_SERVICE
+      volumes:
+        - name: consume
+          persistentVolumeClaim:
+            claimName: paperless-consume
