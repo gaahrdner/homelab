@@ -5,22 +5,10 @@ metadata:
   namespace: argocd
 spec:
   project: default
-  # Use multiple sources: Helm chart + supporting manifests from Git
-  sources:
-  # Source 1: Paperless-ngx Helm chart
-  - repoURL: oci://ghcr.io/gabe565/charts
-    chart: paperless-ngx
-    targetRevision: 0.24.1
-    helm:
-      releaseName: paperless-ngx
-      valueFiles:
-      - $values/src/apps/services/paperless-ngx/k8s/values.yaml
-
-  # Source 2: Supporting manifests (HTTPRoute, secrets, etc.)
-  - repoURL: https://github.com/gaahrdner/homelab.git
+  source:
+    repoURL: https://github.com/gaahrdner/homelab.git
     targetRevision: HEAD
-    path: src/apps/services/paperless-ngx/k8s
-    ref: values
+    path: src/apps/services/paperless-ngx/manifests
 
   destination:
     server: https://kubernetes.default.svc

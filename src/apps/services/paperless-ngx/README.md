@@ -14,6 +14,8 @@ Document management system for scanning, indexing, and archiving all your paper 
 
 ## Architecture
 
+This deployment uses **custom Kubernetes manifests** instead of a Helm chart to avoid OCI registry authentication issues with ArgoCD.
+
 - **Application**: Paperless-ngx v2.14.7 (Python/Django)
 - **Database**: PostgreSQL 16 (10GB storage)
 - **Cache**: Redis 7 (1GB storage)
@@ -22,6 +24,8 @@ Document management system for scanning, indexing, and archiving all your paper 
   - Media: 20GB (processed documents)
   - Export: 2GB (exported archives)
   - Consume: 10GB (incoming documents)
+
+All manifests are in the `manifests/` directory and managed by ArgoCD.
 
 ## Access
 
