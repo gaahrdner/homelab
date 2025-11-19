@@ -36,6 +36,14 @@ spec:
       labels:
         app: paperless-smb
     spec:
+      # Schedule on same node as paperless-ngx to share RWO volume
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app: paperless-ngx
+              topologyKey: kubernetes.io/hostname
       containers:
         - name: samba
           image: dperson/samba:latest
