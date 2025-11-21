@@ -1,0 +1,78 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: auto-discovery
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: auto-discovery
+spec:
+  # Match ALL pods in ALL namespaces
+  namespaceSelector:
+    any: true
+
+  # Empty selector = match all pods (filtering happens in relabeling)
+  selector: {}
+
+  # Pod metrics endpoint configuration
+  podMetricsEndpoints:
+    - interval: 30s
+      scrapeTimeout: 10s
+
+      # Port is taken from prometheus.io/port annotation (default: metrics)
+      # This uses relabeling to dynamically set the port from annotations
+      relabelings:
+        # Keep only pods with prometheus.io/scrape=true
+        - sourceLabels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+          action: keep
+          regex: "true"
+
+        # Set the metrics path from prometheus.io/path annotation (default: /metrics)
+        - sourceLabels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+          action: replace
+          targetLabel: __metrics_path__
+          regex: (.+)
+
+        # Set the port from prometheus.io/port annotation (default: named "metrics" port)
+        - sourceLabels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+          action: replace
+          regex: ([^:]+)(?::\d+)?;(\d+)
+          replacement: $1:$2
+          targetLabel: __address__
+
+        # Add namespace label
+        - sourceLabels: [__meta_kubernetes_namespace]
+          action: replace
+          targetLabel: namespace
+
+        # Add pod label
+        - sourceLabels: [__meta_kubernetes_pod_name]
+          action: replace
+          targetLabel: pod
+
+        # Add container label
+        - sourceLabels: [__meta_kubernetes_pod_container_name]
+          action: replace
+          targetLabel: container
+
+        # Add node label
+        - sourceLabels: [__meta_kubernetes_pod_node_name]
+          action: replace
+          targetLabel: node
+
+        # Add app label from app.kubernetes.io/name
+        - sourceLabels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+          action: replace
+          targetLabel: app
+          regex: (.+)
+
+        # Add version label from app.kubernetes.io/version
+        - sourceLabels: [__meta_kubernetes_pod_label_app_kubernetes_io_version]
+          action: replace
+          targetLabel: version
+          regex: (.+)
+
+        # Add component label from app.kubernetes.io/component
+        - sourceLabels: [__meta_kubernetes_pod_label_app_kubernetes_io_component]
+          action: replace
+          targetLabel: component
+          regex: (.+)

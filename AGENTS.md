@@ -317,6 +317,221 @@ The cluster uses Cloudflare Tunnel (cloudflared) to expose services to the publi
 
 See `src/apps/infrastructure/cloudflared/README.md` for detailed setup.
 
+## Observability (Metrics + Logs)
+
+The cluster has comprehensive observability with automatic discovery of new workloads.
+
+### Monitoring Stack
+
+**Grafana** (http://grafana.internal)
+- Centralized visualization for metrics and logs
+- Credentials: admin / (from 1Password `grafana-admin-credentials`)
+- 20+ built-in Kubernetes dashboards
+- 5Gi Longhorn storage for dashboard persistence
+
+**Prometheus** (kube-prometheus-stack)
+- 7-day metric retention (15GB limit)
+- 20Gi Longhorn storage
+- Automatic ServiceMonitor/PodMonitor discovery across all namespaces
+- Additional scrape configs for Talos components (etcd, kubelet, scheduler, controller-manager)
+
+**Loki** (log aggregation)
+- 7-day log retention (168 hours)
+- 20Gi Longhorn storage
+- Automatically collects logs from ALL pods via Promtail DaemonSet
+- Integrated with Grafana for log queries
+
+**Alertmanager**
+- 25+ default alert rules enabled
+- No notification channels configured (alerts generated but not sent)
+- Add Slack/email/Discord notifications via `alertmanager.config` in values
+
+### What's Already Monitored
+
+**Infrastructure:**
+- Cilium CNI (agent, operator, Hubble metrics)
+- Longhorn storage (volume health, capacity, replicas)
+- Cloudflared tunnels (connection status)
+- External-DNS (record sync operations)
+- Loki + Promtail (log collection metrics)
+
+**Talos System:**
+- etcd (consensus, operations)
+- kubelet (pod/container metrics)
+- cadvisor (container resource usage)
+- kube-controller-manager
+- kube-scheduler
+
+**Platform Services:**
+- cert-manager (certificate expiration tracking)
+- ArgoCD (sync status, application health)
+
+**Applications:**
+- texasdust MariaDB (database metrics via mysqld-exporter)
+- texasdust Valkey (cache metrics via redis-exporter)
+
+### Automatic Discovery for New Workloads
+
+**Option 1: Pod Annotations (Simplest)**
+
+Add these annotations to your Deployment/StatefulSet pod template:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app
+spec:
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"    # Required: Enable scraping
+        prometheus.io/port: "8080"      # Required: Metrics port
+        prometheus.io/path: "/metrics"  # Optional: Default is /metrics
+    spec:
+      containers:
+        - name: app
+          image: my-app:latest
+          ports:
+            - containerPort: 8080
+              name: metrics
+```
+
+**That's it!** The cluster-wide PodMonitor (`src/apps/infrastructure/kube-prometheus-stack/podmonitor-auto-discovery.yaml`) will automatically scrape metrics within 30 seconds.
+
+**Option 2: ServiceMonitor (For Services)**
+
+Create a ServiceMonitor for your service:
+
+```yaml
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: my-app
+  namespace: my-namespace
+spec:
+  selector:
+    matchLabels:
+      app: my-app
+  endpoints:
+    - port: metrics
+      interval: 30s
+```
+
+Prometheus automatically discovers all ServiceMonitors (`serviceMonitorSelectorNilUsesHelmValues: false`).
+
+### Accessing Metrics and Logs
+
+**Grafana UI:**
+```bash
+# Access via HTTPRoute
+open http://grafana.internal
+
+# Or port-forward
+kubectl port-forward -n monitoring svc/kube-prometheus-stack-grafana 3000:80
+open http://localhost:3000
+```
+
+**Query Logs in Grafana:**
+1. Go to Explore → Select "Loki" datasource
+2. Query examples:
+   ```logql
+   # All logs from a namespace
+   {namespace="texasdust"}
+
+   # Search for errors
+   {namespace="texasdust"} |= "error"
+
+   # Logs from specific pod
+   {pod="wordpress-xyz"}
+
+   # Filter by container
+   {namespace="monitoring", container="prometheus"}
+   ```
+
+**Query Metrics in Grafana:**
+1. Go to Explore → Select "Prometheus" datasource
+2. Query examples:
+   ```promql
+   # CPU usage per pod
+   rate(container_cpu_usage_seconds_total[5m])
+
+   # Memory usage
+   container_memory_usage_bytes{namespace="texasdust"}
+
+   # Database connections (MariaDB)
+   mysql_global_status_threads_connected
+
+   # Cache hit rate (Valkey)
+   rate(redis_keyspace_hits_total[5m])
+   ```
+
+### Labels Applied Automatically
+
+All metrics from auto-discovered pods get these labels:
+- `namespace`: Kubernetes namespace
+- `pod`: Pod name
+- `container`: Container name
+- `node`: Node name (urd, verdandi, or skuld)
+- `app`: From `app.kubernetes.io/name` label
+- `version`: From `app.kubernetes.io/version` label
+- `component`: From `app.kubernetes.io/component` label
+
+All logs from pods get these labels:
+- `namespace`, `pod`, `container`, `node`, `app` (same as metrics)
+
+### Best Practices
+
+1. **Always use Prometheus annotations** for new apps with metrics endpoints
+2. **Check Grafana datasources** after deploying Loki or adding new sources
+3. **Store Grafana password in 1Password** (item: `grafana-admin-credentials` in kubernetes vault)
+4. **Create dashboards in Grafana UI**, they persist to Longhorn storage
+5. **Monitor certificate expiration** - cert-manager metrics now enabled
+6. **Use structured logging** (JSON) in applications for better log parsing
+
+### Troubleshooting
+
+**Metrics not appearing:**
+```bash
+# Check if PodMonitor discovered the pod
+kubectl get podmonitors -A
+
+# Check Prometheus targets
+kubectl port-forward -n monitoring svc/kube-prometheus-stack-prometheus 9090:9090
+# Visit http://localhost:9090/targets
+
+# Check pod annotations
+kubectl get pod <pod-name> -n <namespace> -o yaml | grep -A5 annotations
+```
+
+**Logs not appearing:**
+```bash
+# Check Promtail is running on all nodes
+kubectl get pods -n loki-stack -l app.kubernetes.io/name=promtail
+
+# Check Promtail logs
+kubectl logs -n loki-stack -l app.kubernetes.io/name=promtail
+
+# Check Loki is healthy
+kubectl get pods -n loki-stack -l app.kubernetes.io/name=loki
+
+# Test Loki datasource in Grafana
+# Configuration → Data Sources → Loki → Test
+```
+
+**Dashboard not persisting:**
+- Grafana uses Longhorn PVC for persistence
+- Check: `kubectl get pvc -n monitoring`
+- Dashboards are stored in `/var/lib/grafana`
+
+### Documentation
+
+See detailed documentation in:
+- `src/apps/infrastructure/kube-prometheus-stack/README.md` - Prometheus/Grafana/Alertmanager
+- `src/apps/infrastructure/loki-stack/README.md` - Loki/Promtail logging
+- `src/apps/infrastructure/longhorn/servicemonitor.yaml` - Storage metrics
+- `src/apps/services/texasdust/README.md` - Application monitoring example
+
 ## Important Notes
 
 - **Secure Boot**: This cluster uses Talos with Secure Boot enabled. Always use `-secureboot` images from Image Factory.

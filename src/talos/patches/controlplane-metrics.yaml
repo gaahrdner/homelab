@@ -1,0 +1,13 @@
+# Expose kube-controller-manager and kube-scheduler metrics
+# By default, these bind to 127.0.0.1 which prevents Prometheus from scraping them.
+# This patch changes the bind address to 0.0.0.0 to allow external scraping.
+#
+# Reference: https://www.talos.dev/v1.11/talos-guides/configuration/
+#
+cluster:
+  controllerManager:
+    extraArgs:
+      bind-address: 0.0.0.0  # Allow Prometheus to scrape metrics (default: 127.0.0.1)
+  scheduler:
+    extraArgs:
+      bind-address: 0.0.0.0  # Allow Prometheus to scrape metrics (default: 127.0.0.1)

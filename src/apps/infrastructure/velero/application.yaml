@@ -37,7 +37,7 @@ spec:
           existingSecret: velero-credentials
         initContainers:
           - name: velero-plugin-for-aws
-            image: velero/velero-plugin-for-aws:v1.13.0 # Compatible with Velero v1.17.x
+            image: velero/velero-plugin-for-aws:v1.13.1 # Compatible with Velero v1.17.x
             volumeMounts:
               - mountPath: /target
                 name: plugins

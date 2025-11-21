@@ -87,6 +87,7 @@ echo "==> Generating base machine configs..."
 talosctl gen config \
   --with-secrets secrets.yaml \
   --config-patch-control-plane @src/talos/patches/scheduling.yaml \
+  --config-patch-control-plane @src/talos/patches/controlplane-metrics.yaml \
   --config-patch @src/talos/patches/image.yaml \
   --config-patch @src/talos/patches/kubelet.yaml \
   norns ${CONTROL_PLANE_ENDPOINT} --force

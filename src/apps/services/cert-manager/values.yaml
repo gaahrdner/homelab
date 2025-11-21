@@ -44,6 +44,13 @@ cainjector:
       cpu: 100m
       memory: 128Mi
 
-# Disable Prometheus integration (enable later if you add monitoring)
+# Enable Prometheus integration for certificate expiration monitoring
 prometheus:
-  enabled: false
+  enabled: true
+  servicemonitor:
+    enabled: true
+    prometheusInstance: default
+    interval: 60s
+    scrapeTimeout: 30s
+    labels:
+      release: kube-prometheus-stack

@@ -59,8 +59,15 @@ spec:
         grafana:
           enabled: true
 
-          # Admin credentials (consider moving to 1Password)
-          adminPassword: admin
+          # Admin credentials from 1Password
+          # NOTE: Before deploying, create item in 1Password:
+          #   Vault: kubernetes
+          #   Item: grafana-admin-credentials
+          #   Field: password (your secure password)
+          admin:
+            existingSecret: grafana-admin-credentials
+            userKey: username
+            passwordKey: password
 
           # Persistence for dashboards
           persistence:
