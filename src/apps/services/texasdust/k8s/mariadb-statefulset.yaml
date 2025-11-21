@@ -154,7 +154,7 @@ spec:
               name: wordpress-db-credentials
               key: password
         - name: DATA_SOURCE_NAME
-          value: "wordpress:$(MARIADB_PASSWORD)@(localhost:3306)/wordpress"
+          value: "wordpress:$(MARIADB_PASSWORD)@tcp(localhost:3306)/wordpress"
         resources:
           requests:
             cpu: 10m
