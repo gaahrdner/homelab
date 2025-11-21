@@ -148,13 +148,13 @@ spec:
         - containerPort: 9104
           name: metrics
         env:
-        - name: DATA_SOURCE_NAME
-          value: "wordpress:$(MARIADB_PASSWORD)@(localhost:3306)/wordpress"
         - name: MARIADB_PASSWORD
           valueFrom:
             secretKeyRef:
               name: wordpress-db-credentials
               key: password
+        - name: DATA_SOURCE_NAME
+          value: "wordpress:$(MARIADB_PASSWORD)@(localhost:3306)/wordpress"
         resources:
           requests:
             cpu: 10m
