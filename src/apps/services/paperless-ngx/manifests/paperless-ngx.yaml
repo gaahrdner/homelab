@@ -1,0 +1,255 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: paperless-ngx-main
+  namespace: paperless-ngx
+  labels:
+    app: paperless-ngx
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+  selector:
+    app: paperless-ngx
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: paperless-data
+  namespace: paperless-ngx
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 2Gi
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: paperless-media
+  namespace: paperless-ngx
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 20Gi
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: paperless-export
+  namespace: paperless-ngx
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 2Gi
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: paperless-consume
+  namespace: paperless-ngx
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 10Gi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: paperless-ngx
+  namespace: paperless-ngx
+  labels:
+    app: paperless-ngx
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: paperless-ngx
+  template:
+    metadata:
+      labels:
+        app: paperless-ngx
+    spec:
+      containers:
+        - name: paperless-ngx
+          image: ghcr.io/paperless-ngx/paperless-ngx:2.19.6
+          ports:
+            - name: http
+              containerPort: 8000
+          env:
+            # Timezone
+            - name: TZ
+              value: America/Chicago
+
+            # URL Configuration
+            - name: PAPERLESS_URL
+              value: https://docs.internal
+
+            # Admin User (from 1Password)
+            - name: PAPERLESS_ADMIN_USER
+              valueFrom:
+                secretKeyRef:
+                  name: paperless-admin
+                  key: username
+            - name: PAPERLESS_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: paperless-admin
+                  key: password
+
+            # Secret Key (from 1Password)
+            - name: PAPERLESS_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: paperless-secret-key
+                  key: secret-key
+
+            # Database Configuration
+            - name: PAPERLESS_DBENGINE
+              value: postgresql
+            - name: PAPERLESS_DBHOST
+              value: paperless-postgresql
+            - name: PAPERLESS_DBPORT
+              value: "5432"
+            - name: PAPERLESS_DBNAME
+              value: paperless
+            - name: PAPERLESS_DBUSER
+              value: paperless
+            - name: PAPERLESS_DBPASS
+              valueFrom:
+                secretKeyRef:
+                  name: paperless-postgresql
+                  key: password
+
+            # Redis Configuration
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: paperless-redis
+                  key: redis-password
+            - name: PAPERLESS_REDIS
+              value: redis://:$(REDIS_PASSWORD)@paperless-redis:6379
+
+            # OCR Configuration
+            - name: PAPERLESS_OCR_LANGUAGE
+              value: eng
+            - name: PAPERLESS_OCR_LANGUAGES
+              value: eng
+
+            # Consumption Settings
+            - name: PAPERLESS_CONSUMER_POLLING
+              value: "60"
+            - name: PAPERLESS_CONSUMER_DELETE_DUPLICATES
+              value: "true"
+            - name: PAPERLESS_CONSUMER_RECURSIVE
+              value: "true"
+
+            # Email Configuration (from 1Password)
+            - name: PAPERLESS_EMAIL_TASK_CRON
+              value: "*/10 * * * *"
+            - name: PAPERLESS_CONSUMPTION_MAIL_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: paperless-email
+                  key: host
+            - name: PAPERLESS_CONSUMPTION_MAIL_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: paperless-email
+                  key: port
+            - name: PAPERLESS_CONSUMPTION_MAIL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: paperless-email
+                  key: username
+            - name: PAPERLESS_CONSUMPTION_MAIL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: paperless-email
+                  key: password
+            - name: PAPERLESS_CONSUMPTION_MAIL_SECURITY
+              valueFrom:
+                secretKeyRef:
+                  name: paperless-email
+                  key: security
+            - name: PAPERLESS_CONSUMPTION_MAIL_FROM
+              valueFrom:
+                secretKeyRef:
+                  name: paperless-email
+                  key: from
+
+            # Performance
+            - name: PAPERLESS_TASK_WORKERS
+              value: "2"
+            - name: PAPERLESS_THREADS_PER_WORKER
+              value: "1"
+
+          volumeMounts:
+            - name: data
+              mountPath: /usr/src/paperless/data
+            - name: media
+              mountPath: /usr/src/paperless/media
+            - name: export
+              mountPath: /usr/src/paperless/export
+            - name: consume
+              mountPath: /usr/src/paperless/consume
+
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 2Gi
+
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8000
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: paperless-data
+        - name: media
+          persistentVolumeClaim:
+            claimName: paperless-media
+        - name: export
+          persistentVolumeClaim:
+            claimName: paperless-export
+        - name: consume
+          persistentVolumeClaim:
+            claimName: paperless-consume
