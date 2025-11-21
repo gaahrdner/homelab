@@ -50,7 +50,7 @@ spec:
     spec:
       containers:
         - name: postgresql
-          image: postgres:16-alpine
+          image: postgres:18-alpine
           ports:
             - name: postgresql
               containerPort: 5432
