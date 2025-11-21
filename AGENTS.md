@@ -335,12 +335,6 @@ The cluster has comprehensive observability with automatic discovery of new work
 - Automatic ServiceMonitor/PodMonitor discovery across all namespaces
 - Additional scrape configs for Talos components (etcd, kubelet, scheduler, controller-manager)
 
-**Loki** (log aggregation)
-- 7-day log retention (168 hours)
-- 20Gi Longhorn storage
-- Automatically collects logs from ALL pods via Promtail DaemonSet
-- Integrated with Grafana for log queries
-
 **Alertmanager**
 - 25+ default alert rules enabled
 - No notification channels configured (alerts generated but not sent)
@@ -353,7 +347,6 @@ The cluster has comprehensive observability with automatic discovery of new work
 - Longhorn storage (volume health, capacity, replicas)
 - Cloudflared tunnels (connection status)
 - External-DNS (record sync operations)
-- Loki + Promtail (log collection metrics)
 
 **Talos System:**
 - etcd (consensus, operations)
@@ -420,7 +413,7 @@ spec:
 
 Prometheus automatically discovers all ServiceMonitors (`serviceMonitorSelectorNilUsesHelmValues: false`).
 
-### Accessing Metrics and Logs
+### Accessing Metrics
 
 **Grafana UI:**
 ```bash
@@ -431,23 +424,6 @@ open http://grafana.internal
 kubectl port-forward -n monitoring svc/kube-prometheus-stack-grafana 3000:80
 open http://localhost:3000
 ```
-
-**Query Logs in Grafana:**
-1. Go to Explore → Select "Loki" datasource
-2. Query examples:
-   ```logql
-   # All logs from a namespace
-   {namespace="texasdust"}
-
-   # Search for errors
-   {namespace="texasdust"} |= "error"
-
-   # Logs from specific pod
-   {pod="wordpress-xyz"}
-
-   # Filter by container
-   {namespace="monitoring", container="prometheus"}
-   ```
 
 **Query Metrics in Grafana:**
 1. Go to Explore → Select "Prometheus" datasource
@@ -477,17 +453,13 @@ All metrics from auto-discovered pods get these labels:
 - `version`: From `app.kubernetes.io/version` label
 - `component`: From `app.kubernetes.io/component` label
 
-All logs from pods get these labels:
-- `namespace`, `pod`, `container`, `node`, `app` (same as metrics)
-
 ### Best Practices
 
 1. **Always use Prometheus annotations** for new apps with metrics endpoints
-2. **Check Grafana datasources** after deploying Loki or adding new sources
+2. **Check Grafana datasources** after adding new sources
 3. **Store Grafana password in 1Password** (item: `grafana-admin-credentials` in kubernetes vault)
 4. **Create dashboards in Grafana UI**, they persist to Longhorn storage
 5. **Monitor certificate expiration** - cert-manager metrics now enabled
-6. **Use structured logging** (JSON) in applications for better log parsing
 
 ### Troubleshooting
 
@@ -504,21 +476,6 @@ kubectl port-forward -n monitoring svc/kube-prometheus-stack-prometheus 9090:909
 kubectl get pod <pod-name> -n <namespace> -o yaml | grep -A5 annotations
 ```
 
-**Logs not appearing:**
-```bash
-# Check Promtail is running on all nodes
-kubectl get pods -n loki-stack -l app.kubernetes.io/name=promtail
-
-# Check Promtail logs
-kubectl logs -n loki-stack -l app.kubernetes.io/name=promtail
-
-# Check Loki is healthy
-kubectl get pods -n loki-stack -l app.kubernetes.io/name=loki
-
-# Test Loki datasource in Grafana
-# Configuration → Data Sources → Loki → Test
-```
-
 **Dashboard not persisting:**
 - Grafana uses Longhorn PVC for persistence
 - Check: `kubectl get pvc -n monitoring`
@@ -528,7 +485,6 @@ kubectl get pods -n loki-stack -l app.kubernetes.io/name=loki
 
 See detailed documentation in:
 - `src/apps/infrastructure/kube-prometheus-stack/README.md` - Prometheus/Grafana/Alertmanager
-- `src/apps/infrastructure/loki-stack/README.md` - Loki/Promtail logging
 - `src/apps/infrastructure/longhorn/servicemonitor.yaml` - Storage metrics
 - `src/apps/services/texasdust/README.md` - Application monitoring example
 
