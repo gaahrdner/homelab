@@ -72,7 +72,7 @@ spec:
         runAsNonRoot: true
       containers:
       - name: valkey
-        image: valkey/valkey:8.1-alpine
+        image: valkey/valkey:9.0-alpine
         command:
         - valkey-server
         - /etc/valkey/valkey.conf
