@@ -65,25 +65,35 @@ autoscaling:
         value: 100
         periodSeconds: 15
 
-# Health probes (increased timeouts for WordPress)
-startupProbe:
-  enabled: true
+# Health probes (custom probes to avoid security plugin blocking)
+# Using /wp-login.php instead of /wp-admin/install.php (blocked by Wordfence after install)
+customStartupProbe:
+  httpGet:
+    path: /wp-login.php
+    port: http
+    scheme: HTTP
   initialDelaySeconds: 10
   timeoutSeconds: 5
   failureThreshold: 30
   successThreshold: 1
   periodSeconds: 10
 
-livenessProbe:
-  enabled: true
+customLivenessProbe:
+  httpGet:
+    path: /wp-login.php
+    port: http
+    scheme: HTTP
   initialDelaySeconds: 60
   timeoutSeconds: 15
   failureThreshold: 5
   successThreshold: 1
   periodSeconds: 20
 
-readinessProbe:
-  enabled: true
+customReadinessProbe:
+  httpGet:
+    path: /wp-login.php
+    port: http
+    scheme: HTTP
   initialDelaySeconds: 30
   timeoutSeconds: 10
   failureThreshold: 5
