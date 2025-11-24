@@ -114,7 +114,7 @@ spec:
 
       # Redis exporter sidecar for Prometheus metrics
       - name: redis-exporter
-        image: oliver006/redis_exporter:v1.80.0-alpine
+        image: oliver006/redis_exporter:v1.80.1-alpine
         ports:
         - containerPort: 9121
           name: metrics
