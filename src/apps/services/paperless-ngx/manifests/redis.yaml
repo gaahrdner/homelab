@@ -47,6 +47,9 @@ spec:
     metadata:
       labels:
         app: paperless-redis
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9121"
     spec:
       containers:
         - name: redis
@@ -94,6 +97,34 @@ spec:
                 - ping
             initialDelaySeconds: 5
             periodSeconds: 5
+        - name: redis-exporter
+          image: oliver006/redis_exporter:v1.82.0-alpine
+          ports:
+            - name: metrics
+              containerPort: 9121
+          env:
+            - name: REDIS_ADDR
+              value: redis://localhost:6379
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: paperless-redis
+                  key: redis-password
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 65534
       volumes:
         - name: data
           persistentVolumeClaim:

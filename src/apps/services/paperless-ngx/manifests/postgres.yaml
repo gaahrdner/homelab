@@ -47,6 +47,9 @@ spec:
     metadata:
       labels:
         app: paperless-postgresql
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9187"
     spec:
       containers:
         - name: postgresql
@@ -92,6 +95,36 @@ spec:
                 - pg_isready -U paperless
             initialDelaySeconds: 5
             periodSeconds: 5
+        - name: postgres-exporter
+          image: quay.io/prometheuscommunity/postgres-exporter:v0.19.1
+          ports:
+            - name: metrics
+              containerPort: 9187
+          env:
+            - name: DATA_SOURCE_URI
+              value: localhost:5432/paperless?sslmode=disable
+            - name: DATA_SOURCE_USER
+              value: paperless
+            - name: DATA_SOURCE_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: paperless-postgresql
+                  key: password
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 65534
       volumes:
         - name: data
           persistentVolumeClaim:

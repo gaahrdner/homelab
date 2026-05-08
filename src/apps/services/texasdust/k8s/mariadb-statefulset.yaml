@@ -75,6 +75,9 @@ spec:
     metadata:
       labels:
         app: mariadb
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9104"
     spec:
       securityContext:
         fsGroup: 999
@@ -137,6 +140,36 @@ spec:
             drop:
             - ALL
           readOnlyRootFilesystem: false  # MariaDB needs to write to /var/lib/mysql
+
+      - name: mysqld-exporter
+        image: prom/mysqld-exporter:v0.18.0
+        args:
+        - --mysqld.address=localhost:3306
+        - --mysqld.username=root
+        ports:
+        - containerPort: 9104
+          name: metrics
+        env:
+        - name: MYSQLD_EXPORTER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: wordpress-db-credentials
+              key: root-password
+        resources:
+          requests:
+            cpu: 10m
+            memory: 32Mi
+          limits:
+            cpu: 100m
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 65534
 
       volumes:
       - name: config

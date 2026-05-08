@@ -198,6 +198,15 @@ PostgreSQL data is on Longhorn. Velero backs up PVCs automatically (if configure
 
 ### Monitoring
 
+The following Paperless supporting services expose Prometheus metrics and are automatically
+scraped by the cluster-wide PodMonitor:
+
+- **PostgreSQL:** Port 9187 (postgres-exporter sidecar)
+- **Redis:** Port 9121 (redis-exporter sidecar)
+
+The main `paperless-ngx` web application and the SMB sidecar do not currently expose a
+Prometheus metrics endpoint in this repo.
+
 Check consumption folder processing:
 ```bash
 kubectl logs -n paperless-ngx -l app.kubernetes.io/name=paperless-ngx -f
