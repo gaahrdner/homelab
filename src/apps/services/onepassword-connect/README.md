@@ -46,6 +46,20 @@ kubectl get pods -n onepassword
 kubectl logs -n onepassword -l app.kubernetes.io/name=onepassword-connect-operator
 ```
 
+## Monitoring
+
+Prometheus scrapes the Connect API metrics endpoint via the ServiceMonitor in
+`k8s/servicemonitor.yaml`.
+
+- **1Password Connect API:** port `8080`, path `/metrics`
+
+Verify it with:
+
+```bash
+kubectl get servicemonitor -n onepassword onepassword-connect
+kubectl get svc -n onepassword onepassword-connect
+```
+
 ## Usage
 
 Create a OnePasswordItem resource to sync a secret from your vault:

@@ -5,41 +5,44 @@ metadata:
   namespace: argocd
 spec:
   project: default
-  source:
-    chart: connect
-    repoURL: https://1password.github.io/connect-helm-charts
-    targetRevision: 2.0.5
-    helm:
-      valuesObject:
-        # Deploy the operator alongside Connect
-        operator:
-          create: true
-          # Token will be provided via existing secret
-          token:
-            key: token
-            name: onepassword-connect-token
-          # Resource limits for homelab
-          resources:
-            requests:
-              cpu: 10m
-              memory: 64Mi
-            limits:
-              cpu: 100m
-              memory: 128Mi
+  sources:
+    - repoURL: https://1password.github.io/connect-helm-charts
+      chart: connect
+      targetRevision: 2.0.5
+      helm:
+        valuesObject:
+          # Deploy the operator alongside Connect
+          operator:
+            create: true
+            # Token will be provided via existing secret
+            token:
+              key: token
+              name: onepassword-connect-token
+            # Resource limits for homelab
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                cpu: 100m
+                memory: 128Mi
 
-        # Connect server configuration
-        connect:
-          # Credentials will be provided via existing secret
-          credentialsName: onepassword-connect-credentials
-          credentialsKey: 1password-credentials.json
-          # Resource limits for homelab
-          resources:
-            requests:
-              cpu: 50m
-              memory: 128Mi
-            limits:
-              cpu: 200m
-              memory: 256Mi
+          # Connect server configuration
+          connect:
+            # Credentials will be provided via existing secret
+            credentialsName: onepassword-connect-credentials
+            credentialsKey: 1password-credentials.json
+            # Resource limits for homelab
+            resources:
+              requests:
+                cpu: 50m
+                memory: 128Mi
+              limits:
+                cpu: 200m
+                memory: 256Mi
+    - repoURL: https://github.com/gaahrdner/homelab.git
+      targetRevision: HEAD
+      path: src/apps/services/onepassword-connect/k8s
 
   destination:
     server: https://kubernetes.default.svc

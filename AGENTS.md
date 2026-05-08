@@ -358,10 +358,15 @@ The cluster has comprehensive observability with automatic discovery of new work
 **Platform Services:**
 - cert-manager (certificate expiration tracking)
 - ArgoCD (sync status, application health)
+- 1Password Connect (Connect API metrics)
 
 **Applications:**
 - texasdust MariaDB (database metrics via mysqld-exporter)
 - texasdust Valkey (cache metrics via redis-exporter)
+- texasdust WordPress (content metrics via wordpress-exporter)
+- paperless PostgreSQL (database metrics via postgres-exporter)
+- paperless Redis (cache metrics via redis-exporter)
+- paperless SMB ingestion share (session metrics via samba-metrics)
 
 ### Automatic Discovery for New Workloads
 

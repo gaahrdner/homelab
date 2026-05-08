@@ -167,10 +167,14 @@ The following components expose metrics and are automatically scraped by Prometh
   - Connection statistics
   - Key statistics
 
-- **WordPress:** Not currently monitored
-  - Future: Can add apache_exporter sidecar or WordPress plugin for metrics
+- **WordPress:** Port 11011 (wordpress-exporter deployment)
+  - REST API-backed content counts
+  - Posts, pages, media, comments, taxonomies, and related site metadata
+  - Running unauthenticated against the in-cluster service; add a WordPress
+    application password later if you want plugin/theme/user metrics too
 
-All metrics are automatically discovered via the cluster-wide PodMonitor (prometheus.io annotations).
+MariaDB and Valkey are discovered via the cluster-wide PodMonitor. WordPress is
+scraped via `k8s/wordpress-exporter.yaml` and its ServiceMonitor.
 
 ### Health Checks
 

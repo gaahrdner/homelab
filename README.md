@@ -26,6 +26,7 @@ A GitOps-managed Kubernetes homelab cluster running on Talos Linux.
 - **Grafana**: available at `http://grafana.internal`
 - **ArgoCD**: available at `http://argocd.internal`
 - **Logs**: Loki (`grafana-community/helm-charts`) with Alloy collection (`grafana/helm-charts`)
+- **App metrics**: 1Password Connect, Texasdust WordPress/MariaDB/Valkey, and Paperless PostgreSQL/Redis/SMB are scraped automatically
 
 ## Installation
 

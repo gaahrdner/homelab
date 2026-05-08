@@ -35,6 +35,9 @@ spec:
     metadata:
       labels:
         app: paperless-smb
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9922"
     spec:
       # Schedule on same node as paperless-ngx to share RWO volume
       affinity:
@@ -63,6 +66,12 @@ spec:
           volumeMounts:
             - name: consume
               mountPath: /consume
+            - name: samba-run
+              mountPath: /run/samba
+            - name: samba-lib
+              mountPath: /var/lib/samba
+            - name: samba-cache
+              mountPath: /var/cache/samba
           resources:
             requests:
               cpu: 50m
@@ -74,7 +83,32 @@ spec:
             capabilities:
               add:
                 - CAP_NET_BIND_SERVICE
+        - name: samba-metrics
+          image: quay.io/samba.org/samba-metrics:latest
+          ports:
+            - name: metrics
+              containerPort: 9922
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+          volumeMounts:
+            - name: samba-run
+              mountPath: /run/samba
+            - name: samba-lib
+              mountPath: /var/lib/samba
+            - name: samba-cache
+              mountPath: /var/cache/samba
       volumes:
         - name: consume
           persistentVolumeClaim:
             claimName: paperless-consume
+        - name: samba-run
+          emptyDir: {}
+        - name: samba-lib
+          emptyDir: {}
+        - name: samba-cache
+          emptyDir: {}

@@ -30,6 +30,14 @@ spec:
     ports:
     - protocol: TCP
       port: 8000  # WordPress container port
+  # Allow the in-namespace WordPress exporter to query the REST API
+  - from:
+    - podSelector:
+        matchLabels:
+          app: wordpress-exporter
+    ports:
+    - protocol: TCP
+      port: 8000
   egress:
   # Allow to MariaDB
   - to:
