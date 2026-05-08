@@ -10,8 +10,8 @@ A GitOps-managed Kubernetes homelab cluster running on Talos Linux.
   - `verdandi`: 192.168.0.121 (Control Plane)
   - `skuld`: 192.168.0.122 (Control Plane)
 - **Control Plane Endpoint**: `https://192.168.0.120:6443`
-- **Talos Version**: v1.11.5
-- **Kubernetes Version**: v1.34.1
+- **Talos Version**: v1.12.5
+- **Kubernetes Version**: v1.35.4
 
 ## Prerequisites
 
@@ -66,9 +66,15 @@ Once ArgoCD is installed, it will automatically sync all applications in `src/ap
 ### Existing Cluster Updates
 
 1. If you changed extensions.yaml: `mise run generate-schematic` and update `src/talos/patches/image.yaml` with the new installer path.
-2. Regenerate configs (preserves secrets!): `mise run update`
+2. Regenerate configs for the existing Cilium-based cluster (preserves secrets!): `mise run update`
 3. Apply to all nodes: `mise run apply`
 4. Verify health: `mise run health`
+
+### Cluster Upgrades
+
+1. Upgrade Talos one minor version at a time: `TALOS_IMAGE=<image> mise run upgrade`
+2. Upgrade Kubernetes after Talos is on a compatible version: `KUBERNETES_VERSION=1.35.4 mise run upgrade-k8s`
+3. Verify health and confirm `kube-proxy` did not return: `mise run health`
 
 ### Configuration Patches (`src/talos/`)
 
@@ -79,7 +85,7 @@ Once ArgoCD is installed, it will automatically sync all applications in `src/ap
 - `patches/network-urd.yaml` - Hostname for urd node
 - `patches/network-verdandi.yaml` - Hostname for verdandi node
 - `patches/network-skuld.yaml` - Hostname for skuld node
-- `patches/cilium.yaml` - Disable default CNI and kube-proxy (applied during `mise run setup-networking`)
+- `patches/cilium.yaml` - Disable default CNI and kube-proxy (applied during `mise run setup-networking` and preserved by `mise run update`)
 
 ### System Extensions (`src/talos/extensions.yaml`)
 

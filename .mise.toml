@@ -22,6 +22,9 @@ URD_IP = "192.168.0.120"
 VERDANDI_IP = "192.168.0.121"
 SKULD_IP = "192.168.0.122"
 CONTROL_PLANE_ENDPOINT = "https://192.168.0.120:6443"
+KUBECTL_CONTEXT = "admin@norns"
+CLUSTER_TALOS_VERSION = "v1.12.5"
+CLUSTER_KUBERNETES_VERSION = "1.35.4"
 
 # ============================================================================
 # PHASE 1: Image & Extension Management
@@ -40,10 +43,10 @@ echo "✓ Schematic ID: $SCHEMATIC_ID"
 echo ""
 echo "==> Download URLs:"
 echo "SecureBoot ISO:"
-echo "  https://factory.talos.dev/image/$SCHEMATIC_ID/v1.11.5/metal-amd64-secureboot.iso"
+echo "  https://factory.talos.dev/image/$SCHEMATIC_ID/${CLUSTER_TALOS_VERSION}/metal-amd64-secureboot.iso"
 echo ""
 echo "Installer image for image.yaml:"
-echo "  factory.talos.dev/installer-secureboot/$SCHEMATIC_ID:v1.11.5"
+echo "  factory.talos.dev/installer-secureboot/$SCHEMATIC_ID:${CLUSTER_TALOS_VERSION}"
 echo ""
 echo "⚠️  Next steps:"
 echo "1. Download the SecureBoot ISO from the URL above"
@@ -86,6 +89,7 @@ fi
 echo "==> Generating base machine configs..."
 talosctl gen config \
   --with-secrets secrets.yaml \
+  --kubernetes-version ${CLUSTER_KUBERNETES_VERSION} \
   --config-patch-control-plane @src/talos/patches/scheduling.yaml \
   --config-patch-control-plane @src/talos/patches/controlplane-metrics.yaml \
   --config-patch @src/talos/patches/image.yaml \
@@ -127,7 +131,44 @@ depends = ["gen-secrets", "gen-config"]
 
 [tasks.update]
 description = "Regenerate configs after changing patches (preserves secrets)"
-depends = ["gen-config"]
+run = """
+if [ ! -f secrets.yaml ]; then
+  echo "❌ secrets.yaml not found!"
+  echo "Run 'mise run gen-secrets' first to create secrets for a new cluster."
+  exit 1
+fi
+
+echo "==> Regenerating machine configs for the existing Cilium-based cluster..."
+talosctl gen config \
+  --with-secrets secrets.yaml \
+  --kubernetes-version ${CLUSTER_KUBERNETES_VERSION} \
+  --config-patch-control-plane @src/talos/patches/scheduling.yaml \
+  --config-patch-control-plane @src/talos/patches/controlplane-metrics.yaml \
+  --config-patch @src/talos/patches/image.yaml \
+  --config-patch @src/talos/patches/kubelet.yaml \
+  --config-patch @src/talos/patches/cilium.yaml \
+  norns ${CONTROL_PLANE_ENDPOINT} --force
+
+echo "==> Patching node-specific configs (hostnames)..."
+talosctl machineconfig patch controlplane.yaml \
+  --patch @src/talos/patches/network-urd.yaml \
+  --output controlplane-urd.yaml
+
+talosctl machineconfig patch controlplane.yaml \
+  --patch @src/talos/patches/network-verdandi.yaml \
+  --output controlplane-verdandi.yaml
+
+talosctl machineconfig patch controlplane.yaml \
+  --patch @src/talos/patches/network-skuld.yaml \
+  --output controlplane-skuld.yaml
+
+echo ""
+echo "✓ Existing-cluster configs regenerated with Cilium enabled"
+echo "  - controlplane.yaml (base config)"
+echo "  - controlplane-urd.yaml"
+echo "  - controlplane-verdandi.yaml"
+echo "  - controlplane-skuld.yaml"
+"""
 
 [tasks.setup-networking]
 description = "Complete networking setup (Gateway API + Cilium + enable as default CNI)"
@@ -399,11 +440,11 @@ talosctl --nodes ${URD_IP} health \
 
 echo ""
 echo "=== Kubernetes Nodes ==="
-kubectl get nodes -o wide
+kubectl --context ${KUBECTL_CONTEXT} get nodes -o wide
 
 echo ""
 echo "=== System Pods ==="
-kubectl get pods -A
+kubectl --context ${KUBECTL_CONTEXT} get pods -A
 """
 
 [tasks.upgrade]
@@ -413,7 +454,7 @@ if [ -z "$TALOS_IMAGE" ]; then
   echo "❌ TALOS_IMAGE environment variable not set"
   echo ""
   echo "Usage:"
-  echo "  TALOS_IMAGE=factory.talos.dev/installer-secureboot/<schematic>:v1.11.5 mise run upgrade"
+  echo "  TALOS_IMAGE=factory.talos.dev/installer-secureboot/<schematic>:${CLUSTER_TALOS_VERSION} mise run upgrade"
   echo ""
   echo "Get the installer image from 'mise run generate-schematic'"
   exit 1
@@ -427,17 +468,37 @@ talosctl upgrade --nodes ${URD_IP} --image "$TALOS_IMAGE" --preserve
 echo "✓ urd upgraded"
 echo ""
 
-echo "==> Upgrading verdandi (${VERDANDI_IP})..."
-talosctl upgrade --nodes ${VERDANDI_IP} --image "$TALOS_IMAGE" --preserve
-echo "✓ verdandi upgraded"
-echo ""
-
 echo "==> Upgrading skuld (${SKULD_IP})..."
 talosctl upgrade --nodes ${SKULD_IP} --image "$TALOS_IMAGE" --preserve
 echo "✓ skuld upgraded"
 echo ""
 
+echo "==> Upgrading verdandi (${VERDANDI_IP})..."
+talosctl upgrade --nodes ${VERDANDI_IP} --image "$TALOS_IMAGE" --preserve
+echo "✓ verdandi upgraded"
+echo ""
+
 echo "✓ All nodes upgraded to $TALOS_IMAGE"
+"""
+
+[tasks.upgrade-k8s]
+description = "Upgrade Kubernetes to a new version (requires KUBERNETES_VERSION env var)"
+run = """
+if [ -z "$KUBERNETES_VERSION" ]; then
+  echo "❌ KUBERNETES_VERSION environment variable not set"
+  echo ""
+  echo "Usage:"
+  echo "  KUBERNETES_VERSION=1.35.4 mise run upgrade-k8s"
+  exit 1
+fi
+
+echo "==> Dry-run Kubernetes upgrade to v$KUBERNETES_VERSION..."
+talosctl --nodes ${URD_IP} upgrade-k8s --to "$KUBERNETES_VERSION" --dry-run
+echo ""
+echo "==> Upgrading Kubernetes to v$KUBERNETES_VERSION..."
+talosctl --nodes ${URD_IP} upgrade-k8s --to "$KUBERNETES_VERSION"
+echo ""
+echo "✓ Kubernetes upgraded to v$KUBERNETES_VERSION"
 """
 
 # ============================================================================

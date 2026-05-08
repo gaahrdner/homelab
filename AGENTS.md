@@ -26,8 +26,8 @@ This is a Kubernetes homelab cluster running on Talos Linux. The cluster is name
 
 **Key Details:**
 - **Cluster Name**: norns
-- **Talos Version**: v1.11.5
-- **Kubernetes Version**: v1.34.1
+- **Talos Version**: v1.12.5
+- **Kubernetes Version**: v1.35.4
 - **Control Plane Nodes**: urd (192.168.0.120), verdandi (192.168.0.121), skuld (192.168.0.122)
 - **Control Plane Endpoint**: https://192.168.0.120:6443
 - **Task Runner**: mise (configured in `.mise.toml`)
@@ -80,6 +80,7 @@ mise run apply-skuld          # Apply config to skuld only
 ```bash
 mise run health               # Check Talos + Kubernetes health
 TALOS_IMAGE=<image> mise run upgrade  # Upgrade all nodes to new Talos version
+KUBERNETES_VERSION=1.35.4 mise run upgrade-k8s  # Upgrade Kubernetes after Talos
 NODE=<ip> mise run reset-node # Reset specific node (DESTRUCTIVE)
 ```
 
@@ -279,6 +280,8 @@ When you modify patches or need to update configs:
 2. **For existing clusters**: `mise run update` (regenerates configs, keeps secrets)
 
 Both flows end with the same result: updated `controlplane-{node}.yaml` files ready to apply.
+
+**Important**: For an existing cluster that already runs Cilium as the sole CNI, `mise run update` must preserve `src/talos/patches/cilium.yaml`. Do not regenerate existing-cluster configs without that patch, or Talos will reintroduce the default Flannel and kube-proxy bootstrap manifests on the next reconciliation.
 
 ### Node Bootstrap Process
 

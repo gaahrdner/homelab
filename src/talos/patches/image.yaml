@@ -1,7 +1,7 @@
 machine:
   install:
     # https://factory.talos.dev/
-    image: factory.talos.dev/metal-installer-secureboot/bbdb2fb8f886104868f647ffbe8eab12b403bc00db5d39d0ccd73751b4fa472c:v1.11.5
+    image: factory.talos.dev/installer-secureboot/bbdb2fb8f886104868f647ffbe8eab12b403bc00db5d39d0ccd73751b4fa472c:v1.12.5
     disk: /dev/nvme0n1
     wipe: true
   network:
