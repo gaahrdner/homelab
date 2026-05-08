@@ -80,6 +80,7 @@ spec:
               cp /config-src/mosquitto.conf /work-config/mosquitto.conf
               rm -f /work-config/passwd
               mosquitto_passwd -b -c /work-config/passwd "$MQTT_USERNAME" "$MQTT_PASSWORD"
+              chmod 0644 /work-config/mosquitto.conf /work-config/passwd
           env:
             - name: MQTT_USERNAME
               valueFrom:
