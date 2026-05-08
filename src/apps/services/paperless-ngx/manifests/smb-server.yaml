@@ -17,6 +17,42 @@ spec:
     app: paperless-smb
 
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: paperless-smb-metrics
+  namespace: paperless-ngx
+  labels:
+    app: paperless-smb
+    monitoring: samba-metrics
+spec:
+  type: ClusterIP
+  ports:
+    - name: metrics
+      port: 9922
+      targetPort: metrics
+      protocol: TCP
+  selector:
+    app: paperless-smb
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: paperless-smb
+  namespace: paperless-ngx
+spec:
+  selector:
+    matchLabels:
+      app: paperless-smb
+      monitoring: samba-metrics
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s
+
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -35,9 +71,6 @@ spec:
     metadata:
       labels:
         app: paperless-smb
-      annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "9922"
     spec:
       # Schedule on same node as paperless-ngx to share RWO volume
       affinity:
