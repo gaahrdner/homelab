@@ -1,0 +1,107 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mqtt-exporter
+  namespace: awtrix
+  labels:
+    app: mqtt-exporter
+spec:
+  type: ClusterIP
+  selector:
+    app: mqtt-exporter
+  ports:
+    - name: metrics
+      port: 9000
+      targetPort: metrics
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mqtt-exporter
+  namespace: awtrix
+  labels:
+    app: mqtt-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mqtt-exporter
+  template:
+    metadata:
+      labels:
+        app: mqtt-exporter
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: mqtt-exporter
+          image: kpetrem/mqtt-exporter:master
+          env:
+            - name: MQTT_ADDRESS
+              value: mosquitto.awtrix.svc.cluster.local
+            - name: MQTT_PORT
+              value: "1883"
+            - name: MQTT_TOPIC
+              value: "awtrix/+/stats,awtrix/+/stats/#"
+            - name: KEEP_FULL_TOPIC
+              value: "True"
+            - name: EXPOSE_LAST_SEEN
+              value: "True"
+            - name: MQTT_CLIENT_ID
+              value: norns-mqtt-exporter
+            - name: MAX_METRICS
+              value: "512"
+            - name: MQTT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: awtrix-mqtt-credentials
+                  key: username
+            - name: MQTT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: awtrix-mqtt-credentials
+                  key: password
+          ports:
+            - name: metrics
+              containerPort: 9000
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: metrics
+            initialDelaySeconds: 5
+            periodSeconds: 15
+          livenessProbe:
+            httpGet:
+              path: /metrics
+              port: metrics
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: mqtt-exporter
+  namespace: awtrix
+spec:
+  selector:
+    matchLabels:
+      app: mqtt-exporter
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 60s
+      scrapeTimeout: 15s

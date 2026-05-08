@@ -1,0 +1,146 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mosquitto
+  namespace: awtrix
+  labels:
+    app: mosquitto
+spec:
+  clusterIP: None
+  selector:
+    app: mosquitto
+  ports:
+    - name: mqtt
+      port: 1883
+      targetPort: mqtt
+      protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mosquitto-lb
+  namespace: awtrix
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: mqtt-awtrix.internal
+  labels:
+    app: mosquitto
+spec:
+  type: LoadBalancer
+  selector:
+    app: mosquitto
+  ports:
+    - name: mqtt
+      port: 1883
+      targetPort: mqtt
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mosquitto
+  namespace: awtrix
+spec:
+  serviceName: mosquitto
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mosquitto
+  template:
+    metadata:
+      labels:
+        app: mosquitto
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        fsGroup: 1883
+        fsGroupChangePolicy: OnRootMismatch
+      initContainers:
+        - name: generate-config
+          image: eclipse-mosquitto:2.1.2
+          command:
+            - /bin/sh
+            - -ec
+            - |
+              cp /config-src/mosquitto.conf /work-config/mosquitto.conf
+              mosquitto_passwd -b -c /work-config/passwd "$MQTT_USERNAME" "$MQTT_PASSWORD"
+              chown 1883:1883 /work-config/mosquitto.conf /work-config/passwd
+              chown -R 1883:1883 /mosquitto/data
+          env:
+            - name: MQTT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: awtrix-mqtt-credentials
+                  key: username
+            - name: MQTT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: awtrix-mqtt-credentials
+                  key: password
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: config-src
+              mountPath: /config-src
+              readOnly: true
+            - name: work-config
+              mountPath: /work-config
+            - name: data
+              mountPath: /mosquitto/data
+      containers:
+        - name: mosquitto
+          image: eclipse-mosquitto:2.1.2
+          ports:
+            - name: mqtt
+              containerPort: 1883
+              protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: mqtt
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: mqtt
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          securityContext:
+            runAsUser: 1883
+            runAsGroup: 1883
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: work-config
+              mountPath: /mosquitto/config
+              readOnly: true
+            - name: data
+              mountPath: /mosquitto/data
+      volumes:
+        - name: config-src
+          configMap:
+            name: mosquitto-config
+        - name: work-config
+          emptyDir: {}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: longhorn
+        resources:
+          requests:
+            storage: 1Gi
