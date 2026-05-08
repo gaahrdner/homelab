@@ -78,6 +78,7 @@ spec:
             - -ec
             - |
               cp /config-src/mosquitto.conf /work-config/mosquitto.conf
+              rm -f /work-config/passwd
               mosquitto_passwd -b -c /work-config/passwd "$MQTT_USERNAME" "$MQTT_PASSWORD"
               chown 1883:1883 /work-config/mosquitto.conf /work-config/passwd
               chown -R 1883:1883 /mosquitto/data
