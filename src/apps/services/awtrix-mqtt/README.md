@@ -36,17 +36,17 @@ The in-cluster publisher also targets `awtrix/office`, so keep the device on tha
 
 ## Cluster Publisher
 
-A CronJob publishes three AWTRIX CustomApps every minute:
+A CronJob publishes one AWTRIX CustomApp every hour:
 
 - `awtrix/office/custom/cluster`
-- `awtrix/office/custom/workloads`
-- `awtrix/office/custom/version`
 
-They show:
+It shows a compact cluster summary:
 
 - node readiness
-- non-running pod count and restart totals
+- non-running pod count when there is an actual issue
 - Kubernetes version
+
+The publisher also sends empty payloads to the old `workloads` and `version` custom-app topics so those saved pages are removed from the device.
 
 ## MQTT Topics
 
@@ -64,18 +64,18 @@ AWTRIX stats:
 
 ## Example Publish Commands
 
-Replace `awtrix/ulanzi-office` with your configured device prefix.
+Replace `awtrix/office` with your configured device prefix.
 
 ```bash
 mosquitto_pub -h mqtt-awtrix.internal -p 1883 \
   -u '<username>' -P '<password>' \
-  -t 'awtrix/ulanzi-office/custom/k8s' \
+  -t 'awtrix/office/custom/k8s' \
   -m '{"text":"norns OK","color":[0,255,0],"duration":10}'
 ```
 
 ```bash
 mosquitto_pub -h mqtt-awtrix.internal -p 1883 \
   -u '<username>' -P '<password>' \
-  -t 'awtrix/ulanzi-office/notify' \
+  -t 'awtrix/office/notify' \
   -m '{"text":"Longhorn healthy","color":[255,255,255],"background":[0,64,128]}'
 ```

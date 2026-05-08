@@ -45,7 +45,7 @@ metadata:
   name: awtrix-publisher
   namespace: awtrix
 spec:
-  schedule: "*/1 * * * *"
+  schedule: "0 * * * *"
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 1
@@ -81,44 +81,26 @@ spec:
                   total_nodes="$(echo "$ready_and_total" | awk '{print $2}')"
 
                   pod_issues="$(kubectl get pods -A --no-headers | awk '
+                    $2 !~ /^awtrix-publisher-/ &&
                     $4 != "Running" && $4 != "Completed" && $4 != "Succeeded" { bad++ }
                     END { print bad + 0 }
-                  ')"
-
-                  restart_count="$(kubectl get pods -A --no-headers | awk '
-                    { restarts += $5 }
-                    END { print restarts + 0 }
                   ')"
 
                   k8s_version="$(kubectl get nodes -o jsonpath="{.items[0].status.nodeInfo.kubeletVersion}")"
 
                   if [ "$ready_nodes" -eq "$total_nodes" ] && [ "$pod_issues" -eq 0 ]; then
                     cluster_color='[0,255,0]'
-                    cluster_text="norns ${ready_nodes}/${total_nodes} ready"
+                    cluster_text="norns ${ready_nodes}/${total_nodes} ok ${k8s_version#v}"
                   elif [ "$ready_nodes" -eq "$total_nodes" ]; then
                     cluster_color='[255,170,0]'
-                    cluster_text="norns ${pod_issues} pod issue"
+                    cluster_text="norns ${pod_issues} pod ${k8s_version#v}"
                   else
                     cluster_color='[255,0,0]'
                     cluster_text="norns ${ready_nodes}/${total_nodes} ready"
                   fi
 
-                  if [ "$pod_issues" -eq 0 ]; then
-                    workload_color='[0,255,0]'
-                    workload_text="pods clean ${restart_count}r"
-                  else
-                    workload_color='[255,170,0]'
-                    workload_text="pods ${pod_issues} bad ${restart_count}r"
-                  fi
-
-                  version_text="k8s ${k8s_version#v}"
-
-                  printf '{"text":"%s","color":%s,"save":true,"lifetime":150}\n' \
+                  printf '{"text":"%s","color":%s,"save":true,"lifetime":3900}\n' \
                     "$cluster_text" "$cluster_color" > /work/cluster.json
-                  printf '{"text":"%s","color":%s,"save":true,"lifetime":150}\n' \
-                    "$workload_text" "$workload_color" > /work/workloads.json
-                  printf '{"text":"%s","color":[120,180,255],"save":true,"lifetime":150}\n' \
-                    "$version_text" > /work/version.json
               volumeMounts:
                 - name: work
                   mountPath: /work
@@ -140,11 +122,11 @@ spec:
                     -u "$MQTT_USERNAME" -P "$MQTT_PASSWORD" \
                     -t "${AWTRIX_TOPIC_PREFIX}/custom/cluster" -f /work/cluster.json
                   mosquitto_pub -h mosquitto-client.awtrix.svc.cluster.local -p 1883 \
-                    -u "$MQTT_USERNAME" -P "$MQTT_PASSWORD" \
-                    -t "${AWTRIX_TOPIC_PREFIX}/custom/workloads" -f /work/workloads.json
+                    -u "$MQTT_USERNAME" -P "$MQTT_PASSWORD" -n \
+                    -t "${AWTRIX_TOPIC_PREFIX}/custom/workloads"
                   mosquitto_pub -h mosquitto-client.awtrix.svc.cluster.local -p 1883 \
-                    -u "$MQTT_USERNAME" -P "$MQTT_PASSWORD" \
-                    -t "${AWTRIX_TOPIC_PREFIX}/custom/version" -f /work/version.json
+                    -u "$MQTT_USERNAME" -P "$MQTT_PASSWORD" -n \
+                    -t "${AWTRIX_TOPIC_PREFIX}/custom/version"
               env:
                 - name: AWTRIX_TOPIC_PREFIX
                   valueFrom:
