@@ -1,0 +1,201 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: awtrix-publisher
+  namespace: awtrix
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: awtrix-publisher-config
+  namespace: awtrix
+data:
+  AWTRIX_TOPIC_PREFIX: awtrix/office
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: awtrix-publisher
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - nodes
+      - pods
+    verbs:
+      - get
+      - list
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: awtrix-publisher
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: awtrix-publisher
+subjects:
+  - kind: ServiceAccount
+    name: awtrix-publisher
+    namespace: awtrix
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: awtrix-publisher
+  namespace: awtrix
+spec:
+  schedule: "*/1 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 300
+      template:
+        spec:
+          serviceAccountName: awtrix-publisher
+          restartPolicy: Never
+          automountServiceAccountToken: true
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+          initContainers:
+            - name: snapshot-cluster
+              image: bitnami/kubectl:latest
+              command:
+                - /bin/sh
+                - -ec
+                - |
+                  ready_and_total="$(kubectl get nodes --no-headers | awk '
+                    BEGIN { ready = 0; total = 0 }
+                    {
+                      total++
+                      if ($2 ~ /^Ready/) {
+                        ready++
+                      }
+                    }
+                    END { printf "%d %d\n", ready, total }
+                  ')"
+                  ready_nodes="$(echo "$ready_and_total" | awk '{print $1}')"
+                  total_nodes="$(echo "$ready_and_total" | awk '{print $2}')"
+
+                  pod_issues="$(kubectl get pods -A --no-headers | awk '
+                    $4 != "Running" && $4 != "Completed" && $4 != "Succeeded" { bad++ }
+                    END { print bad + 0 }
+                  ')"
+
+                  restart_count="$(kubectl get pods -A --no-headers | awk '
+                    { restarts += $5 }
+                    END { print restarts + 0 }
+                  ')"
+
+                  k8s_version="$(kubectl get nodes -o jsonpath="{.items[0].status.nodeInfo.kubeletVersion}")"
+
+                  if [ "$ready_nodes" -eq "$total_nodes" ] && [ "$pod_issues" -eq 0 ]; then
+                    cluster_color='[0,255,0]'
+                    cluster_text="norns ${ready_nodes}/${total_nodes} ready"
+                  elif [ "$ready_nodes" -eq "$total_nodes" ]; then
+                    cluster_color='[255,170,0]'
+                    cluster_text="norns ${pod_issues} pod issue"
+                  else
+                    cluster_color='[255,0,0]'
+                    cluster_text="norns ${ready_nodes}/${total_nodes} ready"
+                  fi
+
+                  if [ "$pod_issues" -eq 0 ]; then
+                    workload_color='[0,255,0]'
+                    workload_text="pods clean ${restart_count}r"
+                  else
+                    workload_color='[255,170,0]'
+                    workload_text="pods ${pod_issues} bad ${restart_count}r"
+                  fi
+
+                  version_text="k8s ${k8s_version#v}"
+
+                  printf '{"text":"%s","color":%s,"save":true,"lifetime":150}\n' \
+                    "$cluster_text" "$cluster_color" > /work/cluster.json
+                  printf '{"text":"%s","color":%s,"save":true,"lifetime":150}\n' \
+                    "$workload_text" "$workload_color" > /work/workloads.json
+                  printf '{"text":"%s","color":[120,180,255],"save":true,"lifetime":150}\n' \
+                    "$version_text" > /work/version.json
+              volumeMounts:
+                - name: work
+                  mountPath: /work
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+                readOnlyRootFilesystem: true
+                runAsNonRoot: true
+                runAsUser: 1001
+            - name: publish-awtrix
+              image: eclipse-mosquitto:2
+              command:
+                - /bin/sh
+                - -ec
+                - |
+                  mosquitto_pub -h mosquitto-client.awtrix.svc.cluster.local -p 1883 \
+                    -u "$MQTT_USERNAME" -P "$MQTT_PASSWORD" \
+                    -t "${AWTRIX_TOPIC_PREFIX}/custom/cluster" -f /work/cluster.json
+                  mosquitto_pub -h mosquitto-client.awtrix.svc.cluster.local -p 1883 \
+                    -u "$MQTT_USERNAME" -P "$MQTT_PASSWORD" \
+                    -t "${AWTRIX_TOPIC_PREFIX}/custom/workloads" -f /work/workloads.json
+                  mosquitto_pub -h mosquitto-client.awtrix.svc.cluster.local -p 1883 \
+                    -u "$MQTT_USERNAME" -P "$MQTT_PASSWORD" \
+                    -t "${AWTRIX_TOPIC_PREFIX}/custom/version" -f /work/version.json
+              env:
+                - name: AWTRIX_TOPIC_PREFIX
+                  valueFrom:
+                    configMapKeyRef:
+                      name: awtrix-publisher-config
+                      key: AWTRIX_TOPIC_PREFIX
+                - name: MQTT_USERNAME
+                  valueFrom:
+                    secretKeyRef:
+                      name: awtrix-mqtt-credentials
+                      key: username
+                - name: MQTT_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: awtrix-mqtt-credentials
+                      key: password
+              volumeMounts:
+                - name: work
+                  mountPath: /work
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+                readOnlyRootFilesystem: true
+                runAsNonRoot: true
+                runAsUser: 1883
+          containers:
+            - name: hold
+              image: busybox:1.37
+              command:
+                - /bin/sh
+                - -ec
+                - "echo published"
+              resources:
+                requests:
+                  cpu: 5m
+                  memory: 8Mi
+                limits:
+                  cpu: 20m
+                  memory: 16Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+                readOnlyRootFilesystem: true
+                runAsNonRoot: true
+                runAsUser: 65534
+                seccompProfile:
+                  type: RuntimeDefault
+          volumes:
+            - name: work
+              emptyDir: {}

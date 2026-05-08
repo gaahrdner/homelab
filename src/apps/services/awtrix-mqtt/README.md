@@ -25,14 +25,28 @@ In the AWTRIX web UI:
 - MQTT server: `mqtt-awtrix.internal`
 - MQTT port: `1883`
 - MQTT username/password: from `awtrix-mqtt-credentials`
-- MQTT base topic: use a two-level prefix starting with `awtrix/`, for example `awtrix/ulanzi-office`
+- MQTT base topic: `awtrix/office`
 
 The exporter is configured to scrape AWTRIX stats topics under:
 
 - `awtrix/+/stats`
 - `awtrix/+/stats/#`
 
-Using a two-level prefix keeps Grafana metrics predictable.
+The in-cluster publisher also targets `awtrix/office`, so keep the device on that exact prefix unless you update the publisher ConfigMap too.
+
+## Cluster Publisher
+
+A CronJob publishes three AWTRIX CustomApps every minute:
+
+- `awtrix/office/custom/cluster`
+- `awtrix/office/custom/workloads`
+- `awtrix/office/custom/version`
+
+They show:
+
+- node readiness
+- non-running pod count and restart totals
+- Kubernetes version
 
 ## MQTT Topics
 
