@@ -1,12 +1,22 @@
-# ArgoCD GitHub Container Registry Authentication
+# ArgoCD 1Password Integration
 
-This directory contains configuration for ArgoCD to authenticate with GitHub Container Registry (ghcr.io) to pull OCI Helm charts.
+This directory contains 1Password-backed configuration for ArgoCD:
+
+- `onepassword-item.yaml` for GitHub Container Registry credentials
+- `admin-credentials-onepassword-item.yaml` for the ArgoCD admin login
 
 ## Setup
 
-### 1. Create 1Password Item
+### 1. Create 1Password Items
 
-In your 1Password "kubernetes" vault, create an item named `github-ghcr-argocd-repo` with these fields:
+For the ArgoCD admin login, create an item named `argocd-admin-credentials` in the `kubernetes` vault with these fields:
+
+| Field Name  | Field Type | Value |
+|------------|------------|-------|
+| `username` | text | `admin` |
+| `password` | password | `<your ArgoCD admin password>` |
+
+For the GitHub Container Registry credentials, create an item named `github-ghcr-argocd-repo` in the same vault with these fields:
 
 | Field Name  | Field Type | Value |
 |------------|------------|-------|
@@ -21,6 +31,7 @@ In your 1Password "kubernetes" vault, create an item named `github-ghcr-argocd-r
 
 ```bash
 kubectl apply -f src/apps/infrastructure/argocd/onepassword-item.yaml
+kubectl apply -f src/apps/infrastructure/argocd/admin-credentials-onepassword-item.yaml
 ```
 
 ### 3. Wait for Secret Sync
