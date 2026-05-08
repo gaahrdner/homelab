@@ -38,7 +38,7 @@ spec:
           image: kpetrem/mqtt-exporter:master
           env:
             - name: MQTT_ADDRESS
-              value: mosquitto.awtrix.svc.cluster.local
+              value: mosquitto-client.awtrix.svc.cluster.local
             - name: MQTT_PORT
               value: "1883"
             - name: MQTT_TOPIC
