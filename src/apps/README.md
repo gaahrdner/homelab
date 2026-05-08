@@ -8,6 +8,7 @@ This directory contains all Kubernetes resources managed by ArgoCD.
 apps/
 ├── infrastructure/      # Cluster-level infrastructure
 │   ├── cilium-l2/      # LoadBalancer IP pool configuration
+│   ├── logging/        # Loki + Alloy + Grafana datasource
 │   └── longhorn/       # Distributed block storage
 └── services/           # Everything else
     ├── cert-manager/   # TLS certificate management
@@ -39,7 +40,7 @@ Cluster-level configuration that requires special handling:
 
 Everything else:
 
-- Platform services (cert-manager, 1Password, monitoring)
+- Platform services (cert-manager, 1Password, monitoring, logging)
 - Your applications (websites, databases, etc.)
 
 ## Sync Policy

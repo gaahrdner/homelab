@@ -20,6 +20,13 @@ A GitOps-managed Kubernetes homelab cluster running on Talos Linux.
 - [kubectl](https://kubernetes.io/docs/tasks/tools/) - Kubernetes CLI
 - [helm](https://helm.sh/) - Kubernetes package manager
 
+## Observability
+
+- **Metrics and dashboards**: `kube-prometheus-stack` via ArgoCD
+- **Grafana**: available at `http://grafana.internal`
+- **ArgoCD**: available at `http://argocd.internal`
+- **Logs**: Loki (`grafana-community/helm-charts`) with Alloy collection (`grafana/helm-charts`)
+
 ## Installation
 
 ### New Cluster Installation

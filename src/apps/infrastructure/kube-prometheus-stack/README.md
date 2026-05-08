@@ -4,7 +4,7 @@ Complete monitoring stack with Prometheus, Grafana, and Alertmanager.
 
 ## Installation
 
-Helm chart v70.0.0 managed by ArgoCD with ServerSideApply for large CRDs.
+Helm chart `84.5.0` managed by ArgoCD with ServerSideApply for large CRDs.
 
 ## Configuration
 
@@ -38,6 +38,7 @@ Helm chart v70.0.0 managed by ArgoCD with ServerSideApply for large CRDs.
 - **Alertmanager**: Alert routing and notifications
 - **node-exporter**: Node-level metrics
 - **kube-state-metrics**: Kubernetes object state metrics
+- **Loki datasource**: Added via ConfigMap sidecar discovery in the `monitoring` namespace
 
 ## Dependencies
 
@@ -55,7 +56,7 @@ The stack automatically discovers ServiceMonitors from all namespaces. Currently
 - ArgoCD (server, controller, repo-server)
 - external-dns
 - Cloudflared
-- Loki and Promtail
+- Loki and Alloy
 
 ### PodMonitors (Auto-Discovery)
 A cluster-wide PodMonitor automatically scrapes metrics from ANY pod with these annotations:
@@ -107,6 +108,7 @@ spec:
 - **Grafana UI**: http://grafana.internal or via LoadBalancer IP
 - **Prometheus UI**: Port-forward to `kube-prometheus-stack-prometheus:9090`
 - **Alertmanager UI**: Port-forward to `kube-prometheus-stack-alertmanager:9093`
+- **ArgoCD UI**: http://argocd.internal
 
 ## Notes
 
