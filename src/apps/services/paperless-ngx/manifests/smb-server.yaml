@@ -57,6 +57,8 @@ spec:
               mkdir -p /run/samba
               mkdir -p /var/lib/samba/private/msg.sock
               mkdir -p /var/cache/samba
+              chmod 0755 /run/samba /var/lib/samba /var/lib/samba/private /var/cache/samba
+              chmod 0700 /var/lib/samba/private/msg.sock
           volumeMounts:
             - name: samba-run
               mountPath: /run/samba
