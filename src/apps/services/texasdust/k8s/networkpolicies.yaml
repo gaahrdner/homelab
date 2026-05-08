@@ -74,32 +74,32 @@ spec:
   policyTypes:
   - Ingress
   - Egress
-ingress:
-  # Allow from WordPress only
-  - from:
-    - podSelector:
-        matchLabels:
-          app: wordpress
-    ports:
-    - protocol: TCP
-      port: 3306
-  # Allow Prometheus scraping from the monitoring namespace
-  - from:
-    - namespaceSelector:
-        matchLabels:
-          kubernetes.io/metadata.name: monitoring
-    ports:
-    - protocol: TCP
-      port: 9104
+  ingress:
+    # Allow from WordPress only
+    - from:
+      - podSelector:
+          matchLabels:
+            app: wordpress
+      ports:
+      - protocol: TCP
+        port: 3306
+    # Allow Prometheus scraping from the monitoring namespace
+    - from:
+      - namespaceSelector:
+          matchLabels:
+            kubernetes.io/metadata.name: monitoring
+      ports:
+      - protocol: TCP
+        port: 9104
   egress:
-  # Allow DNS for hostname resolution
-  - to:
-    - namespaceSelector:
-        matchLabels:
-          kubernetes.io/metadata.name: kube-system
-    ports:
-    - protocol: UDP
-      port: 53
+    # Allow DNS for hostname resolution
+    - to:
+      - namespaceSelector:
+          matchLabels:
+            kubernetes.io/metadata.name: kube-system
+      ports:
+      - protocol: UDP
+        port: 53
 ---
 # NetworkPolicy for Valkey
 # Allows: WordPress ingress only
@@ -115,29 +115,29 @@ spec:
   policyTypes:
   - Ingress
   - Egress
-ingress:
-  # Allow from WordPress only
-  - from:
-    - podSelector:
-        matchLabels:
-          app: wordpress
-    ports:
-    - protocol: TCP
-      port: 6379
-  # Allow Prometheus scraping from the monitoring namespace
-  - from:
-    - namespaceSelector:
-        matchLabels:
-          kubernetes.io/metadata.name: monitoring
-    ports:
-    - protocol: TCP
-      port: 9121
+  ingress:
+    # Allow from WordPress only
+    - from:
+      - podSelector:
+          matchLabels:
+            app: wordpress
+      ports:
+      - protocol: TCP
+        port: 6379
+    # Allow Prometheus scraping from the monitoring namespace
+    - from:
+      - namespaceSelector:
+          matchLabels:
+            kubernetes.io/metadata.name: monitoring
+      ports:
+      - protocol: TCP
+        port: 9121
   egress:
-  # Allow DNS
-  - to:
-    - namespaceSelector:
-        matchLabels:
-          kubernetes.io/metadata.name: kube-system
-    ports:
-    - protocol: UDP
-      port: 53
+    # Allow DNS
+    - to:
+      - namespaceSelector:
+          matchLabels:
+            kubernetes.io/metadata.name: kube-system
+      ports:
+      - protocol: UDP
+        port: 53
