@@ -142,7 +142,7 @@ spec:
           readOnlyRootFilesystem: false  # MariaDB needs to write to /var/lib/mysql
 
       - name: mysqld-exporter
-        image: prom/mysqld-exporter:v0.18.0
+        image: prom/mysqld-exporter:v0.19.0
         args:
         - --mysqld.address=localhost:3306
         - --mysqld.username=root
