@@ -1,4 +1,4 @@
-FROM alpine:3.22 AS fetch
+FROM alpine:3.23 AS fetch
 
 ARG MCPPROXY_VERSION=v0.29.3
 
@@ -11,7 +11,7 @@ RUN wget -O mcpproxy.tgz \
     && tar -xzf mcpproxy.tgz \
     && chmod 0755 /out/mcpproxy
 
-FROM alpine:3.22
+FROM alpine:3.23
 
 RUN apk add --no-cache ca-certificates tzdata \
     && addgroup -g 65532 nonroot \

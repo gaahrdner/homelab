@@ -19,7 +19,7 @@ spec:
         fsGroup: 65532
       initContainers:
         - name: init-permissions
-          image: alpine:3.22
+          image: alpine:3.23
           command:
             - /bin/sh
             - -ceu
