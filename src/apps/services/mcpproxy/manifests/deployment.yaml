@@ -17,6 +17,20 @@ spec:
         - name: ghcr-pull-secret
       securityContext:
         fsGroup: 65532
+      initContainers:
+        - name: init-permissions
+          image: alpine:3.22
+          command:
+            - /bin/sh
+            - -ceu
+            - |
+              chown 65532:65532 /data /tmp
+              chmod 0700 /data
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: tmp
+              mountPath: /tmp
       containers:
         - name: mcpproxy
           image: ghcr.io/gaahrdner/mcpproxy:v0.29.3
