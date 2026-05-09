@@ -1,23 +1,26 @@
 # MCPProxy
 
-This deploys [`smart-mcp-proxy/mcpproxy-go`](https://github.com/smart-mcp-proxy/mcpproxy-go) as a headless, internal-only MCP proxy on the cluster.
+This deploys [`smart-mcp-proxy/mcpproxy-go`](https://github.com/smart-mcp-proxy/mcpproxy-go) as an internal MCP proxy with the built-in web UI enabled.
 
 ## What This Deployment Does
 
 - Exposes MCPProxy at `http://mcp.internal/mcp` through an internal LoadBalancer service
-- Runs with **no auth on `/mcp`** for LAN-only use
-- Disables the web UI and management endpoints so configuration stays in Git
-- Starts with an empty upstream server list; add upstreams by editing `manifests/configmap.yaml`
+- Exposes the web UI at `http://mcp.internal/ui/`
+- Leaves `/mcp` open on the LAN with `require_mcp_auth: false`
+- Enables management through the web UI
+- Seeds a default config from `manifests/configmap.yaml`, then persists runtime changes on a Longhorn PVC
+- Uses a 1Password-sourced admin API key for web UI and REST API access
 
 ## Why It Is Set Up This Way
 
-The upstream project is primarily designed as a desktop/LAN service. For this cluster deployment:
+The upstream project is primarily designed as an interactive desktop/LAN service. This cluster deployment keeps that interaction model for administration:
 
 - `enable_tray` is disabled
-- `features.enable_web_ui` is disabled
-- `mcpproxy serve` runs with `--read-only` and `--disable-management`
+- `features.enable_web_ui` is enabled
+- `mcpproxy serve` runs with management enabled
+- the seed config is copied to `/data/config/mcp_config.json` on first boot and then owned by the application
 
-That keeps the cluster version predictable and GitOps-friendly instead of treating the pod like an interactive desktop install.
+That lets you manage upstream servers in the UI without losing changes on pod restarts.
 
 ## Current Runtime
 
@@ -52,25 +55,27 @@ If the package remains private, bootstrap the pull secret from the existing `arg
 mise run mcpproxy-bootstrap-pull-secret
 ```
 
-## Adding Upstream Servers
+## Admin API Key
 
-Edit `src/apps/services/mcpproxy/manifests/configmap.yaml` and add entries under `mcpServers`.
+Before first deploy, create this item in the 1Password `kubernetes` vault:
 
-Example remote HTTP server:
+- Item: `mcpproxy-admin-api-key`
+- Field: `api-key` (password)
 
-```json
-{
-  "name": "context7",
-  "url": "https://mcp.context7.com/mcp",
-  "protocol": "http",
-  "quarantined": false,
-  "enabled": true
-}
-```
+A hex key generated with `openssl rand -hex 32` is a good fit.
 
-Set `quarantined: false` after you have reviewed and approved a server in Git. This cluster deployment keeps the management UI disabled, so Git is the approval path.
+MCPProxy requires that admin API key for the web UI and REST API. `/mcp` remains unauthenticated unless you later turn on `require_mcp_auth`.
 
-This cluster deployment is best suited to **remote HTTP MCP servers**. `mcpproxy` can also manage stdio servers, but that usually implies local binaries or Docker-based isolation, which is not what this setup is optimized for.
+## Managing Upstream Servers
+
+Use the web UI after the first deploy:
+
+- UI: `http://mcp.internal/ui/?apikey=YOUR_KEY`
+- MCP endpoint: `http://mcp.internal/mcp`
+
+The ConfigMap is only a bootstrap seed now. After the first start, MCPProxy stores the live config on the PVC at `/data/config/mcp_config.json`, and UI changes persist there.
+
+This deployment is best suited to **remote HTTP MCP servers**. `mcpproxy` can also manage stdio servers, but that usually implies local binaries or Docker-based isolation, which is not what this setup is optimized for.
 
 ## Secrets
 
@@ -90,7 +95,11 @@ If the GHCR package is private:
 mise run mcpproxy-bootstrap-pull-secret
 ```
 
-### 2. Let ArgoCD Sync
+### 2. Add The Admin API Key In 1Password
+
+Create `mcpproxy-admin-api-key` in the `kubernetes` vault with one password field named `api-key`.
+
+### 3. Let ArgoCD Sync
 
 ArgoCD will pick up:
 
@@ -103,21 +112,13 @@ Check status with:
 mise run mcpproxy-status
 ```
 
-### 3. Add Upstream MCP Servers
+Once the app syncs, open:
 
-Edit [src/apps/services/mcpproxy/manifests/configmap.yaml](/Users/gaahrdner/Code/homelab/src/apps/services/mcpproxy/manifests/configmap.yaml) and add remote HTTP servers under `mcpServers`, then commit and push.
+- `http://mcp.internal/ui/?apikey=YOUR_KEY`
 
-Example:
+If `mcp.internal` still has not propagated in UniFi DNS, use the service IP instead:
 
-```json
-{
-  "name": "context7",
-  "url": "https://mcp.context7.com/mcp",
-  "protocol": "http",
-  "quarantined": false,
-  "enabled": true
-}
-```
+- `http://192.168.0.206/ui/?apikey=YOUR_KEY`
 
 ### 4. Point Clients At It
 

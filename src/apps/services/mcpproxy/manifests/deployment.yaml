@@ -18,15 +18,30 @@ spec:
       securityContext:
         fsGroup: 65532
       initContainers:
-        - name: init-permissions
+        - name: bootstrap-config
           image: alpine:3.22
           command:
             - /bin/sh
             - -ceu
             - |
-              chown 65532:65532 /data /tmp
+              mkdir -p /data/config
+              if [ ! -f /data/config/mcp_config.json ]; then
+                cp /config-src/mcp_config.json /data/config/mcp_config.json
+                sed -i "s|__MCPPROXY_API_KEY__|${MCPPROXY_API_KEY}|g" /data/config/mcp_config.json
+              fi
+              chown -R 65532:65532 /data /tmp
               chmod 0700 /data
+              chmod 0600 /data/config/mcp_config.json
+          env:
+            - name: MCPPROXY_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mcpproxy-admin-api-key
+                  key: api-key
           volumeMounts:
+            - name: config-seed
+              mountPath: /config-src
+              readOnly: true
             - name: data
               mountPath: /data
             - name: tmp
@@ -39,11 +54,9 @@ spec:
             - /usr/local/bin/mcpproxy
             - serve
             - --config
-            - /config/mcp_config.json
+            - /data/config/mcp_config.json
             - --log-level
             - info
-            - --read-only
-            - --disable-management
           env:
             - name: HOME
               value: /data
@@ -77,21 +90,19 @@ spec:
               drop:
                 - ALL
           volumeMounts:
-            - name: config
-              mountPath: /config
-              readOnly: true
             - name: data
               mountPath: /data
             - name: tmp
               mountPath: /tmp
       volumes:
-        - name: config
+        - name: config-seed
           configMap:
             name: mcpproxy-config
             items:
               - key: mcp_config.json
                 path: mcp_config.json
         - name: data
-          emptyDir: {}
+          persistentVolumeClaim:
+            claimName: mcpproxy-data
         - name: tmp
           emptyDir: {}

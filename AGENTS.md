@@ -201,19 +201,20 @@ src/
 The cluster runs `smart-mcp-proxy/mcpproxy-go` as an internal HTTP MCP endpoint at `http://mcp.internal/mcp`.
 
 **Deployment model:**
-- Headless only: no tray integration
-- Web UI disabled
-- Management endpoints disabled
-- `mcp_config.json` is kept in Git under `src/apps/services/mcpproxy/manifests/configmap.yaml`
+- No tray integration
+- Web UI enabled at `http://mcp.internal/ui/`
+- Management stays enabled through the web UI and REST API
+- `mcp_config.json` in `src/apps/services/mcpproxy/manifests/configmap.yaml` is only the bootstrap seed
+- Runtime config persists on the `mcpproxy-data` PVC at `/data/config/mcp_config.json`
 - Runtime image is built from `src/apps/services/mcpproxy/Dockerfile`
 - Exposed internally via a Cilium `LoadBalancer` Service with `external-dns`
 - No auth is required on `/mcp` for internal LAN use
+- The web UI and REST API require the admin `api_key`; source it from the 1Password `kubernetes` vault item `mcpproxy-admin-api-key`
 - If the GHCR package remains private, bootstrap `ghcr-pull-secret` in the `mcpproxy` namespace from the existing 1Password-backed GHCR credentials
 
 **Recommended usage:**
 - Prefer remote HTTP MCP upstreams in the cluster deployment
 - Avoid relying on MCPProxy's local keyring features in Kubernetes
-- Mark reviewed upstreams with `quarantined: false` in `mcp_config.json` because the in-cluster deployment keeps UI-based approval disabled
 - If an upstream needs credentials, add them to the 1Password `kubernetes` vault first and sync them into the namespace
 
 **Client note:**
