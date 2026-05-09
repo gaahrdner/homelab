@@ -206,6 +206,7 @@ The cluster runs `smart-mcp-proxy/mcpproxy-go` as an internal HTTP MCP endpoint 
 - Management endpoints disabled
 - `mcp_config.json` is kept in Git under `src/apps/services/mcpproxy/manifests/configmap.yaml`
 - Runtime image is built from `src/apps/services/mcpproxy/Dockerfile`
+- Exposed internally via a Cilium `LoadBalancer` Service with `external-dns`
 - No auth is required on `/mcp` for internal LAN use
 - If the GHCR package remains private, bootstrap `ghcr-pull-secret` in the `mcpproxy` namespace from the existing 1Password-backed GHCR credentials
 

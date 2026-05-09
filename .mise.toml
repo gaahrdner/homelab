@@ -456,7 +456,7 @@ kubectl --context ${KUBECTL_CONTEXT} get applications.argoproj.io -n argocd mcpp
 
 echo ""
 echo "=== MCPProxy Resources ==="
-kubectl --context ${KUBECTL_CONTEXT} get pods,svc,httproute -n mcpproxy
+kubectl --context ${KUBECTL_CONTEXT} get pods,svc -n mcpproxy
 """
 
 [tasks.mcpproxy-logs]

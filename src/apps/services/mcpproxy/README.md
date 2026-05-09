@@ -4,7 +4,7 @@ This deploys [`smart-mcp-proxy/mcpproxy-go`](https://github.com/smart-mcp-proxy/
 
 ## What This Deployment Does
 
-- Exposes MCPProxy at `http://mcp.internal/mcp` through the internal Gateway
+- Exposes MCPProxy at `http://mcp.internal/mcp` through an internal LoadBalancer service
 - Runs with **no auth on `/mcp`** for LAN-only use
 - Disables the web UI and management endpoints so configuration stays in Git
 - Starts with an empty upstream server list; add upstreams by editing `manifests/configmap.yaml`
