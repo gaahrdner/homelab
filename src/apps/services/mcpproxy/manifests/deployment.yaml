@@ -17,7 +17,7 @@ spec:
         fsGroup: 65532
       containers:
         - name: mcpproxy
-          image: ghcr.io/gaahrdner/homelab-mcpproxy:v0.29.3
+          image: ghcr.io/gaahrdner/mcpproxy:v0.29.3
           imagePullPolicy: IfNotPresent
           command:
             - /usr/local/bin/mcpproxy

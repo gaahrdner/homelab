@@ -22,7 +22,7 @@ That keeps the cluster version predictable and GitOps-friendly instead of treati
 ## Current Runtime
 
 - MCPProxy version: `v0.29.3`
-- Runtime image: `ghcr.io/gaahrdner/homelab-mcpproxy:v0.29.3`
+- Runtime image: `ghcr.io/gaahrdner/mcpproxy:v0.29.3`
 - Build source: [Dockerfile](/Users/gaahrdner/Code/homelab/src/apps/services/mcpproxy/Dockerfile)
 
 This is now hermetic at runtime: the pod does not download MCPProxy on startup.
@@ -37,7 +37,7 @@ mise run mcpproxy-image-push
 
 That publishes:
 
-- `ghcr.io/gaahrdner/homelab-mcpproxy:v0.29.3`
+- `ghcr.io/gaahrdner/mcpproxy:v0.29.3`
 
 If you want a different registry path, update:
 
