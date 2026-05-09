@@ -25,7 +25,6 @@ CONTROL_PLANE_ENDPOINT = "https://192.168.0.120:6443"
 KUBECTL_CONTEXT = "admin@norns"
 CLUSTER_TALOS_VERSION = "v1.12.5"
 CLUSTER_KUBERNETES_VERSION = "1.35.4"
-MCPPROXY_IMAGE = "ghcr.io/gaahrdner/mcpproxy:v0.29.3"
 
 # ============================================================================
 # PHASE 1: Image & Extension Management
@@ -448,58 +447,20 @@ echo "=== System Pods ==="
 kubectl --context ${KUBECTL_CONTEXT} get pods -A
 """
 
-[tasks.mcpproxy-status]
-description = "Check MCPProxy status, route, and backing pod"
+[tasks.unla-status]
+description = "Check Unla status, service, and backing pod"
 run = """
 echo "=== ArgoCD Application ==="
-kubectl --context ${KUBECTL_CONTEXT} get applications.argoproj.io -n argocd mcpproxy || true
+kubectl --context ${KUBECTL_CONTEXT} get applications.argoproj.io -n argocd unla || true
 
 echo ""
-echo "=== MCPProxy Resources ==="
-kubectl --context ${KUBECTL_CONTEXT} get pods,svc -n mcpproxy
+echo "=== Unla Resources ==="
+kubectl --context ${KUBECTL_CONTEXT} get pods,svc,pvc,onepassworditem,secret -n unla
 """
 
-[tasks.mcpproxy-logs]
-description = "Tail MCPProxy deployment logs"
-run = "kubectl --context ${KUBECTL_CONTEXT} logs -n mcpproxy deploy/mcpproxy --follow"
-
-[tasks.mcpproxy-bootstrap-pull-secret]
-description = "Create the MCPProxy GHCR imagePullSecret from the existing argocd GHCR credentials"
-run = """
-USERNAME=$(kubectl --context ${KUBECTL_CONTEXT} get secret -n argocd ghcr-repository-credentials -o jsonpath='{.data.name}' | base64 -d)
-PASSWORD=$(kubectl --context ${KUBECTL_CONTEXT} get secret -n argocd ghcr-repository-credentials -o jsonpath='{.data.password}' | base64 -d)
-
-kubectl --context ${KUBECTL_CONTEXT} create namespace mcpproxy --dry-run=client -o yaml | kubectl --context ${KUBECTL_CONTEXT} apply -f -
-
-kubectl --context ${KUBECTL_CONTEXT} create secret docker-registry ghcr-pull-secret \
-  --namespace mcpproxy \
-  --docker-server=ghcr.io \
-  --docker-username="$USERNAME" \
-  --docker-password="$PASSWORD" \
-  --dry-run=client -o yaml | kubectl --context ${KUBECTL_CONTEXT} apply -f -
-"""
-
-[tasks.mcpproxy-image-build]
-description = "Build the hermetic MCPProxy runtime image locally"
-run = """
-docker buildx build \
-  --platform linux/amd64 \
-  --build-arg MCPPROXY_VERSION=v0.29.3 \
-  --tag ${MCPPROXY_IMAGE} \
-  src/apps/services/mcpproxy \
-  --load
-"""
-
-[tasks.mcpproxy-image-push]
-description = "Build and push the hermetic MCPProxy runtime image"
-run = """
-docker buildx build \
-  --platform linux/amd64 \
-  --build-arg MCPPROXY_VERSION=v0.29.3 \
-  --tag ${MCPPROXY_IMAGE} \
-  src/apps/services/mcpproxy \
-  --push
-"""
+[tasks.unla-logs]
+description = "Tail Unla deployment logs"
+run = "kubectl --context ${KUBECTL_CONTEXT} logs -n unla deploy/unla --follow"
 
 [tasks.upgrade]
 description = "Upgrade all nodes to new Talos version (requires TALOS_IMAGE env var)"

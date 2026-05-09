@@ -34,7 +34,7 @@ This is a Kubernetes homelab cluster running on Talos Linux. The cluster is name
 
 **Deployed Applications:**
 - **Infrastructure**: Cilium L2 LoadBalancer, Longhorn distributed storage, external-dns (UniFi), Cloudflare Tunnel
-- **Platform Services**: cert-manager (TLS), 1Password Connect (secrets), kube-prometheus-stack, MCPProxy
+- **Platform Services**: cert-manager (TLS), 1Password Connect (secrets), kube-prometheus-stack, Unla MCP Gateway
 - **Applications**: texasdust.org (WordPress nonprofit site, exposed via Cloudflare Tunnel)
 
 ## Common Commands
@@ -196,30 +196,29 @@ src/
 
 **Without ArgoCD**: You can still use the cluster normally and apply manifests with `kubectl apply` manually.
 
-### MCP Proxy
+### MCP Gateway
 
-The cluster runs `smart-mcp-proxy/mcpproxy-go` as an internal HTTP MCP endpoint at `http://mcp.internal/mcp`.
+The cluster runs `AmoyLab/Unla` as an internal MCP gateway with the UI on `http://mcp.internal/` and the shared streamable HTTP endpoint on `http://mcp.internal:5235/mcp/user/mcp`.
 
 **Deployment model:**
-- No tray integration
-- Web UI enabled at `http://mcp.internal/ui/`
-- Management stays enabled through the web UI and REST API
-- `mcp_config.json` in `src/apps/services/mcpproxy/manifests/configmap.yaml` is only the bootstrap seed
-- Runtime config persists on the `mcpproxy-data` PVC at `/data/config/mcp_config.json`
-- Runtime image is built from `src/apps/services/mcpproxy/Dockerfile`
+- Single all-in-one container based on the official `ghcr.io/amoylab/unla/allinone:v0.9.0` image
+- Web UI exposed on port `80`
+- Streamable HTTP MCP endpoint exposed on port `5235`
+- Configuration persists in SQLite on the `unla-data` PVC at `/data/unla.db`
 - Exposed internally via a Cilium `LoadBalancer` Service with `external-dns`
-- No auth is required on `/mcp` for internal LAN use
-- The web UI and REST API require the admin `api_key`; source it from the 1Password `kubernetes` vault item `mcpproxy-admin-api-key`
-- If the GHCR package remains private, bootstrap `ghcr-pull-secret` in the `mcpproxy` namespace from the existing 1Password-backed GHCR credentials
+- UI authentication is controlled by the `unla-admin` 1Password-backed secret item
+
+**Required secret:**
+- Add `unla-admin` to the 1Password `kubernetes` vault with fields `username`, `password`, and `jwt-secret-key`
 
 **Recommended usage:**
-- Prefer remote HTTP MCP upstreams in the cluster deployment
-- Avoid relying on MCPProxy's local keyring features in Kubernetes
+- Use Unla as the central shared MCP gateway for multiple clients and machines
+- Prefer upstream MCP servers that expose stable HTTP endpoints reachable from the cluster
 - If an upstream needs credentials, add them to the 1Password `kubernetes` vault first and sync them into the namespace
 
 **Client note:**
-- HTTP-native MCP clients can connect directly to `http://mcp.internal/mcp`
-- Claude Desktop still needs a local HTTP-to-stdio bridge such as `mcp-remote`
+- HTTP-native MCP clients can connect directly to `http://mcp.internal:5235/mcp/user/mcp`
+- Use the Unla UI to register and manage upstream MCP services
 
 ### Configuration Management
 

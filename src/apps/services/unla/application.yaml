@@ -1,18 +1,18 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: mcpproxy
+  name: unla
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: https://github.com/gaahrdner/homelab.git
     targetRevision: HEAD
-    path: src/apps/services/mcpproxy/manifests
+    path: src/apps/services/unla/manifests
 
   destination:
     server: https://kubernetes.default.svc
-    namespace: mcpproxy
+    namespace: unla
 
   syncPolicy:
     automated:

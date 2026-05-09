@@ -1,16 +1,19 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: mcpproxy
-  namespace: mcpproxy
+  name: unla
+  namespace: unla
   annotations:
     external-dns.alpha.kubernetes.io/hostname: mcp.internal
     io.cilium/lb-ipam-ips: "192.168.0.206"
 spec:
   type: LoadBalancer
   selector:
-    app: mcpproxy
+    app: unla
   ports:
-    - name: http
+    - name: web
       port: 80
-      targetPort: 8080
+      targetPort: 80
+    - name: mcp
+      port: 5235
+      targetPort: 5235

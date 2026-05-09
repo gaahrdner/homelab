@@ -25,7 +25,7 @@ A GitOps-managed Kubernetes homelab cluster running on Talos Linux.
 - **Metrics and dashboards**: `kube-prometheus-stack` via ArgoCD
 - **Grafana**: available at `http://grafana.internal`
 - **ArgoCD**: available at `http://argocd.internal`
-- **MCP proxy**: `mcpproxy-go` available at `http://mcp.internal/mcp` with web UI at `http://mcp.internal/ui/`
+- **MCP gateway**: `Unla` available at `http://mcp.internal/` with streamable HTTP MCP at `http://mcp.internal:5235/mcp/user/mcp`
 - **Logs**: Loki (`grafana-community/helm-charts`) with Alloy collection (`grafana/helm-charts`)
 - **App metrics**: 1Password Connect, Texasdust WordPress/MariaDB/Valkey, and Paperless PostgreSQL/Redis/SMB are scraped automatically
 
