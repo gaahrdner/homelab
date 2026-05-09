@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcpproxy
+  namespace: mcpproxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mcpproxy
+  template:
+    metadata:
+      labels:
+        app: mcpproxy
+    spec:
+      securityContext:
+        fsGroup: 65532
+      containers:
+        - name: mcpproxy
+          image: ghcr.io/gaahrdner/homelab-mcpproxy:v0.29.3
+          imagePullPolicy: IfNotPresent
+          command:
+            - /usr/local/bin/mcpproxy
+            - serve
+            - --config
+            - /config/mcp_config.json
+            - --log-level
+            - info
+            - --read-only
+            - --disable-management
+          env:
+            - name: HOME
+              value: /data
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 25m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 512Mi
+          securityContext:
+            runAsUser: 65532
+            runAsGroup: 65532
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: config
+              mountPath: /config
+              readOnly: true
+            - name: data
+              mountPath: /data
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: config
+          configMap:
+            name: mcpproxy-config
+            items:
+              - key: mcp_config.json
+                path: mcp_config.json
+        - name: data
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}

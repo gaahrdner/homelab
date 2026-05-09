@@ -25,6 +25,7 @@ CONTROL_PLANE_ENDPOINT = "https://192.168.0.120:6443"
 KUBECTL_CONTEXT = "admin@norns"
 CLUSTER_TALOS_VERSION = "v1.12.5"
 CLUSTER_KUBERNETES_VERSION = "1.35.4"
+MCPPROXY_IMAGE = "ghcr.io/gaahrdner/homelab-mcpproxy:v0.29.3"
 
 # ============================================================================
 # PHASE 1: Image & Extension Management
@@ -445,6 +446,43 @@ kubectl --context ${KUBECTL_CONTEXT} get nodes -o wide
 echo ""
 echo "=== System Pods ==="
 kubectl --context ${KUBECTL_CONTEXT} get pods -A
+"""
+
+[tasks.mcpproxy-status]
+description = "Check MCPProxy status, route, and backing pod"
+run = """
+echo "=== ArgoCD Application ==="
+kubectl --context ${KUBECTL_CONTEXT} get applications.argoproj.io -n argocd mcpproxy || true
+
+echo ""
+echo "=== MCPProxy Resources ==="
+kubectl --context ${KUBECTL_CONTEXT} get pods,svc,httproute -n mcpproxy
+"""
+
+[tasks.mcpproxy-logs]
+description = "Tail MCPProxy deployment logs"
+run = "kubectl --context ${KUBECTL_CONTEXT} logs -n mcpproxy deploy/mcpproxy --follow"
+
+[tasks.mcpproxy-image-build]
+description = "Build the hermetic MCPProxy runtime image locally"
+run = """
+docker buildx build \
+  --platform linux/amd64 \
+  --build-arg MCPPROXY_VERSION=v0.29.3 \
+  --tag ${MCPPROXY_IMAGE} \
+  src/apps/services/mcpproxy \
+  --load
+"""
+
+[tasks.mcpproxy-image-push]
+description = "Build and push the hermetic MCPProxy runtime image"
+run = """
+docker buildx build \
+  --platform linux/amd64 \
+  --build-arg MCPPROXY_VERSION=v0.29.3 \
+  --tag ${MCPPROXY_IMAGE} \
+  src/apps/services/mcpproxy \
+  --push
 """
 
 [tasks.upgrade]

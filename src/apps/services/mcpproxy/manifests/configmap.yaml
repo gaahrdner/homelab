@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mcpproxy-config
+  namespace: mcpproxy
+data:
+  mcp_config.json: |
+    {
+      "listen": "0.0.0.0:8080",
+      "data_dir": "/data",
+      "enable_tray": false,
+      "enable_socket": false,
+      "require_mcp_auth": false,
+      "top_k": 8,
+      "tools_limit": 20,
+      "tool_response_limit": 20000,
+      "features": {
+        "enable_web_ui": false
+      },
+      "mcpServers": []
+    }

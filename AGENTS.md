@@ -34,7 +34,7 @@ This is a Kubernetes homelab cluster running on Talos Linux. The cluster is name
 
 **Deployed Applications:**
 - **Infrastructure**: Cilium L2 LoadBalancer, Longhorn distributed storage, external-dns (UniFi), Cloudflare Tunnel
-- **Platform Services**: cert-manager (TLS), 1Password Connect (secrets), kube-prometheus-stack
+- **Platform Services**: cert-manager (TLS), 1Password Connect (secrets), kube-prometheus-stack, MCPProxy
 - **Applications**: texasdust.org (WordPress nonprofit site, exposed via Cloudflare Tunnel)
 
 ## Common Commands
@@ -195,6 +195,28 @@ src/
 - **apps/**: Everything else that ArgoCD can safely manage
 
 **Without ArgoCD**: You can still use the cluster normally and apply manifests with `kubectl apply` manually.
+
+### MCP Proxy
+
+The cluster runs `smart-mcp-proxy/mcpproxy-go` as an internal HTTP MCP endpoint at `http://mcp.internal/mcp`.
+
+**Deployment model:**
+- Headless only: no tray integration
+- Web UI disabled
+- Management endpoints disabled
+- `mcp_config.json` is kept in Git under `src/apps/services/mcpproxy/manifests/configmap.yaml`
+- Runtime image is built from `src/apps/services/mcpproxy/Dockerfile`
+- No auth is required on `/mcp` for internal LAN use
+
+**Recommended usage:**
+- Prefer remote HTTP MCP upstreams in the cluster deployment
+- Avoid relying on MCPProxy's local keyring features in Kubernetes
+- Mark reviewed upstreams with `quarantined: false` in `mcp_config.json` because the in-cluster deployment keeps UI-based approval disabled
+- If an upstream needs credentials, add them to the 1Password `kubernetes` vault first and sync them into the namespace
+
+**Client note:**
+- HTTP-native MCP clients can connect directly to `http://mcp.internal/mcp`
+- Claude Desktop still needs a local HTTP-to-stdio bridge such as `mcp-remote`
 
 ### Configuration Management
 
