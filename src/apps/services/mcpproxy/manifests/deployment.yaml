@@ -13,6 +13,8 @@ spec:
       labels:
         app: mcpproxy
     spec:
+      imagePullSecrets:
+        - name: ghcr-pull-secret
       securityContext:
         fsGroup: 65532
       containers:

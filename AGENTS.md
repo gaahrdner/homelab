@@ -207,6 +207,7 @@ The cluster runs `smart-mcp-proxy/mcpproxy-go` as an internal HTTP MCP endpoint 
 - `mcp_config.json` is kept in Git under `src/apps/services/mcpproxy/manifests/configmap.yaml`
 - Runtime image is built from `src/apps/services/mcpproxy/Dockerfile`
 - No auth is required on `/mcp` for internal LAN use
+- If the GHCR package remains private, bootstrap `ghcr-pull-secret` in the `mcpproxy` namespace from the existing 1Password-backed GHCR credentials
 
 **Recommended usage:**
 - Prefer remote HTTP MCP upstreams in the cluster deployment

@@ -463,6 +463,22 @@ kubectl --context ${KUBECTL_CONTEXT} get pods,svc,httproute -n mcpproxy
 description = "Tail MCPProxy deployment logs"
 run = "kubectl --context ${KUBECTL_CONTEXT} logs -n mcpproxy deploy/mcpproxy --follow"
 
+[tasks.mcpproxy-bootstrap-pull-secret]
+description = "Create the MCPProxy GHCR imagePullSecret from the existing argocd GHCR credentials"
+run = """
+USERNAME=$(kubectl --context ${KUBECTL_CONTEXT} get secret -n argocd ghcr-repository-credentials -o jsonpath='{.data.name}' | base64 -d)
+PASSWORD=$(kubectl --context ${KUBECTL_CONTEXT} get secret -n argocd ghcr-repository-credentials -o jsonpath='{.data.password}' | base64 -d)
+
+kubectl --context ${KUBECTL_CONTEXT} create namespace mcpproxy --dry-run=client -o yaml | kubectl --context ${KUBECTL_CONTEXT} apply -f -
+
+kubectl --context ${KUBECTL_CONTEXT} create secret docker-registry ghcr-pull-secret \
+  --namespace mcpproxy \
+  --docker-server=ghcr.io \
+  --docker-username="$USERNAME" \
+  --docker-password="$PASSWORD" \
+  --dry-run=client -o yaml | kubectl --context ${KUBECTL_CONTEXT} apply -f -
+"""
+
 [tasks.mcpproxy-image-build]
 description = "Build the hermetic MCPProxy runtime image locally"
 run = """

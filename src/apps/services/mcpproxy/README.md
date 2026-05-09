@@ -46,6 +46,12 @@ If you want a different registry path, update:
 
 If you keep the GHCR package public, the cluster does not need an image pull secret.
 
+If the package remains private, bootstrap the pull secret from the existing `argocd` GHCR credentials:
+
+```bash
+mise run mcpproxy-bootstrap-pull-secret
+```
+
 ## Adding Upstream Servers
 
 Edit `src/apps/services/mcpproxy/manifests/configmap.yaml` and add entries under `mcpServers`.
@@ -76,6 +82,12 @@ If an upstream MCP server needs credentials, put them in the 1Password `kubernet
 
 ```bash
 mise run mcpproxy-image-push
+```
+
+If the GHCR package is private:
+
+```bash
+mise run mcpproxy-bootstrap-pull-secret
 ```
 
 ### 2. Let ArgoCD Sync
