@@ -32,28 +32,13 @@ The exporter is configured to scrape AWTRIX stats topics under:
 - `awtrix/+/stats`
 - `awtrix/+/stats/#`
 
-The in-cluster publisher also targets `awtrix/office`, so keep the device on that exact prefix unless you update the publisher ConfigMap too.
-
-## Cluster Publisher
-
-A CronJob publishes one AWTRIX CustomApp every hour:
-
-- `awtrix/office/custom/cluster`
-
-It shows a compact cluster summary:
-
-- node readiness
-- non-running pod count when there is an actual issue
-- Kubernetes version
-
-The publisher also sends empty payloads to the old `workloads` and `version` custom-app topics so those saved pages are removed from the device.
-
 ## MQTT Topics
 
 AWTRIX updates:
 
 - Custom app: `[PREFIX]/custom/[appname]`
 - Notification: `[PREFIX]/notify`
+- Dismiss held notification: `[PREFIX]/notify/dismiss`
 
 AWTRIX stats:
 
