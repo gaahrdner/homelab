@@ -1,0 +1,72 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: open-webui
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://helm.openwebui.com
+      chart: open-webui
+      targetRevision: 14.4.0
+      helm:
+        releaseName: open-webui
+        valuesObject:
+          ollama:
+            enabled: false
+          pipelines:
+            enabled: false
+          tika:
+            enabled: false
+          terminals:
+            enabled: false
+          replicaCount: 1
+          image:
+            tag: v0.9.2
+            pullPolicy: IfNotPresent
+          service:
+            type: ClusterIP
+            port: 80
+          persistence:
+            enabled: true
+            size: 10Gi
+            accessModes:
+              - ReadWriteOnce
+            storageClass: longhorn
+          extraEnvVars:
+            - name: WEBUI_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: open-webui-secret
+                  key: WEBUI_SECRET_KEY
+            - name: OPENAI_API_BASE_URL
+              value: http://litellm.litellm.svc.cluster.local:4000/v1
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: litellm-master-key
+                  key: master-key
+            - name: ENABLE_OPENAI_API
+              value: "true"
+            - name: UVICORN_WORKERS
+              value: "1"
+    - repoURL: https://github.com/gaahrdner/homelab.git
+      targetRevision: HEAD
+      path: src/apps/services/ai/open-webui/k8s
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: open-webui
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

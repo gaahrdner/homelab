@@ -460,6 +460,10 @@ ln -s AGENTS.md CLAUDE.md
 echo "✓ Linked CLAUDE.md to AGENTS.md"
 """
 
+[tasks.generate-ai-1password-items]
+description = "Create missing 1Password items for LiteLLM, Open WebUI, and Langfuse"
+run = "./scripts/generate-ai-1password-items.sh"
+
 [tasks.upgrade]
 description = "Upgrade all nodes to new Talos version (requires TALOS_IMAGE env var)"
 run = """

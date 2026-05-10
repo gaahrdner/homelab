@@ -1,0 +1,91 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: langfuse
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://langfuse.github.io/langfuse-k8s
+      chart: langfuse
+      targetRevision: 1.5.26
+      helm:
+        releaseName: langfuse
+        valuesObject:
+          langfuse:
+            salt:
+              secretKeyRef:
+                name: langfuse-core-secrets
+                key: salt
+            nextauth:
+              url: http://langfuse.internal
+              secret:
+                secretKeyRef:
+                  name: langfuse-core-secrets
+                  key: nextauth-secret
+            encryptionKey:
+              secretKeyRef:
+                name: langfuse-core-secrets
+                key: encryption-key
+            web:
+              service:
+                type: ClusterIP
+                port: 3000
+              replicas: 1
+              resources:
+                requests:
+                  cpu: 200m
+                  memory: 512Mi
+                limits:
+                  cpu: 1000m
+                  memory: 1Gi
+            worker:
+              replicas: 1
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 256Mi
+                limits:
+                  cpu: 1000m
+                  memory: 1Gi
+          postgresql:
+            auth:
+              username: langfuse
+              existingSecret: langfuse-postgresql
+              secretKeys:
+                userPasswordKey: password
+                adminPasswordKey: postgres-password
+              database: postgres_langfuse
+          redis:
+            auth:
+              existingSecret: langfuse-redis
+              existingSecretPasswordKey: password
+          clickhouse:
+            auth:
+              existingSecret: langfuse-clickhouse
+              existingSecretKey: password
+          s3:
+            auth:
+              existingSecret: langfuse-minio
+              rootUserSecretKey: root-user
+              rootPasswordSecretKey: root-password
+    - repoURL: https://github.com/gaahrdner/homelab.git
+      targetRevision: HEAD
+      path: src/apps/services/ai/langfuse/k8s
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: langfuse
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
