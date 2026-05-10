@@ -34,3 +34,10 @@ Create these items in the `kubernetes` vault:
 
 After first login, create Langfuse API keys in the UI if you want LiteLLM or
 other apps to send traces into Langfuse.
+
+## Metrics
+
+- PostgreSQL metrics are exposed via a repo-managed `postgres-exporter`
+- Redis/Valkey metrics are exposed via a repo-managed `redis-exporter`
+- Langfuse web and worker are OTel-oriented; they do not currently expose a repo-wired Prometheus scrape endpoint
+- ClickHouse and MinIO are not exporter-wired yet in this repo

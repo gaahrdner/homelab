@@ -29,3 +29,10 @@ correct before the first successful startup.
 - UI: `http://open-webui.internal`
 
 On first launch, create the initial admin account in the UI.
+
+## Metrics
+
+Open WebUI supports OpenTelemetry export, but this repo does not yet run an
+OTLP collector path for it. That means you get standard Kubernetes pod/node
+resource metrics automatically, but not an application-level Prometheus scrape
+endpoint from Open WebUI itself today.

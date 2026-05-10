@@ -40,6 +40,12 @@ requests successfully.
 - LiteLLM endpoint: `http://litellm.internal`
 - OpenAI-compatible base URL: `http://litellm.internal/v1`
 
+## Metrics
+
+- LiteLLM proxy metrics are exposed on `/metrics`
+- LiteLLM PostgreSQL metrics are exposed via the `postgres-exporter` sidecar
+- Both are scraped through the cluster-wide auto-discovery `PodMonitor`
+
 ## Layout
 
 - `k8s/configmap.yaml`: LiteLLM proxy config
