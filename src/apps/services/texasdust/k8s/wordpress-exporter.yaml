@@ -4,6 +4,8 @@ kind: Service
 metadata:
   name: wordpress-exporter
   namespace: texasdust
+  annotations:
+    tailscale.com/expose: "true"
   labels:
     app: wordpress-exporter
 spec:

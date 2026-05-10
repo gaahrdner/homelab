@@ -4,6 +4,8 @@ kind: Service
 metadata:
   name: paperless-postgresql
   namespace: paperless-ngx
+  annotations:
+    tailscale.com/expose: "true"
   labels:
     app: paperless-postgresql
 spec:

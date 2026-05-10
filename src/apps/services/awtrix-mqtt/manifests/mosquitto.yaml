@@ -20,6 +20,8 @@ kind: Service
 metadata:
   name: mosquitto-client
   namespace: awtrix
+  annotations:
+    tailscale.com/expose: "true"
   labels:
     app: mosquitto
 spec:
@@ -38,6 +40,7 @@ metadata:
   namespace: awtrix
   annotations:
     external-dns.alpha.kubernetes.io/hostname: mqtt-awtrix.internal
+    tailscale.com/expose: "true"
   labels:
     app: mosquitto
 spec:

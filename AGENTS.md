@@ -18,6 +18,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 6. **Don't be sycophantic** - Focus on technical accuracy and getting things right, not on praise or validation.
 
+7. **Default new workload Services to Tailscale exposure** - For new repo-managed, non-headless workload `Service` resources, add `tailscale.com/expose: "true"` unless there is a concrete reason not to. Headless Services remain excluded because Tailscale service exposure does not support them.
+
 ## Project Overview
 
 This is a Kubernetes homelab cluster running on Talos Linux. The cluster is named "norns" and consists of three control plane nodes (urd, verdandi, skuld) that also run workloads.

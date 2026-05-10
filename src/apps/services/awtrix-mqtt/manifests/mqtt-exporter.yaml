@@ -3,6 +3,8 @@ kind: Service
 metadata:
   name: mqtt-exporter
   namespace: awtrix
+  annotations:
+    tailscale.com/expose: "true"
   labels:
     app: mqtt-exporter
 spec:

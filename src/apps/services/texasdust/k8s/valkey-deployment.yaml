@@ -35,6 +35,8 @@ kind: Service
 metadata:
   name: valkey
   namespace: texasdust
+  annotations:
+    tailscale.com/expose: "true"
   labels:
     app: valkey
 spec:

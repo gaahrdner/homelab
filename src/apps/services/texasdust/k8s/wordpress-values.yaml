@@ -34,7 +34,8 @@ securityContext:
 service:
   type: ClusterIP
   port: 80
-  annotations: {}
+  annotations:
+    tailscale.com/expose: "true"
 
 # Resource limits and requests
 resources:
