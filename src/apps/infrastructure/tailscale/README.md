@@ -22,8 +22,9 @@ The `Connector` advertises both ranges so tailnet clients can reach ClusterIP se
 
 Repo-managed workload `Service` resources that should appear in Tailscale use:
 
-- `tailscale.com/expose: "true"`
 - `tailscale.com/proxy-group: "norns-ingress"`
+
+The `ProxyGroup` annotation is the HA publication mechanism. Do not combine it with `tailscale.com/expose`, which is the legacy per-Service Machine model.
 
 The `ProxyGroup` keeps those Services on a shared HA proxy pool so they show up as Tailscale Services instead of individual Machines.
 

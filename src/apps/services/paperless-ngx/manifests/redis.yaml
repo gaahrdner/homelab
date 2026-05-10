@@ -5,7 +5,6 @@ metadata:
   name: paperless-redis
   namespace: paperless-ngx
   annotations:
-    tailscale.com/expose: "true"
     tailscale.com/proxy-group: "norns-ingress"
   labels:
     app: paperless-redis

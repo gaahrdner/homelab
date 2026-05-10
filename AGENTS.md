@@ -18,7 +18,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 6. **Don't be sycophantic** - Focus on technical accuracy and getting things right, not on praise or validation.
 
-7. **Default new workload Services to Tailscale exposure** - For new repo-managed, non-headless workload `Service` resources, add `tailscale.com/expose: "true"` and `tailscale.com/proxy-group: "norns-ingress"` unless there is a concrete reason not to. Headless Services remain excluded because Tailscale service exposure does not support them.
+7. **Default new workload Services to Tailscale exposure** - For new repo-managed, non-headless workload `Service` resources, add `tailscale.com/proxy-group: "norns-ingress"` unless there is a concrete reason not to. Do not combine it with `tailscale.com/expose`, which is the legacy per-Service Machine model. Headless Services remain excluded because Tailscale service exposure does not support them.
 
 ## Project Overview
 

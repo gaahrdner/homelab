@@ -4,7 +4,6 @@ metadata:
   name: mqtt-exporter
   namespace: awtrix
   annotations:
-    tailscale.com/expose: "true"
     tailscale.com/proxy-group: "norns-ingress"
   labels:
     app: mqtt-exporter
