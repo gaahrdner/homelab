@@ -35,8 +35,6 @@ kind: Service
 metadata:
   name: valkey
   namespace: texasdust
-  annotations:
-    tailscale.com/proxy-group: "norns-ingress"
   labels:
     app: valkey
 spec:

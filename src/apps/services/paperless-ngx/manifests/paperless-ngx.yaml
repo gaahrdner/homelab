@@ -4,8 +4,6 @@ kind: Service
 metadata:
   name: paperless-ngx-main
   namespace: paperless-ngx
-  annotations:
-    tailscale.com/proxy-group: "norns-ingress"
   labels:
     app: paperless-ngx
 spec:

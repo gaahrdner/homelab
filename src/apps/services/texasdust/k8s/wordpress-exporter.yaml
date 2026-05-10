@@ -4,8 +4,6 @@ kind: Service
 metadata:
   name: wordpress-exporter
   namespace: texasdust
-  annotations:
-    tailscale.com/proxy-group: "norns-ingress"
   labels:
     app: wordpress-exporter
 spec:

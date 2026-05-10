@@ -18,7 +18,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 6. **Don't be sycophantic** - Focus on technical accuracy and getting things right, not on praise or validation.
 
-7. **Default new workload Services to Tailscale exposure** - For new repo-managed, non-headless workload `Service` resources, add `tailscale.com/proxy-group: "norns-ingress"` unless there is a concrete reason not to. Do not combine it with `tailscale.com/expose`, which is the legacy per-Service Machine model. Headless Services remain excluded because Tailscale service exposure does not support them.
+7. **Default new workload Services to Tailscale exposure** - Do not expose new workload `Service` resources through Tailscale by default. Prefer routed access through the cluster subnet router and existing internal DNS or Gateway API entrypoints. Add explicit Tailscale-published ingress only for concrete cases that benefit from tailnet-native discovery or ACLs.
 
 ## Project Overview
 
@@ -371,7 +371,6 @@ Tailscale should run in-cluster, not separately on each Talos node. This repo ma
 **Required tailnet policy shape:**
 - `tag:k8s-operator` must own `tag:k8s`
 - `autoApprovers.routes` should approve `10.96.0.0/12` and `10.244.0.0/16` for `tag:k8s`
-- `autoApprovers.services` should approve `tag:k8s` for `tag:k8s` so the shared `norns-ingress` `ProxyGroup` can advertise HA Tailscale Services
 
 See `src/apps/infrastructure/tailscale/README.md` for the exact manifests and policy snippet.
 

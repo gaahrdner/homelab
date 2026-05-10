@@ -34,8 +34,6 @@ securityContext:
 service:
   type: ClusterIP
   port: 80
-  annotations:
-    tailscale.com/proxy-group: "norns-ingress"
 
 # Resource limits and requests
 resources:

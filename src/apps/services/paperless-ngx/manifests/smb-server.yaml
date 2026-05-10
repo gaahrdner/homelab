@@ -4,8 +4,6 @@ kind: Service
 metadata:
   name: paperless-smb
   namespace: paperless-ngx
-  annotations:
-    tailscale.com/proxy-group: "norns-ingress"
   labels:
     app: paperless-smb
 spec:
@@ -24,8 +22,6 @@ kind: Service
 metadata:
   name: paperless-smb-metrics
   namespace: paperless-ngx
-  annotations:
-    tailscale.com/proxy-group: "norns-ingress"
   labels:
     app: paperless-smb
     monitoring: samba-metrics

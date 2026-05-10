@@ -3,8 +3,6 @@ kind: Service
 metadata:
   name: mqtt-exporter
   namespace: awtrix
-  annotations:
-    tailscale.com/proxy-group: "norns-ingress"
   labels:
     app: mqtt-exporter
 spec:

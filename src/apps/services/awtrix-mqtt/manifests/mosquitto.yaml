@@ -20,8 +20,6 @@ kind: Service
 metadata:
   name: mosquitto-client
   namespace: awtrix
-  annotations:
-    tailscale.com/proxy-group: "norns-ingress"
   labels:
     app: mosquitto
 spec:
@@ -40,7 +38,6 @@ metadata:
   namespace: awtrix
   annotations:
     external-dns.alpha.kubernetes.io/hostname: mqtt-awtrix.internal
-    tailscale.com/proxy-group: "norns-ingress"
   labels:
     app: mosquitto
 spec:

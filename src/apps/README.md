@@ -44,7 +44,7 @@ Everything else:
 
 - Platform services (cert-manager, 1Password, monitoring, logging)
 - Your applications (websites, databases, etc.)
-- Default for new non-headless workload `Service` resources: add `tailscale.com/proxy-group: "norns-ingress"` so they publish through the shared HA Tailscale `ProxyGroup`. Do not combine it with `tailscale.com/expose`, which is the legacy per-Service Machine model.
+- Default for new workload access: prefer the cluster subnet router plus existing internal DNS and Gateway API entrypoints. Add Tailscale-published ingress only when a specific service benefits from tailnet-native discovery or ACLs.
 
 ## Sync Policy
 
