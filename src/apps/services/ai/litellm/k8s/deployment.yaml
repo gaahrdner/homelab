@@ -42,7 +42,7 @@ spec:
               value: INFO
           envFrom:
             - secretRef:
-                name: litellm-vllm-upstreams
+                name: litellm-vllm-upstream
           volumeMounts:
             - name: config
               mountPath: /app/config.yaml
