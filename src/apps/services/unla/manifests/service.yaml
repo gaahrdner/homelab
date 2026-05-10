@@ -7,6 +7,7 @@ metadata:
     external-dns.alpha.kubernetes.io/hostname: mcp.internal
     io.cilium/lb-ipam-ips: "192.168.0.206"
     tailscale.com/expose: "true"
+    tailscale.com/proxy-group: "norns-ingress"
 spec:
   type: LoadBalancer
   selector:

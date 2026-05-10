@@ -6,6 +6,7 @@ metadata:
   namespace: paperless-ngx
   annotations:
     tailscale.com/expose: "true"
+    tailscale.com/proxy-group: "norns-ingress"
   labels:
     app: paperless-smb
 spec:
@@ -26,6 +27,7 @@ metadata:
   namespace: paperless-ngx
   annotations:
     tailscale.com/expose: "true"
+    tailscale.com/proxy-group: "norns-ingress"
   labels:
     app: paperless-smb
     monitoring: samba-metrics

@@ -6,6 +6,7 @@ metadata:
   namespace: texasdust
   annotations:
     tailscale.com/expose: "true"
+    tailscale.com/proxy-group: "norns-ingress"
   labels:
     app: wordpress-exporter
 spec:
