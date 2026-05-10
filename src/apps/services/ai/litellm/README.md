@@ -18,7 +18,7 @@ Create these items in the `kubernetes` vault:
 - `litellm-postgresql`
   - `postgres-password`
   - `password`
-- `litellm-vllm-upstream`
+- `litellm-vllm-upstreams`
   - `VLLM_1_API_BASE`
   - `VLLM_1_API_KEY`
 
