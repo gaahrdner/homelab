@@ -64,6 +64,9 @@ spec:
             auth:
               existingSecret: langfuse-clickhouse
               existingSecretKey: password
+            migration:
+              clusterEnabled: false
+            replicaCount: 1
           s3:
             auth:
               existingSecret: langfuse-minio
