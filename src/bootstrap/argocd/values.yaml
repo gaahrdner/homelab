@@ -78,6 +78,44 @@ configs:
         clusters:
         - "*"
 
+    resource.customizations.health.gateway.networking.k8s.io_HTTPRoute: |
+      hs = {}
+
+      if obj.status ~= nil and obj.status.parents ~= nil then
+        for _, parent in ipairs(obj.status.parents) do
+          if parent.conditions ~= nil then
+            local accepted = nil
+            local resolvedRefs = nil
+
+            for _, condition in ipairs(parent.conditions) do
+              if condition.type == "Accepted" then
+                accepted = condition.status
+              elseif condition.type == "ResolvedRefs" then
+                resolvedRefs = condition.status
+              end
+            end
+
+            if accepted == "False" or resolvedRefs == "False" then
+              hs.status = "Degraded"
+              hs.message = "HTTPRoute was rejected or has unresolved references"
+              return hs
+            end
+
+            if accepted == "True" and (resolvedRefs == nil or resolvedRefs == "True") then
+              hs.status = "Healthy"
+              hs.message = "HTTPRoute accepted by Gateway"
+              return hs
+            end
+          end
+        end
+      end
+
+      -- Some Gateway controllers can serve traffic before backfilling route status.
+      -- Treat missing status as healthy unless the controller reports a negative condition.
+      hs.status = "Healthy"
+      hs.message = "No negative HTTPRoute status reported"
+      return hs
+
   # RBAC configuration - CRITICAL for v3
   # v3 enforces logs RBAC (no opt-out flag)
   # Grant admin role access to logs
