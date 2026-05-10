@@ -14,7 +14,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 4. **Store everything in Git** - Never apply manifests directly from URLs. Download CRDs, Helm values, and configs to the repository first (under `src/kubernetes/` or `src/talos/`). This ensures reproducibility and GitOps principles.
 
-5. **Keep documentation current** - After completing work, update CLAUDE.md, README.md, and any relevant mise tasks to reflect what was done and how to do it again.
+5. **Keep documentation current** - After completing work, update AGENTS.md, run `mise run sync-agent-docs` to mirror it to CLAUDE.md, update README.md, and adjust any relevant mise tasks to reflect what was done and how to do it again.
 
 6. **Don't be sycophantic** - Focus on technical accuracy and getting things right, not on praise or validation.
 
@@ -37,7 +37,7 @@ This is a Kubernetes homelab cluster running on Talos Linux. The cluster is name
 **Deployed Applications:**
 - **Infrastructure**: Cilium L2 LoadBalancer, Longhorn distributed storage, external-dns (UniFi), Cloudflare Tunnel
 - **Remote Access**: Tailscale Kubernetes operator with a connector that advertises cluster pod/service CIDRs to the tailnet
-- **Platform Services**: cert-manager (TLS), 1Password Connect (secrets), kube-prometheus-stack, Unla MCP Gateway
+- **Platform Services**: cert-manager (TLS), 1Password Connect (secrets), kube-prometheus-stack
 - **Applications**: texasdust.org (WordPress nonprofit site, exposed via Cloudflare Tunnel)
 
 ## Common Commands
@@ -198,30 +198,6 @@ src/
 - **apps/**: Everything else that ArgoCD can safely manage
 
 **Without ArgoCD**: You can still use the cluster normally and apply manifests with `kubectl apply` manually.
-
-### MCP Gateway
-
-The cluster runs `AmoyLab/Unla` as an internal MCP gateway with the UI on `http://mcp.internal/` and the shared streamable HTTP endpoint on `http://mcp.internal:5235/mcp/user/mcp`.
-
-**Deployment model:**
-- Single all-in-one container based on the official `ghcr.io/amoylab/unla/allinone:v0.9.0` image
-- Web UI exposed on port `80`
-- Streamable HTTP MCP endpoint exposed on port `5235`
-- Configuration persists in SQLite on the `unla-data` PVC at `/data/unla.db`
-- Exposed internally via a Cilium `LoadBalancer` Service with `external-dns`
-- UI authentication is controlled by the `unla-admin` 1Password-backed secret item
-
-**Required secret:**
-- Add `unla-admin` to the 1Password `kubernetes` vault with fields `username`, `password`, and `jwt-secret-key`
-
-**Recommended usage:**
-- Use Unla as the central shared MCP gateway for multiple clients and machines
-- Prefer upstream MCP servers that expose stable HTTP endpoints reachable from the cluster
-- If an upstream needs credentials, add them to the 1Password `kubernetes` vault first and sync them into the namespace
-
-**Client note:**
-- HTTP-native MCP clients can connect directly to `http://mcp.internal:5235/mcp/user/mcp`
-- Use the Unla UI to register and manage upstream MCP services
 
 ### Configuration Management
 

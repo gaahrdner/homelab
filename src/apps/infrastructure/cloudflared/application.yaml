@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/gaahrdner/homelab.git
     targetRevision: HEAD
-    path: src/apps/infrastructure/cloudflared/manifests
+    path: src/apps/infrastructure/cloudflared/k8s
   destination:
     server: https://kubernetes.default.svc
     namespace: cloudflared

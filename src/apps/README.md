@@ -6,16 +6,18 @@ This directory contains all Kubernetes resources managed by ArgoCD.
 
 ```text
 apps/
-├── infrastructure/      # Cluster-level infrastructure
-│   ├── cilium-l2/      # LoadBalancer IP pool configuration
-│   ├── logging/        # Loki + Alloy + Grafana datasource
-│   ├── longhorn/       # Distributed block storage
-│   └── tailscale/      # Tailscale operator + cluster subnet router
-└── services/           # Everything else
-    ├── cert-manager/   # TLS certificate management
-    ├── onepassword-connect/  # 1Password secrets management
-    ├── texasdust/      # WordPress nonprofit site for texasdust.org
-    └── (your apps)     # Web services, databases, etc.
+├── infrastructure/           # Cluster-level infrastructure
+│   ├── <app>/
+│   │   ├── application.yaml  # ArgoCD Application watched by root app
+│   │   ├── k8s/              # Child manifests / Helm values for that app
+│   │   └── README.md
+│   └── *.yaml                # Small shared resources synced directly by root
+└── services/                 # Platform services and user workloads
+    ├── <app>/
+    │   ├── application.yaml
+    │   ├── k8s/
+    │   └── README.md
+    └── <group>/<app>/        # Optional extra grouping for related services
 ```
 
 ## How It Works
@@ -57,8 +59,26 @@ All apps use automated sync with:
 ## Adding a New Application
 
 1. Create directory: `apps/services/myapp/`
-2. Add manifests: `deployment.yaml`, `service.yaml`, etc.
-3. Commit and push
-4. ArgoCD syncs automatically within ~3 minutes
+2. Add `application.yaml`
+3. Put Kubernetes manifests and Helm values under `k8s/`
+4. Add `README.md` with prerequisites and operational notes
+5. Commit and push
+6. ArgoCD syncs automatically within ~3 minutes
+
+Preferred layout:
+
+```text
+src/apps/services/myapp/
+├── application.yaml
+├── k8s/
+│   ├── namespace.yaml
+│   ├── onepassword-item.yaml
+│   ├── deployment.yaml
+│   └── service.yaml
+└── README.md
+```
+
+Avoid introducing a separate `manifests/` directory. `k8s/` is the single payload
+directory convention for child app resources.
 
 Or force immediate sync via ArgoCD UI.

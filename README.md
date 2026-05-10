@@ -20,12 +20,15 @@ A GitOps-managed Kubernetes homelab cluster running on Talos Linux.
 - [kubectl](https://kubernetes.io/docs/tasks/tools/) - Kubernetes CLI
 - [helm](https://helm.sh/) - Kubernetes package manager
 
+## Repo Maintenance
+
+- Sync AI assistant instruction docs after editing `AGENTS.md`: `mise run sync-agent-docs`
+
 ## Observability
 
 - **Metrics and dashboards**: `kube-prometheus-stack` via ArgoCD
 - **Grafana**: available at `http://grafana.internal`
 - **ArgoCD**: available at `http://argocd.internal`
-- **MCP gateway**: `Unla` available at `http://mcp.internal/` with streamable HTTP MCP at `http://mcp.internal:5235/mcp/user/mcp`
 - **Logs**: Loki (`grafana-community/helm-charts`) with Alloy collection (`grafana/helm-charts`)
 - **App metrics**: 1Password Connect, Texasdust WordPress/MariaDB/Valkey, and Paperless PostgreSQL/Redis/SMB are scraped automatically
 

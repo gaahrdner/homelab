@@ -447,20 +447,18 @@ echo "=== System Pods ==="
 kubectl --context ${KUBECTL_CONTEXT} get pods -A
 """
 
-[tasks.unla-status]
-description = "Check Unla status, service, and backing pod"
+[tasks.sync-agent-docs]
+description = "Ensure CLAUDE.md mirrors AGENTS.md"
 run = """
-echo "=== ArgoCD Application ==="
-kubectl --context ${KUBECTL_CONTEXT} get applications.argoproj.io -n argocd unla || true
+if [ -L CLAUDE.md ] && [ "$(readlink CLAUDE.md)" = "AGENTS.md" ]; then
+  echo "✓ CLAUDE.md already points to AGENTS.md"
+  exit 0
+fi
 
-echo ""
-echo "=== Unla Resources ==="
-kubectl --context ${KUBECTL_CONTEXT} get pods,svc,pvc,onepassworditem,secret -n unla
+rm -f CLAUDE.md
+ln -s AGENTS.md CLAUDE.md
+echo "✓ Linked CLAUDE.md to AGENTS.md"
 """
-
-[tasks.unla-logs]
-description = "Tail Unla deployment logs"
-run = "kubectl --context ${KUBECTL_CONTEXT} logs -n unla deploy/unla --follow"
 
 [tasks.upgrade]
 description = "Upgrade all nodes to new Talos version (requires TALOS_IMAGE env var)"

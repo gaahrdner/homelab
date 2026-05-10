@@ -25,7 +25,7 @@ This deployment uses **custom Kubernetes manifests** instead of a Helm chart to 
   - Export: 2GB (exported archives)
   - Consume: 10GB (incoming documents)
 
-All manifests are in the `manifests/` directory and managed by ArgoCD.
+All Kubernetes resources and local values are in the `k8s/` directory and managed by ArgoCD.
 
 ## Access
 
