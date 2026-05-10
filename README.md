@@ -29,6 +29,14 @@ A GitOps-managed Kubernetes homelab cluster running on Talos Linux.
 - **Logs**: Loki (`grafana-community/helm-charts`) with Alloy collection (`grafana/helm-charts`)
 - **App metrics**: 1Password Connect, Texasdust WordPress/MariaDB/Valkey, and Paperless PostgreSQL/Redis/SMB are scraped automatically
 
+## Remote Access
+
+- **Tailscale**: deployed in-cluster via the Kubernetes operator
+- **Subnet router**: the cluster advertises the Kubernetes Service CIDR `10.96.0.0/12` and Pod CIDR `10.244.0.0/16` to the tailnet
+- **Secrets**: operator OAuth credentials come from the 1Password `kubernetes` vault item `tailscale-operator-oauth`
+
+See `src/apps/infrastructure/tailscale/README.md` for setup and policy requirements.
+
 ## Installation
 
 ### New Cluster Installation

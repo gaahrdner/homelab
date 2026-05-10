@@ -34,6 +34,7 @@ This is a Kubernetes homelab cluster running on Talos Linux. The cluster is name
 
 **Deployed Applications:**
 - **Infrastructure**: Cilium L2 LoadBalancer, Longhorn distributed storage, external-dns (UniFi), Cloudflare Tunnel
+- **Remote Access**: Tailscale Kubernetes operator with a connector that advertises cluster pod/service CIDRs to the tailnet
 - **Platform Services**: cert-manager (TLS), 1Password Connect (secrets), kube-prometheus-stack, Unla MCP Gateway
 - **Applications**: texasdust.org (WordPress nonprofit site, exposed via Cloudflare Tunnel)
 
@@ -343,6 +344,33 @@ The cluster uses Cloudflare Tunnel (cloudflared) to expose services to the publi
 - texasdust.org → wordpress.texasdust:80 (WordPress nonprofit site)
 
 See `src/apps/infrastructure/cloudflared/README.md` for detailed setup.
+
+## Remote Cluster Access with Tailscale
+
+Tailscale should run in-cluster, not separately on each Talos node. This repo manages Tailscale using the Kubernetes operator and a single `Connector` subnet router.
+
+**Why this model:**
+- Keeps Tailscale in GitOps instead of hand-managed node auth state
+- Avoids enrolling all three control-plane nodes as separate tailnet devices
+- Advertises the Kubernetes network itself, which is the part the tailnet actually needs
+
+**Current advertised routes:**
+- Service CIDR: `10.96.0.0/12`
+- Pod CIDR aggregate: `10.244.0.0/16`
+
+**Required secret:**
+- Add `tailscale-operator-oauth` to the 1Password `kubernetes` vault with fields `client_id` and `client_secret`
+
+**Required Tailscale OAuth scopes:**
+- `Devices Core` write
+- `Auth Keys` write
+- `Services` write
+
+**Required tailnet policy shape:**
+- `tag:k8s-operator` must own `tag:k8s`
+- `autoApprovers.routes` should approve `10.96.0.0/12` and `10.244.0.0/16` for `tag:k8s`
+
+See `src/apps/infrastructure/tailscale/README.md` for the exact manifests and policy snippet.
 
 ## Observability (Metrics + Logs)
 

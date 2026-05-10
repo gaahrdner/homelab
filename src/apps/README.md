@@ -9,7 +9,8 @@ apps/
 ├── infrastructure/      # Cluster-level infrastructure
 │   ├── cilium-l2/      # LoadBalancer IP pool configuration
 │   ├── logging/        # Loki + Alloy + Grafana datasource
-│   └── longhorn/       # Distributed block storage
+│   ├── longhorn/       # Distributed block storage
+│   └── tailscale/      # Tailscale operator + cluster subnet router
 └── services/           # Everything else
     ├── cert-manager/   # TLS certificate management
     ├── onepassword-connect/  # 1Password secrets management
@@ -35,6 +36,7 @@ Cluster-level configuration that requires special handling:
 - Distributed storage (Longhorn)
 - Storage classes
 - Network policies
+- Shared network access tooling such as Tailscale subnet routing
 
 ### Services
 

@@ -1,0 +1,14 @@
+apiVersion: tailscale.com/v1alpha1
+kind: Connector
+metadata:
+  name: norns-cluster-routes
+  namespace: tailscale
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  replicas: 1
+  hostnamePrefix: norns-cluster
+  subnetRouter:
+    advertiseRoutes:
+      - 10.96.0.0/12
+      - 10.244.0.0/16
