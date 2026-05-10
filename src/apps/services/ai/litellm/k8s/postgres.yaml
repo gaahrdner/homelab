@@ -59,7 +59,7 @@ spec:
               cpu: 500m
               memory: 512Mi
         - name: postgres-exporter
-          image: prometheuscommunity/postgres-exporter:v0.17.1
+          image: prometheuscommunity/postgres-exporter:v0.19.1
           imagePullPolicy: IfNotPresent
           ports:
             - name: metrics
