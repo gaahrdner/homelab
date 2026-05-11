@@ -5,14 +5,14 @@ This directory contains the ArgoCD Application manifests for deploying Velero, a
 ## Components
 
 *   `application.yaml`: ArgoCD Application to deploy Velero via its Helm chart.
-*   `k8s/onepassword-item.yaml`: Syncs R2 API credentials from 1Password into a Kubernetes Secret.
+*   `k8s/onepassword-item.yaml`: Syncs both the raw R2 credentials and the Velero `cloud` credentials secret from 1Password.
 *   `k8s/schedules.yaml`: Daily and weekly Velero schedules for cluster object backups.
 
 ## Configuration Details
 
 *   **Backup Storage:** Cloudflare R2 bucket (`homelab-backup`)
 *   **R2 Endpoint:** `https://48efe0f369d822f5035c1e179d993127.r2.cloudflarestorage.com`
-*   **Credentials:** The raw R2 credentials are synced from the `velero-r2-credentials` item in the `kubernetes` vault. The Velero chart itself still consumes the preformatted `velero-credentials` secret.
+*   **Credentials:** The raw R2 credentials are synced from the `velero-r2-credentials` item in the `kubernetes` vault. Velero itself consumes the `velero-cloud-credentials` secret, also synced from 1Password, with the required `cloud` key content.
 *   **Volume Snapshots:** Uses `velero-plugin-for-csi` to integrate with Longhorn, but the scheduled backups in this repo intentionally do not take CSI snapshots. Longhorn offsite backups are the volume disaster-recovery path.
 *   **Velero Version:** Helm chart `2.31.0` (Velero application `v1.12.2`)
 *   **Plugin Versions:** `velero-plugin-for-aws:v1.7.0`, `velero-plugin-for-csi:v1.7.0`
@@ -28,7 +28,13 @@ This directory contains the ArgoCD Application manifests for deploying Velero, a
     - `AWS_ENDPOINTS`
     - `bucket`
     - `account_id`
-3.  **Sync with ArgoCD:** Once these files are committed and pushed to your Git repository, ArgoCD will automatically deploy Velero to your cluster.
+3.  **Store Velero Cloud Credentials in 1Password:** Ensure `velero-cloud-credentials` exists in the same vault with a `cloud` field containing the standard AWS credentials file content:
+    ```ini
+    [default]
+    aws_access_key_id=...
+    aws_secret_access_key=...
+    ```
+4.  **Sync with ArgoCD:** Once these files are committed and pushed to your Git repository, ArgoCD will automatically deploy Velero to your cluster.
 
 ## Post-Installation
 
