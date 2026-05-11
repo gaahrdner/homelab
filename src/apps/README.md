@@ -6,6 +6,10 @@ This directory contains all Kubernetes resources managed by ArgoCD.
 
 ```text
 apps/
+├── crds/                     # Cluster-scoped schema and migration-sensitive primitives
+│   └── <component>/
+│       ├── *.yaml            # CRDs or cluster-scoped companion resources
+│       └── README.md
 ├── infrastructure/           # Cluster-level infrastructure
 │   ├── <app>/
 │   │   ├── application.yaml  # ArgoCD Application watched by root app
@@ -32,10 +36,17 @@ ArgoCD watches this directory and automatically syncs all resources to the clust
 
 ### Ownership Rules
 
-- The root app owns `Application` CRs and shared singleton infrastructure manifests that do not belong to a child app.
+- The root app owns `Application` CRs, `crds/`, and shared singleton infrastructure manifests that do not belong to a child app.
 - App-specific support resources belong under that app's `k8s/` directory, even when the app itself is rendered from an external Helm chart.
-- Live CRD ownership handoffs are an explicit exception. Treat them as migrations, not cleanup.
+- `crds/` exists to make migration-sensitive schema ownership explicit instead of burying it as an exception inside a service directory.
 - Avoid splitting a single logical workload across root-managed manifests and child-managed payloads unless the resource is genuinely shared.
+
+### CRDs
+
+Cluster-scoped schema and other migration-sensitive primitives:
+
+- CustomResourceDefinitions
+- tightly coupled cluster-scoped bootstrap objects that should not be handed between owners casually
 
 ### Infrastructure
 

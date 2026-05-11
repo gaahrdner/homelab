@@ -183,6 +183,7 @@ src/
 │   ├── cilium/         # CNI Helm values
 │   └── argocd/         # ArgoCD installation + root app
 ├── apps/               # Everything ArgoCD manages
+│   ├── crds/           # Cluster-scoped schema and migration-sensitive primitives
 │   ├── infrastructure/ # Cluster-level and shared singleton infrastructure
 │   └── services/       # Stable services and internal workloads
 └── talos/              # Talos machine configs

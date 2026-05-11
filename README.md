@@ -105,6 +105,7 @@ For one-off experiments you can still apply manifests manually, but the normal o
 
 ### Workload Tiers
 
+- `src/apps/crds/`: cluster-scoped schema and migration-sensitive primitives
 - `src/apps/infrastructure/`: core cluster platform services and shared singleton resources
 - `src/apps/services/`: user-facing or platform-adjacent workloads
 - `src/apps/services/ai/`: internal and experimental AI workloads built around LiteLLM, Open WebUI, and Langfuse
