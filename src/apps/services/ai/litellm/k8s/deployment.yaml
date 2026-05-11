@@ -27,7 +27,7 @@ spec:
           args:
             - |
               export DATABASE_URL="postgresql://litellm:${DATABASE_PASSWORD}@litellm-postgresql/litellm"
-              exec litellm --config /app/config.yaml
+              exec litellm --config /app/config/config.yaml
           ports:
             - name: http
               containerPort: 4000
@@ -49,8 +49,7 @@ spec:
                 name: litellm-vllm-upstreams
           volumeMounts:
             - name: config
-              mountPath: /app/config.yaml
-              subPath: config.yaml
+              mountPath: /app/config
           livenessProbe:
             httpGet:
               path: /health/liveliness
