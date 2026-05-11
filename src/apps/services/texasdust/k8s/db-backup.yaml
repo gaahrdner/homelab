@@ -19,6 +19,9 @@ spec:
   jobTemplate:
     spec:
       template:
+        metadata:
+          labels:
+            app: mariadb-backup
         spec:
           restartPolicy: OnFailure
           volumes:
@@ -44,7 +47,9 @@ spec:
                     --single-transaction \
                     --quick \
                     --lock-tables=false \
-                    wordpress | gzip -9 > /backup/wordpress.sql.gz
+                    wordpress > /backup/wordpress.sql
+                  test -s /backup/wordpress.sql
+                  gzip -9 /backup/wordpress.sql
               volumeMounts:
                 - name: backup
                   mountPath: /backup
@@ -75,6 +80,7 @@ spec:
                 - |
                   set -eu
                   stamp="$(date -u +%Y/%m/%d/%H%M%SZ)"
+                  test -s /backup/wordpress.sql.gz
                   aws s3 cp /backup/wordpress.sql.gz "s3://homelab-backup/logical-dumps/texasdust/mariadb/${stamp}.sql.gz" \
                     --endpoint-url "${AWS_ENDPOINTS}" \
                     --only-show-errors

@@ -91,6 +91,14 @@ spec:
       ports:
       - protocol: TCP
         port: 3306
+    # Allow the in-namespace logical backup job to dump the database
+    - from:
+      - podSelector:
+          matchLabels:
+            app: mariadb-backup
+      ports:
+      - protocol: TCP
+        port: 3306
     # Allow Prometheus scraping from the monitoring namespace
     - from:
       - namespaceSelector:
