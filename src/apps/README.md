@@ -31,7 +31,6 @@ ArgoCD watches this directory and automatically syncs all resources to the clust
 - **Add a new app**: Create a directory with Kubernetes manifests, commit, push
 - **Update an app**: Modify the manifests, commit, push
 - **Delete an app**: Remove the directory, commit, push
-- **Stage an app without deploying it**: create the directory and `k8s/` payload, but do not add `application.yaml` until the workload is ready for ArgoCD
 
 ## Directory Guidelines
 
