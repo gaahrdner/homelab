@@ -45,6 +45,10 @@ The backup layers are intentionally split:
 - Longhorn for PVC data
 - logical dumps for faster app-level database recovery
 
+Service-specific restore docs:
+
+- [Texasdust restore runbook](src/apps/services/texasdust/RESTORE.md)
+
 ## Remote Access
 
 - **Tailscale**: deployed in-cluster via the Kubernetes operator

@@ -186,6 +186,10 @@ Texasdust now has three backup layers:
 
 The logical dump is the fastest application-level recovery path if the database is damaged but the rest of the cluster is intact.
 
+Restore procedure:
+
+- [Texasdust Restore Runbook](./RESTORE.md)
+
 ### Health Checks
 
 ```bash
