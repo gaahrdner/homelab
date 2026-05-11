@@ -30,7 +30,7 @@ jobs:
       IMAGE_TAG: ${{ inputs.image_tag }}
     steps:
       - name: Checkout upstream Gas City
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           repository: gastownhall/gascity
           ref: ${{ env.GASCITY_REF }}
