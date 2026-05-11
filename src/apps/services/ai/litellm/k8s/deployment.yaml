@@ -42,11 +42,15 @@ spec:
                 secretKeyRef:
                   name: litellm-master-key
                   key: master-key
+            - name: LANGFUSE_OTEL_HOST
+              value: http://langfuse-web.langfuse.svc.cluster.local:3000
             - name: LITELLM_LOG
               value: INFO
           envFrom:
             - secretRef:
                 name: litellm-vllm-upstreams
+            - secretRef:
+                name: langfuse-project-api-keys
           volumeMounts:
             - name: config
               mountPath: /app/config

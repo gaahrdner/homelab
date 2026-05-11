@@ -7,6 +7,7 @@ LiteLLM is deployed as the cluster's internal AI gateway.
 - Exposes LiteLLM at `http://litellm.internal`
 - Persists gateway state in PostgreSQL on Longhorn storage
 - Reads the gateway master key and vLLM upstream settings from 1Password
+- Sends proxy traces to the self-hosted Langfuse deployment
 - Targets the GX10 head node at `http://192.168.0.131:8000/v1`
 
 ## Required 1Password Items
@@ -21,6 +22,9 @@ Create these items in the `kubernetes` vault:
 - `litellm-vllm-upstreams`
   - `VLLM_1_API_BASE`
   - `VLLM_1_API_KEY`
+- `langfuse-project-api-keys`
+  - `LANGFUSE_PUBLIC_KEY`
+  - `LANGFUSE_SECRET_KEY`
 
 ## Important Note
 
@@ -45,6 +49,11 @@ requests successfully.
 - LiteLLM proxy metrics are exposed on `/metrics`
 - LiteLLM PostgreSQL metrics are exposed via the `postgres-exporter` sidecar
 - Both are scraped through the cluster-wide auto-discovery `PodMonitor`
+
+## Tracing
+
+- LiteLLM exports traces directly to the in-cluster Langfuse service
+- The Langfuse project API keys are sourced from 1Password
 
 ## Layout
 
