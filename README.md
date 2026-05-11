@@ -24,6 +24,7 @@ A GitOps-managed Kubernetes homelab cluster running on Talos Linux.
 
 - Sync AI assistant instruction docs after editing `AGENTS.md`: `mise run sync-agent-docs`
 - Create missing 1Password items for LiteLLM, Open WebUI, and Langfuse: `mise run generate-ai-1password-items`
+- Reapply Open WebUI -> LiteLLM Langfuse trace header config after a reset: `mise run configure-open-webui-langfuse`
 
 ## Observability
 

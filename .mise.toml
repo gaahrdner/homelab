@@ -464,6 +464,10 @@ echo "✓ Linked CLAUDE.md to AGENTS.md"
 description = "Create missing 1Password items for LiteLLM, Open WebUI, and Langfuse"
 run = "./scripts/generate-ai-1password-items.sh"
 
+[tasks.configure-open-webui-langfuse]
+description = "Persist Open WebUI -> LiteLLM Langfuse trace headers and restart Open WebUI"
+run = "./scripts/configure-open-webui-langfuse.sh"
+
 [tasks.upgrade]
 description = "Upgrade all nodes to new Talos version (requires TALOS_IMAGE env var)"
 run = """

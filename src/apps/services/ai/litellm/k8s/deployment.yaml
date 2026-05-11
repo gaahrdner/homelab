@@ -42,8 +42,12 @@ spec:
                 secretKeyRef:
                   name: litellm-master-key
                   key: master-key
+            - name: LANGFUSE_RELEASE
+              value: litellm-v1.83.14-stable.patch.2
             - name: LANGFUSE_OTEL_HOST
               value: http://langfuse-web.langfuse.svc.cluster.local:3000
+            - name: LANGFUSE_TRACING_ENVIRONMENT
+              value: norns
             - name: LITELLM_LOG
               value: INFO
           envFrom:

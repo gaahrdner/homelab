@@ -24,6 +24,15 @@ Open WebUI stores many connection settings in its internal database after first
 boot. In practice, that means the initial LiteLLM URL and API key should be
 correct before the first successful startup.
 
+This repo also includes a helper to persist Langfuse trace headers on the
+OpenAI-compatible LiteLLM connection after startup:
+
+- `mise run configure-open-webui-langfuse`
+
+That helper configures Open WebUI to forward templated `langfuse_*` headers for
+the current `USER_ID` and `CHAT_ID`, which lets LiteLLM group Langfuse traces
+by user and chat session.
+
 ## Access
 
 - UI: `http://open-webui.internal`
