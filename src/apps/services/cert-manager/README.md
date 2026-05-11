@@ -4,7 +4,7 @@ Automated TLS certificate management for Kubernetes using ACME (Let's Encrypt).
 
 ## Installation
 
-Helm chart v1.19.1 managed by ArgoCD. CRDs installed separately via crds.yaml.
+Helm chart v1.19.1 managed by ArgoCD. The CRDs and ClusterIssuers remain root-managed in this repo on purpose, because CRD ownership handoffs under Argo prune are a migration task, not a cleanup task.
 
 ## Configuration
 

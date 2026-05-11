@@ -5,176 +5,172 @@ metadata:
   namespace: argocd
 spec:
   project: default
-  source:
-    chart: kube-prometheus-stack
-    repoURL: https://prometheus-community.github.io/helm-charts
-    targetRevision: 84.5.0
-    helm:
-      valuesObject:
-        # ====================================================================
-        # Prometheus Configuration
-        # ====================================================================
-        prometheus:
-          prometheusSpec:
-            # Retention configuration for homelab
-            retention: 7d
-            retentionSize: 15GB
+  sources:
+    - chart: kube-prometheus-stack
+      repoURL: https://prometheus-community.github.io/helm-charts
+      targetRevision: 84.5.0
+      helm:
+        valuesObject:
+          # ====================================================================
+          # Prometheus Configuration
+          # ====================================================================
+          prometheus:
+            prometheusSpec:
+              # Retention configuration for homelab
+              retention: 7d
+              retentionSize: 15GB
 
-            # Storage configuration using Longhorn
-            storageSpec:
-              volumeClaimTemplate:
-                spec:
-                  storageClassName: longhorn
-                  accessModes:
-                    - ReadWriteOnce
-                  resources:
-                    requests:
-                      storage: 20Gi
+              # Storage configuration using Longhorn
+              storageSpec:
+                volumeClaimTemplate:
+                  spec:
+                    storageClassName: longhorn
+                    accessModes:
+                      - ReadWriteOnce
+                    resources:
+                      requests:
+                        storage: 20Gi
 
-            # Resource limits for homelab
-            resources:
-              requests:
-                cpu: 200m
-                memory: 512Mi
-              limits:
-                cpu: 1000m
-                memory: 2Gi
+              # Resource limits for homelab
+              resources:
+                requests:
+                  cpu: 200m
+                  memory: 512Mi
+                limits:
+                  cpu: 1000m
+                  memory: 2Gi
 
-            # ServiceMonitor selector - discover all ServiceMonitors
-            serviceMonitorSelectorNilUsesHelmValues: false
-            podMonitorSelectorNilUsesHelmValues: false
+              # ServiceMonitor selector - discover all ServiceMonitors
+              serviceMonitorSelectorNilUsesHelmValues: false
+              podMonitorSelectorNilUsesHelmValues: false
 
-            # Additional scrape configs for Talos components (etcd, etc.)
-            additionalScrapeConfigsSecret:
-              name: additional-scrape-configs
-              key: prometheus-additional.yaml
+              # Additional scrape configs for Talos components (etcd, etc.)
+              additionalScrapeConfigsSecret:
+                name: additional-scrape-configs
+                key: prometheus-additional.yaml
 
-            # Enable features
-            enableAdminAPI: false
-            walCompression: true
+              # Enable features
+              enableAdminAPI: false
+              walCompression: true
 
-        # ====================================================================
-        # Grafana Configuration
-        # ====================================================================
-        grafana:
-          enabled: true
-
-          # Admin credentials from 1Password
-          # NOTE: Before deploying, create item in 1Password:
-          #   Vault: kubernetes
-          #   Item: grafana-admin-credentials
-          #   Field: password (your secure password)
-          admin:
-            existingSecret: grafana-admin-credentials
-            userKey: username
-            passwordKey: password
-
-          # Persistence for dashboards
-          persistence:
+          # ====================================================================
+          # Grafana Configuration
+          # ====================================================================
+          grafana:
             enabled: true
-            storageClassName: longhorn
-            size: 5Gi
 
-          # Resource limits
-          resources:
-            requests:
-              cpu: 50m
-              memory: 256Mi
-            limits:
-              cpu: 500m
-              memory: 512Mi
+            # Admin credentials from 1Password
+            admin:
+              existingSecret: grafana-admin-credentials
+              userKey: username
+              passwordKey: password
 
-          # Expose via LoadBalancer (will get IP from cilium-l2 pool)
-          service:
-            type: LoadBalancer
-
-        # ====================================================================
-        # Alertmanager Configuration
-        # ====================================================================
-        alertmanager:
-          alertmanagerSpec:
-            # Storage for alert state
-            storage:
-              volumeClaimTemplate:
-                spec:
-                  storageClassName: longhorn
-                  accessModes:
-                    - ReadWriteOnce
-                  resources:
-                    requests:
-                      storage: 2Gi
+            # Persistence for dashboards
+            persistence:
+              enabled: true
+              storageClassName: longhorn
+              size: 5Gi
 
             # Resource limits
+            resources:
+              requests:
+                cpu: 50m
+                memory: 256Mi
+              limits:
+                cpu: 500m
+                memory: 512Mi
+
+            # Expose via LoadBalancer (will get IP from cilium-l2 pool)
+            service:
+              type: LoadBalancer
+
+          # ====================================================================
+          # Alertmanager Configuration
+          # ====================================================================
+          alertmanager:
+            alertmanagerSpec:
+              # Storage for alert state
+              storage:
+                volumeClaimTemplate:
+                  spec:
+                    storageClassName: longhorn
+                    accessModes:
+                      - ReadWriteOnce
+                    resources:
+                      requests:
+                        storage: 2Gi
+
+              # Resource limits
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 32Mi
+                limits:
+                  cpu: 100m
+                  memory: 128Mi
+
+          # ====================================================================
+          # Component Configuration
+          # ====================================================================
+          prometheusOperator:
+            resources:
+              requests:
+                cpu: 50m
+                memory: 64Mi
+              limits:
+                cpu: 200m
+                memory: 128Mi
+
+          prometheus-node-exporter:
             resources:
               requests:
                 cpu: 10m
                 memory: 32Mi
               limits:
                 cpu: 100m
+                memory: 64Mi
+
+          kube-state-metrics:
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                cpu: 100m
                 memory: 128Mi
 
-        # ====================================================================
-        # Component Configuration
-        # ====================================================================
-        # Prometheus Operator
-        prometheusOperator:
-          resources:
-            requests:
-              cpu: 50m
-              memory: 64Mi
-            limits:
-              cpu: 200m
-              memory: 128Mi
-
-        # Node Exporter (metrics from each node)
-        prometheus-node-exporter:
-          resources:
-            requests:
-              cpu: 10m
-              memory: 32Mi
-            limits:
-              cpu: 100m
-              memory: 64Mi
-
-        # Kube State Metrics (Kubernetes object metrics)
-        kube-state-metrics:
-          resources:
-            requests:
-              cpu: 10m
-              memory: 64Mi
-            limits:
-              cpu: 100m
-              memory: 128Mi
-
-        # ====================================================================
-        # Default Rules and Dashboards
-        # ====================================================================
-        defaultRules:
-          create: true
-          rules:
-            alertmanager: true
-            etcd: true
-            configReloaders: true
-            general: true
-            k8s: true
-            kubeApiserverAvailability: true
-            kubeApiserverSlos: true
-            kubelet: true
-            kubeProxy: true
-            kubePrometheusGeneral: true
-            kubePrometheusNodeRecording: true
-            kubernetesApps: true
-            kubernetesResources: true
-            kubernetesStorage: true
-            kubernetesSystem: true
-            kubeScheduler: true
-            kubeStateMetrics: true
-            network: true
-            node: true
-            nodeExporterAlerting: true
-            nodeExporterRecording: true
-            prometheus: true
-            prometheusOperator: true
+          # ====================================================================
+          # Default Rules and Dashboards
+          # ====================================================================
+          defaultRules:
+            create: true
+            rules:
+              alertmanager: true
+              etcd: true
+              configReloaders: true
+              general: true
+              k8s: true
+              kubeApiserverAvailability: true
+              kubeApiserverSlos: true
+              kubelet: true
+              kubeProxy: true
+              kubePrometheusGeneral: true
+              kubePrometheusNodeRecording: true
+              kubernetesApps: true
+              kubernetesResources: true
+              kubernetesStorage: true
+              kubernetesSystem: true
+              kubeScheduler: true
+              kubeStateMetrics: true
+              network: true
+              node: true
+              nodeExporterAlerting: true
+              nodeExporterRecording: true
+              prometheus: true
+              prometheusOperator: true
+    - repoURL: https://github.com/gaahrdner/homelab.git
+      targetRevision: HEAD
+      path: src/apps/infrastructure/kube-prometheus-stack/k8s
 
   destination:
     server: https://kubernetes.default.svc

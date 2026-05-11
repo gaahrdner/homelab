@@ -56,26 +56,28 @@ See `src/apps/infrastructure/tailscale/README.md` for setup and policy requireme
    - Reset the platform to Setup Mode
    - Boot all nodes and wipe their disks
 
-#### Cluster Bootstrap (3 Commands)
+#### Base Cluster Bootstrap (3 Commands)
 
 1. **Generate cluster configuration**: `mise run gen-cluster`
 2. **Initialize the cluster**: `mise run init` (applies configs, bootstraps etcd, sets up kubeconfig)
 3. **Setup networking**: `mise run setup-networking` (Gateway API, Cilium CNI with Hubble, replaces Flannel)
 
-That's it! You now have a working Kubernetes cluster with Cilium networking.
+That gives you a working Talos + Kubernetes base cluster.
 
-#### Optional: GitOps with ArgoCD
+#### Standard GitOps Bootstrap
 
-To enable automatic application management from Git:
+This repo assumes workloads are managed through ArgoCD:
 
-1. Update `src/bootstrap/argocd/root-app.yaml` with your GitHub repo URL
+1. Verify `src/bootstrap/argocd/root-app.yaml` points at the correct GitHub repo
 2. Run: `mise run bootstrap-gitops`
 
-Once ArgoCD is installed, it will automatically sync all applications in `src/apps/` including:
+Once ArgoCD is installed, it automatically syncs all applications in `src/apps/` including:
 
 - LoadBalancer IP pool configuration
 - Any platform services you add
 - Your applications
+
+For one-off experiments you can still apply manifests manually, but the normal operating model for this repo is GitOps after bootstrap.
 
 ### Existing Cluster Updates
 
@@ -100,6 +102,12 @@ Once ArgoCD is installed, it will automatically sync all applications in `src/ap
 - `patches/network-verdandi.yaml` - Hostname for verdandi node
 - `patches/network-skuld.yaml` - Hostname for skuld node
 - `patches/cilium.yaml` - Disable default CNI and kube-proxy (applied during `mise run setup-networking` and preserved by `mise run update`)
+
+### Workload Tiers
+
+- `src/apps/infrastructure/`: core cluster platform services and shared singleton resources
+- `src/apps/services/`: user-facing or platform-adjacent workloads
+- `src/apps/services/ai/`: internal and experimental AI workloads built around LiteLLM, Open WebUI, and Langfuse
 
 ### System Extensions (`src/talos/extensions.yaml`)
 

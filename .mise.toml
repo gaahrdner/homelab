@@ -5,9 +5,11 @@
 # cluster with 3 control plane nodes.
 #
 # Quick Start (New Cluster):
-#   1. mise run gen-cluster     # Generate secrets + configs
-#   2. mise run init            # Initialize cluster
-#   3. mise run health          # Verify health
+#   1. mise run gen-cluster        # Generate secrets + configs
+#   2. mise run init               # Initialize cluster
+#   3. mise run setup-networking   # Switch to Cilium + Gateway API
+#   4. mise run bootstrap-gitops   # Standard workload management path
+#   5. mise run health             # Verify health
 #
 # Update Existing Cluster:
 #   1. mise run update          # Regenerate configs (keeps secrets)
@@ -249,8 +251,8 @@ echo "✓ Cilium with Hubble, Gateway API, and L2 announcements installed"
 echo "✓ Cilium is now the sole CNI (Flannel and kube-proxy removed)"
 echo ""
 echo "Next steps:"
+echo "  - Run 'mise run bootstrap-gitops' to install ArgoCD"
 echo "  - Run 'mise run health' to verify cluster health"
-echo "  - (Optional) Run 'mise run bootstrap-gitops' to install ArgoCD"
 """
 
 [tasks.setup-loadbalancer]

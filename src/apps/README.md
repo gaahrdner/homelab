@@ -11,7 +11,7 @@ apps/
 │   │   ├── application.yaml  # ArgoCD Application watched by root app
 │   │   ├── k8s/              # Child manifests / Helm values for that app
 │   │   └── README.md
-│   └── *.yaml                # Small shared resources synced directly by root
+│   └── *.yaml                # Shared singleton resources synced directly by root
 └── services/                 # Platform services and user workloads
     ├── <app>/
     │   ├── application.yaml
@@ -30,6 +30,13 @@ ArgoCD watches this directory and automatically syncs all resources to the clust
 
 ## Directory Guidelines
 
+### Ownership Rules
+
+- The root app owns `Application` CRs and shared singleton infrastructure manifests that do not belong to a child app.
+- App-specific support resources belong under that app's `k8s/` directory, even when the app itself is rendered from an external Helm chart.
+- Live CRD ownership handoffs are an explicit exception. Treat them as migrations, not cleanup.
+- Avoid splitting a single logical workload across root-managed manifests and child-managed payloads unless the resource is genuinely shared.
+
 ### Infrastructure
 
 Cluster-level configuration that requires special handling:
@@ -46,6 +53,7 @@ Everything else:
 
 - Platform services (cert-manager, 1Password, monitoring, logging)
 - Your applications (websites, databases, etc.)
+- `services/ai/` is the experimental/internal tier for AI tooling. Keep that separation visible in docs and review changes there with a lower stability bar than core platform workloads.
 - Default for new workload access: prefer the cluster subnet router plus existing internal DNS and Gateway API entrypoints. Add Tailscale-published ingress only when a specific service benefits from tailnet-native discovery or ACLs.
 
 ## Sync Policy

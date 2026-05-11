@@ -46,6 +46,13 @@ Helm chart `84.5.0` managed by ArgoCD with ServerSideApply for large CRDs.
 - Cilium L2 pool (for Grafana LoadBalancer)
 - Gateway (for grafana.internal)
 
+## Ownership
+
+- `application.yaml` owns the external Helm chart plus the local support manifests under `k8s/`
+- `k8s/podmonitor-auto-discovery.yaml` provides cluster-wide scrape-by-annotation discovery
+- `k8s/prometheus-additional-scrape-configs.yaml` holds the Talos scrape config secret
+- `k8s/httproute.yaml` exposes Grafana at `grafana.internal`
+
 ## Automatic Metrics Discovery
 
 ### ServiceMonitors

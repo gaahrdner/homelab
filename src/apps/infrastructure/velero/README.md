@@ -4,9 +4,8 @@ This directory contains the ArgoCD Application manifests for deploying Velero, a
 
 ## Components
 
-*   `namespace.yaml`: Defines the `velero` namespace.
-*   `onepassword-item.yaml`: Syncs R2 API credentials from 1Password into a Kubernetes Secret.
 *   `application.yaml`: ArgoCD Application to deploy Velero via its Helm chart.
+*   `k8s/onepassword-item.yaml`: Syncs R2 API credentials from 1Password into a Kubernetes Secret.
 
 ## Configuration Details
 

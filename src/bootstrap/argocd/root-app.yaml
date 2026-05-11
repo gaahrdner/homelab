@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/gaahrdner/homelab.git
-    targetRevision: main
+    targetRevision: HEAD
     path: src/apps
     directory:
       recurse: true

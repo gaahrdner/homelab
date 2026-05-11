@@ -49,7 +49,8 @@ kubectl logs -n onepassword -l app.kubernetes.io/name=onepassword-connect-operat
 ## Monitoring
 
 Prometheus scrapes the Connect API metrics endpoint via the ServiceMonitor in
-`k8s/servicemonitor.yaml`.
+`k8s/servicemonitor.yaml`. The internal route is also owned by this app in
+`k8s/httproute.yaml`.
 
 - **1Password Connect API:** port `8080`, path `/metrics`
 

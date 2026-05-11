@@ -129,7 +129,7 @@ The `mise run setup-networking` command handles all 5 steps automatically. It:
 - Applies configs and reboots all nodes to complete the transition
 - Verifies kube-proxy removal
 
-After `setup-networking`, you have a working cluster. LoadBalancer and application management is handled separately by ArgoCD (optional).
+After `setup-networking`, you have a working base cluster. This repo's normal operating model is to bootstrap ArgoCD next and manage workloads from Git.
 
 ### DNS Management with External-DNS
 
@@ -171,9 +171,9 @@ nslookup myapp.internal
 
 See `src/apps/infrastructure/external-dns/README.md` for detailed configuration and troubleshooting.
 
-### GitOps with ArgoCD (Optional)
+### GitOps with ArgoCD
 
-ArgoCD is **optional** but recommended for automatic application management. Once installed via `mise run bootstrap-gitops`, it manages all resources in `src/apps/`.
+ArgoCD is the standard workload management path for this repo. Once installed via `mise run bootstrap-gitops`, it manages all resources in `src/apps/`.
 
 **Directory Structure:**
 ```
@@ -182,9 +182,9 @@ src/
 │   ├── gateway-api/    # CRDs applied during networking setup
 │   ├── cilium/         # CNI Helm values
 │   └── argocd/         # ArgoCD installation + root app
-├── apps/               # Everything ArgoCD manages (if installed)
-│   ├── infrastructure/ # Cluster-level (LoadBalancer pools, storage)
-│   └── services/       # Everything else (cert-manager, apps, etc.)
+├── apps/               # Everything ArgoCD manages
+│   ├── infrastructure/ # Cluster-level and shared singleton infrastructure
+│   └── services/       # Stable services and internal workloads
 └── talos/              # Talos machine configs
 ```
 
@@ -197,7 +197,7 @@ src/
 - **bootstrap/**: Infrastructure requiring special handling (CNI transitions, node reboots, ArgoCD itself)
 - **apps/**: Everything else that ArgoCD can safely manage
 
-**Without ArgoCD**: You can still use the cluster normally and apply manifests with `kubectl apply` manually.
+You can still use `kubectl apply` manually for short-lived experiments, but it is not the normal path for persisted workloads in this repo.
 
 ### Configuration Management
 
@@ -428,7 +428,7 @@ spec:
               name: metrics
 ```
 
-**That's it!** The cluster-wide PodMonitor (`src/apps/infrastructure/kube-prometheus-stack/podmonitor-auto-discovery.yaml`) will automatically scrape metrics within 30 seconds.
+**That's it!** The cluster-wide PodMonitor (`src/apps/infrastructure/kube-prometheus-stack/k8s/podmonitor-auto-discovery.yaml`) will automatically scrape metrics within 30 seconds.
 
 **Option 2: ServiceMonitor (For Services)**
 
@@ -523,7 +523,7 @@ kubectl get pod <pod-name> -n <namespace> -o yaml | grep -A5 annotations
 
 See detailed documentation in:
 - `src/apps/infrastructure/kube-prometheus-stack/README.md` - Prometheus/Grafana/Alertmanager
-- `src/apps/infrastructure/longhorn/servicemonitor.yaml` - Storage metrics
+- `src/apps/infrastructure/longhorn/k8s/servicemonitor.yaml` - Storage metrics
 - `src/apps/services/texasdust/README.md` - Application monitoring example
 
 ## Important Notes
