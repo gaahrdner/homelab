@@ -187,6 +187,12 @@ The consumption folder is mounted at `/usr/src/paperless/consume` inside the pod
 
 ### Backup
 
+Paperless now has three backup layers:
+
+1. Velero for cluster objects and workload metadata
+2. Longhorn recurring offsite volume backups for the application and PostgreSQL PVCs
+3. A daily logical PostgreSQL dump uploaded to `s3://homelab-backup/logical-dumps/paperless/postgresql/`
+
 Paperless exports are stored in the `export` volume. You can:
 ```bash
 kubectl exec -n paperless-ngx deployment/paperless-ngx-main -- python manage.py document_exporter /usr/src/paperless/export
@@ -194,7 +200,7 @@ kubectl exec -n paperless-ngx deployment/paperless-ngx-main -- python manage.py 
 
 ### Database Backup
 
-PostgreSQL data is on Longhorn. Velero backs up PVCs automatically (if configured).
+PostgreSQL data is on Longhorn, and this repo also schedules a daily logical dump for faster app-level restores.
 
 ### Monitoring
 

@@ -176,6 +176,16 @@ The following components expose metrics and are automatically scraped by Prometh
 MariaDB and Valkey are discovered via the cluster-wide PodMonitor. WordPress is
 scraped via `k8s/wordpress-exporter.yaml` and its ServiceMonitor.
 
+## Backup
+
+Texasdust now has three backup layers:
+
+1. Velero for cluster objects and workload metadata
+2. Longhorn recurring offsite volume backups for the WordPress and MariaDB PVCs
+3. A daily logical MariaDB dump uploaded to `s3://homelab-backup/logical-dumps/texasdust/mariadb/`
+
+The logical dump is the fastest application-level recovery path if the database is damaged but the rest of the cluster is intact.
+
 ### Health Checks
 
 ```bash

@@ -351,6 +351,18 @@ Tailscale should run in-cluster, not separately on each Talos node. This repo ma
 
 See `src/apps/infrastructure/tailscale/README.md` for the exact manifests and policy snippet.
 
+## Backups
+
+The repo uses layered backups:
+
+- **Velero** for cluster objects and workload metadata
+- **Longhorn** for off-cluster PVC backups
+- **Logical database dumps** for Texasdust MariaDB and Paperless PostgreSQL
+
+Important:
+- Do not treat Velero alone as full persistent-data disaster recovery.
+- Do not apply bucket lifecycle expiration directly to the Longhorn backup prefix; Longhorn manages that retention itself.
+
 ## Observability (Metrics + Logs)
 
 The cluster has comprehensive observability with automatic discovery of new workloads.

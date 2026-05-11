@@ -34,6 +34,17 @@ A GitOps-managed Kubernetes homelab cluster running on Talos Linux.
 - **Logs**: Loki (`grafana-community/helm-charts`) with Alloy collection (`grafana/helm-charts`)
 - **App metrics**: 1Password Connect, Texasdust WordPress/MariaDB/Valkey, and Paperless PostgreSQL/Redis/SMB are scraped automatically
 
+## Backups
+
+- **Velero**: cluster object and workload metadata backups to Cloudflare R2
+- **Longhorn**: recurring off-cluster volume backups to the `longhorn/` prefix in the same R2 bucket
+- **Logical DB dumps**: daily Texasdust MariaDB and Paperless PostgreSQL dumps to `logical-dumps/`
+
+The backup layers are intentionally split:
+- Velero for Kubernetes objects
+- Longhorn for PVC data
+- logical dumps for faster app-level database recovery
+
 ## Remote Access
 
 - **Tailscale**: deployed in-cluster via the Kubernetes operator

@@ -1,0 +1,83 @@
+apiVersion: onepassword.com/v1
+kind: OnePasswordItem
+metadata:
+  name: velero-r2-credentials
+  namespace: texasdust
+spec:
+  itemPath: "vaults/mbn7rk3d5gfgofrv3a2zt2tdoe/items/velero-r2-credentials"
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mariadb-logical-backup
+  namespace: texasdust
+spec:
+  schedule: "0 6 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          volumes:
+            - name: backup
+              emptyDir: {}
+          initContainers:
+            - name: dump
+              image: mariadb:12.2
+              env:
+                - name: MYSQL_PWD
+                  valueFrom:
+                    secretKeyRef:
+                      name: wordpress-db-credentials
+                      key: root-password
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -eu
+                  mariadb-dump \
+                    --host=mariadb \
+                    --user=root \
+                    --single-transaction \
+                    --quick \
+                    --lock-tables=false \
+                    wordpress | gzip -9 > /backup/wordpress.sql.gz
+              volumeMounts:
+                - name: backup
+                  mountPath: /backup
+          containers:
+            - name: upload
+              image: amazon/aws-cli:2.17.45
+              env:
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: velero-r2-credentials
+                      key: AWS_ACCESS_KEY_ID
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: velero-r2-credentials
+                      key: AWS_SECRET_ACCESS_KEY
+                - name: AWS_ENDPOINTS
+                  valueFrom:
+                    secretKeyRef:
+                      name: velero-r2-credentials
+                      key: AWS_ENDPOINTS
+                - name: AWS_DEFAULT_REGION
+                  value: auto
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -eu
+                  stamp="$(date -u +%Y/%m/%d/%H%M%SZ)"
+                  aws s3 cp /backup/wordpress.sql.gz "s3://homelab-backup/logical-dumps/texasdust/mariadb/${stamp}.sql.gz" \
+                    --endpoint-url "${AWS_ENDPOINTS}" \
+                    --only-show-errors
+              volumeMounts:
+                - name: backup
+                  mountPath: /backup

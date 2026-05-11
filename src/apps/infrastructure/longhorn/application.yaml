@@ -33,6 +33,13 @@ spec:
             nodeDownPodDeletionPolicy: delete-both-statefulset-and-deployment-pod
             replicaSoftAntiAffinity: false
             replicaAutoBalance: best-effort
+            backupTarget: s3://homelab-backup@us-east-1/longhorn/
+            backupTargetCredentialSecret: velero-r2-credentials
+            backupstorePollInterval: 300
+            allowRecurringJobWhileVolumeDetached: true
+            restoreVolumeRecurringJobs: true
+            recurringSuccessfulJobsHistoryLimit: 3
+            recurringFailedJobsHistoryLimit: 3
 
           image:
             pullPolicy: IfNotPresent

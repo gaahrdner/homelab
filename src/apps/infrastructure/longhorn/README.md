@@ -13,6 +13,8 @@ Helm chart v1.10.0 managed by ArgoCD. UI exposed via LoadBalancer.
 - **Replica Strategy**: Best-effort auto-balance, no soft anti-affinity
 - **UI Service**: LoadBalancer (gets IP from cilium-l2 pool)
 - **HTTPRoute**: longhorn.internal (via gateway/internal)
+- **Backup Target**: Cloudflare R2 bucket `homelab-backup`, prefix `longhorn/`
+- **Recurring Jobs**: daily volume backups and daily Longhorn system backups
 
 ## Dependencies
 
@@ -23,3 +25,20 @@ Helm chart v1.10.0 managed by ArgoCD. UI exposed via LoadBalancer.
 ## UI Access
 
 - Via LoadBalancer IP or https://longhorn.internal
+
+## Required 1Password Fields
+
+The existing `velero-r2-credentials` item is reused for Longhorn. It must include:
+
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+- `AWS_ENDPOINTS`
+
+Use this value for `AWS_ENDPOINTS`:
+
+- `https://48efe0f369d822f5035c1e179d993127.r2.cloudflarestorage.com`
+
+## Backup Notes
+
+- Longhorn handles retention for Longhorn backups. Do not put object lifecycle expiration rules on the `longhorn/` prefix in R2.
+- The recurring job group `default` means volumes without explicit recurring-job labels still receive daily offsite backups.

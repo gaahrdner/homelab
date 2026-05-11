@@ -1,0 +1,39 @@
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: cluster-daily
+  namespace: velero
+spec:
+  schedule: "15 6 * * *"
+  template:
+    ttl: 720h0m0s
+    includeClusterResources: true
+    snapshotVolumes: false
+    defaultVolumesToFsBackup: false
+    excludedNamespaces:
+      - kube-system
+      - longhorn-system
+      - velero
+    metadata:
+      labels:
+        backup-tier: cluster-daily
+---
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: cluster-weekly
+  namespace: velero
+spec:
+  schedule: "0 7 * * 0"
+  template:
+    ttl: 2160h0m0s
+    includeClusterResources: true
+    snapshotVolumes: false
+    defaultVolumesToFsBackup: false
+    excludedNamespaces:
+      - kube-system
+      - longhorn-system
+      - velero
+    metadata:
+      labels:
+        backup-tier: cluster-weekly

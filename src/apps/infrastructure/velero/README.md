@@ -6,13 +6,14 @@ This directory contains the ArgoCD Application manifests for deploying Velero, a
 
 *   `application.yaml`: ArgoCD Application to deploy Velero via its Helm chart.
 *   `k8s/onepassword-item.yaml`: Syncs R2 API credentials from 1Password into a Kubernetes Secret.
+*   `k8s/schedules.yaml`: Daily and weekly Velero schedules for cluster object backups.
 
 ## Configuration Details
 
 *   **Backup Storage:** Cloudflare R2 bucket (`homelab-backup`)
 *   **R2 Endpoint:** `https://48efe0f369d822f5035c1e179d993127.r2.cloudflarestorage.com`
-*   **Credentials:** Managed via 1Password Connect, referencing the `velero-r2-credentials` item in the `kubernetes` vault.
-*   **Volume Snapshots:** Uses `velero-plugin-for-csi` to integrate with Longhorn for persistent volume snapshots. The `defaultVolumesnapshotClass` is set to `longhorn`.
+*   **Credentials:** The raw R2 credentials are synced from the `velero-r2-credentials` item in the `kubernetes` vault. The Velero chart itself still consumes the preformatted `velero-credentials` secret.
+*   **Volume Snapshots:** Uses `velero-plugin-for-csi` to integrate with Longhorn, but the scheduled backups in this repo intentionally do not take CSI snapshots. Longhorn offsite backups are the volume disaster-recovery path.
 *   **Velero Version:** Helm chart `2.31.0` (Velero application `v1.12.2`)
 *   **Plugin Versions:** `velero-plugin-for-aws:v1.7.0`, `velero-plugin-for-csi:v1.7.0`
 
@@ -21,7 +22,12 @@ This directory contains the ArgoCD Application manifests for deploying Velero, a
 ## Setup Instructions
 
 1.  **Create R2 API Token:** Follow Cloudflare's documentation to create an R2 API token with "Object Read & Write" permissions.
-2.  **Store Credentials in 1Password:** Create a new item named `velero-r2-credentials` in your 1Password "kubernetes" vault. Add the following fields: `bucket`, `account_id`, `access_key_id`, and `secret_access_key`.
+2.  **Store Raw R2 Credentials in 1Password:** Ensure the existing item `velero-r2-credentials` in the `kubernetes` vault includes at least:
+    - `AWS_ACCESS_KEY_ID`
+    - `AWS_SECRET_ACCESS_KEY`
+    - `AWS_ENDPOINTS`
+    - `bucket`
+    - `account_id`
 3.  **Sync with ArgoCD:** Once these files are committed and pushed to your Git repository, ArgoCD will automatically deploy Velero to your cluster.
 
 ## Post-Installation
@@ -52,3 +58,9 @@ After Velero is deployed and running:
     ```bash
     velero backup create my-first-backup --include-namespaces <your-namespace> --wait
     ```
+
+## Strategy
+
+- Velero is the backup layer for cluster objects and workload metadata.
+- Longhorn is the backup layer for persistent volume data.
+- Texasdust and Paperless also have logical database dump jobs for faster app-level restores.
