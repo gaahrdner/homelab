@@ -8,7 +8,7 @@ data:
     model_list:
       - model_name: vllm
         litellm_params:
-          model: openai/vllm
+          model: openai/qwen3.6-27b-fp8
           api_base: os.environ/VLLM_1_API_BASE
           api_key: os.environ/VLLM_1_API_KEY
     general_settings:
