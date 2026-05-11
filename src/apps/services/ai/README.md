@@ -7,6 +7,7 @@ This directory is the internal and experimental AI tier for the homelab.
 - `litellm`: internal model gateway
 - `open-webui`: internal chat UI
 - `langfuse`: internal tracing and evaluation
+- `gascity`: staged only for now; image publishing and cluster-side manifests are in Git, but there is no live Argo application yet
 
 ## Expectations
 

@@ -1,0 +1,116 @@
+name: Publish Gas City Images
+
+on:
+  workflow_dispatch:
+    inputs:
+      gascity_ref:
+        description: Upstream gastownhall/gascity git ref to build
+        required: true
+        default: v1.1.0
+      image_tag:
+        description: Tag to publish to GHCR
+        required: true
+        default: v1.1.0
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: publish-gascity-images-${{ github.event.inputs.image_tag || 'manual' }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAMESPACE: ghcr.io/${{ github.repository_owner }}
+      GASCITY_REF: ${{ inputs.gascity_ref }}
+      IMAGE_TAG: ${{ inputs.image_tag }}
+    steps:
+      - name: Checkout upstream Gas City
+        uses: actions/checkout@v4
+        with:
+          repository: gastownhall/gascity
+          ref: ${{ env.GASCITY_REF }}
+          path: gascity-upstream
+          persist-credentials: false
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: gascity-upstream/go.mod
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Prepare image build inputs
+        id: prep
+        working-directory: gascity-upstream
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          . ./deps.env
+          echo "dolt_version=$DOLT_VERSION" >> "$GITHUB_OUTPUT"
+          bin_dir="${RUNNER_TEMP}/gascity-image-bin"
+          mkdir -p "$bin_dir"
+          BD_INSTALL_BIN_DIR="$bin_dir" .github/scripts/install-bd-archive.sh "$BD_VERSION"
+          BR_INSTALL_BIN_DIR="$bin_dir" .github/scripts/install-br-archive.sh "$BR_VERSION"
+          go build -o gc ./cmd/gc
+          cp -f "$bin_dir/bd" bd
+          cp -f "$bin_dir/br" br
+
+      - name: Build and publish gc-agent-base
+        uses: docker/build-push-action@v6
+        with:
+          context: gascity-upstream
+          file: gascity-upstream/contrib/k8s/Dockerfile.base
+          platforms: linux/amd64
+          push: true
+          build-args: |
+            DOLT_VERSION=${{ steps.prep.outputs.dolt_version }}
+          tags: |
+            ${{ env.IMAGE_NAMESPACE }}/gascity-agent-base:${{ env.IMAGE_TAG }}
+
+      - name: Build and publish gc-agent
+        uses: docker/build-push-action@v6
+        with:
+          context: gascity-upstream
+          file: gascity-upstream/contrib/k8s/Dockerfile.agent
+          platforms: linux/amd64
+          push: true
+          build-args: |
+            BASE_IMAGE=${{ env.IMAGE_NAMESPACE }}/gascity-agent-base:${{ env.IMAGE_TAG }}
+          tags: |
+            ${{ env.IMAGE_NAMESPACE }}/gascity-agent:${{ env.IMAGE_TAG }}
+
+      - name: Build and publish gc-controller
+        uses: docker/build-push-action@v6
+        with:
+          context: gascity-upstream
+          file: gascity-upstream/contrib/k8s/Dockerfile.controller
+          platforms: linux/amd64
+          push: true
+          build-args: |
+            BASE=${{ env.IMAGE_NAMESPACE }}/gascity-agent:${{ env.IMAGE_TAG }}
+          tags: |
+            ${{ env.IMAGE_NAMESPACE }}/gascity-controller:${{ env.IMAGE_TAG }}
+
+      - name: Build and publish gc-mcp-mail
+        uses: docker/build-push-action@v6
+        with:
+          context: gascity-upstream
+          file: gascity-upstream/contrib/k8s/Dockerfile.mail
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAMESPACE }}/gascity-mcp-mail:${{ env.IMAGE_TAG }}

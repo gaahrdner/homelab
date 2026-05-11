@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcp-mail
+  namespace: gascity
+  labels:
+    app: mcp-mail
+    app.kubernetes.io/part-of: gascity
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mcp-mail
+  template:
+    metadata:
+      labels:
+        app: mcp-mail
+        app.kubernetes.io/part-of: gascity
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: mcp-mail
+          image: ghcr.io/gaahrdner/gascity-mcp-mail:v1.1.0
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            readOnlyRootFilesystem: true
+          ports:
+            - containerPort: 8765
+              name: http
+          livenessProbe:
+            httpGet:
+              path: /health/liveness
+              port: 8765
+            initialDelaySeconds: 5
+            periodSeconds: 15
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health/liveness
+              port: 8765
+            initialDelaySeconds: 3
+            periodSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 500m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          volumeMounts:
+            - name: mail-data
+              mountPath: /var/lib/mcp-mail
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: mail-data
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
