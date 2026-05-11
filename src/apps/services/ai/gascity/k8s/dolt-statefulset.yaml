@@ -27,7 +27,7 @@ spec:
           type: RuntimeDefault
       initContainers:
         - name: init-user
-          image: dolthub/dolt:1.88.0
+          image: dolthub/dolt:1.88.1
           env:
             - name: HOME
               value: /tmp
@@ -57,7 +57,7 @@ spec:
               mountPath: /tmp
       containers:
         - name: dolt
-          image: dolthub/dolt:1.88.0
+          image: dolthub/dolt:1.88.1
           env:
             - name: HOME
               value: /tmp
