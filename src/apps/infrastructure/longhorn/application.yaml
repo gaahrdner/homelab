@@ -38,8 +38,8 @@ spec:
             backupstorePollInterval: 300
             allowRecurringJobWhileVolumeDetached: true
             restoreVolumeRecurringJobs: true
-            recurringSuccessfulJobsHistoryLimit: 3
-            recurringFailedJobsHistoryLimit: 3
+            recurringSuccessfulJobsHistoryLimit: "3"
+            recurringFailedJobsHistoryLimit: "3"
 
           image:
             pullPolicy: IfNotPresent
