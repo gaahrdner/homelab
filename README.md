@@ -32,7 +32,7 @@ A GitOps-managed Kubernetes homelab cluster running on Talos Linux.
 - **Grafana**: available at `http://grafana.internal`
 - **ArgoCD**: available at `http://argocd.internal`
 - **Logs**: Loki (`grafana-community/helm-charts`) with Alloy collection (`grafana/helm-charts`)
-- **App metrics**: 1Password Connect, Texasdust WordPress/MariaDB/Valkey, and Paperless PostgreSQL/Redis/SMB are scraped automatically
+- **App metrics**: 1Password Connect, Texasdust WordPress/MariaDB/Valkey, Paperless PostgreSQL/Redis/SMB, and Keeper PostgreSQL/Redis are scraped automatically
 
 ## Backups
 
@@ -124,6 +124,12 @@ For one-off experiments you can still apply manifests manually, but the normal o
 - `src/apps/infrastructure/`: core cluster platform services and shared singleton resources
 - `src/apps/services/`: user-facing or platform-adjacent workloads
 - `src/apps/services/ai/`: internal and experimental AI workloads built around LiteLLM, Open WebUI, and Langfuse
+
+Current service workloads include:
+
+- `texasdust`: WordPress site exposed through Cloudflare Tunnel
+- `paperless-ngx`: internal document management
+- `keeper`: internal calendar sync service at `http://keeper.internal`
 
 ### System Extensions (`src/talos/extensions.yaml`)
 

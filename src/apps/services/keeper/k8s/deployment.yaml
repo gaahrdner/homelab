@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keeper
+  namespace: keeper
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: keeper
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: keeper
+    spec:
+      containers:
+        - name: keeper
+          image: ghcr.io/ridafkih/keeper-services:2.9
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3000
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keeper-postgresql
+                  key: password
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keeper-redis
+                  key: redis-password
+            - name: DATABASE_URL
+              value: postgres://keeper:$(POSTGRES_PASSWORD)@keeper-postgresql:5432/keeper
+            - name: REDIS_URL
+              value: redis://:$(REDIS_PASSWORD)@keeper-redis:6379
+            - name: BETTER_AUTH_URL
+              value: http://keeper.internal
+            - name: TRUSTED_ORIGINS
+              value: http://keeper.internal
+            - name: WORKER_JOB_QUEUE_ENABLED
+              value: "true"
+          envFrom:
+            - secretRef:
+                name: keeper-app-secrets
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 30
