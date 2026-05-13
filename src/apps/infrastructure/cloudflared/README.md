@@ -12,12 +12,17 @@ Internet → Cloudflare Edge → Tunnel → cloudflared pods → Kubernetes Serv
 
 **Architecture**: Locally-managed tunnel (configuration in Git, not dashboard-managed)
 
-## Current Tunnels
+## Current Tunnel Hostnames
 
 ### texasdust.org
 - **Tunnel ID**: af22f227-24f2-4520-8f39-90e0cc3403a9
 - **Backend**: `wordpress.texasdust:80` (WordPress nonprofit site)
 - **Replicas**: 2 (for high availability)
+
+### keeper.alderwood.house
+- **Tunnel ID**: af22f227-24f2-4520-8f39-90e0cc3403a9
+- **Backend**: `keeper.keeper:3000` (Keeper calendar sync service)
+- **Purpose**: Public HTTPS origin for Google OAuth callbacks
 
 ## Configuration
 
@@ -33,6 +38,7 @@ Internet → Cloudflare Edge → Tunnel → cloudflared pods → Kubernetes Serv
 
 **DNS Routing**: Cloudflare DNS CNAME
 - Record: `texasdust.org` → `af22f227-24f2-4520-8f39-90e0cc3403a9.cfargotunnel.com`
+- Record: `keeper.alderwood.house` → `af22f227-24f2-4520-8f39-90e0cc3403a9.cfargotunnel.com`
 - Proxy: Enabled (orange cloud)
 
 ## Monitoring

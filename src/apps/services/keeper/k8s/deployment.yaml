@@ -36,14 +36,16 @@ spec:
             - name: REDIS_URL
               value: redis://:$(REDIS_PASSWORD)@keeper-redis:6379
             - name: BETTER_AUTH_URL
-              value: http://keeper.internal
+              value: https://keeper.alderwood.house
             - name: TRUSTED_ORIGINS
-              value: http://keeper.internal
+              value: http://keeper.internal,https://keeper.alderwood.house
             - name: WORKER_JOB_QUEUE_ENABLED
               value: "true"
           envFrom:
             - secretRef:
                 name: keeper-app-secrets
+            - secretRef:
+                name: keeper-google-oauth
           resources:
             requests:
               cpu: 100m

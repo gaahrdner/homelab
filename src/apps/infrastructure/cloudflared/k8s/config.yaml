@@ -5,7 +5,7 @@ metadata:
   namespace: cloudflared
 data:
   config.yaml: |
-    # Tunnel configuration for texasdust.org
+    # Tunnel configuration for texasdust.org and keeper.alderwood.house
     tunnel: af22f227-24f2-4520-8f39-90e0cc3403a9
     credentials-file: /etc/cloudflared/creds/af22f227-24f2-4520-8f39-90e0cc3403a9.json
 
@@ -20,6 +20,13 @@ data:
         originRequest:
           httpHostHeader: texasdust.org
           originServerName: texasdust.org
+
+      # Route Keeper through Cloudflare so Google OAuth can use an HTTPS callback
+      - hostname: keeper.alderwood.house
+        service: http://keeper.keeper:3000
+        originRequest:
+          httpHostHeader: keeper.alderwood.house
+          originServerName: keeper.alderwood.house
 
       # Catch-all rule (required)
       - service: http_status:404

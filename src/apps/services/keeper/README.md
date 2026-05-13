@@ -14,7 +14,9 @@ by Longhorn volumes.
 - **Database**: PostgreSQL 17 (10Gi)
 - **Cache / queue**: Redis 7 (1Gi)
 - **Storage**: Longhorn distributed storage
-- **Access**: `http://keeper.internal` via Gateway API HTTPRoute + external-dns
+- **Access**:
+  - `http://keeper.internal` via Gateway API HTTPRoute + external-dns
+  - `https://keeper.alderwood.house` via Cloudflare Tunnel for Google OAuth
 
 `keeper-services` keeps the manifest surface smaller than running all of
 Keeper's individual images, while still avoiding the all-in-one standalone
@@ -22,8 +24,8 @@ container that embeds its own database and Redis.
 
 ## Prerequisites
 
-Before Argo CD syncs the workload, add these items to the 1Password
-`kubernetes` vault:
+Before Argo CD syncs the Google-enabled workload, add these items to the
+1Password `kubernetes` vault:
 
 ### 1. `keeper-app-secrets`
 
@@ -53,9 +55,18 @@ Fields:
   - redis-password (password): Strong Redis password
 ```
 
-This baseline deployment does not wire Google or Microsoft OAuth yet. Keeper
-still works for providers like ICS, iCloud, and generic CalDAV without those
-credentials.
+### 4. `keeper-google-oauth`
+
+Google OAuth credentials for Calendar destinations.
+
+```text
+Fields:
+  - GOOGLE_CLIENT_ID (text): Google OAuth web client ID
+  - GOOGLE_CLIENT_SECRET (password): Google OAuth client secret
+```
+
+Microsoft OAuth is still not wired in this repo. Keeper continues to work for
+ICS, iCloud, and generic CalDAV without any Microsoft credentials.
 
 ## Deployment
 
@@ -73,14 +84,15 @@ about 3 minutes.
 ## Access
 
 - **Internal URL**: `http://keeper.internal`
+- **Public HTTPS URL**: `https://keeper.alderwood.house`
 - **Service DNS**: `keeper.keeper.svc.cluster.local:3000`
 - **No Tailscale-published Service**: access is routed through the cluster
   subnet router and the existing internal Gateway
 
 The deployment sets:
 
-- `BETTER_AUTH_URL=http://keeper.internal`
-- `TRUSTED_ORIGINS=http://keeper.internal`
+- `BETTER_AUTH_URL=https://keeper.alderwood.house`
+- `TRUSTED_ORIGINS=http://keeper.internal,https://keeper.alderwood.house`
 
 If you later expose Keeper on a second hostname, update both values so
 `better-auth` accepts that origin.
@@ -116,18 +128,20 @@ Keeper's upstream docs currently require these scopes:
   `userinfo.email`
 - **Microsoft**: `Calendars.ReadWrite`, `User.Read`, `offline_access`
 
-If you want Google or Microsoft destinations later, add a dedicated 1Password
-item for those client IDs and secrets, then extend
-[deployment.yaml](/Users/gaahrdner/Code/homelab/src/apps/services/keeper/k8s/deployment.yaml)
-with the corresponding environment variables.
+For Google, create a Google OAuth web client with:
+
+- Authorized JavaScript origin: `https://keeper.alderwood.house`
+- Authorized redirect URI: `https://keeper.alderwood.house/api/auth/callback/google`
+
+Then store the client ID and secret in the `keeper-google-oauth` 1Password item.
+
+Microsoft is still pending repo wiring.
 
 ## Notes
 
 - This deployment intentionally runs a single Keeper replica because the
   `keeper-services` image bundles the cron scheduler and worker into the same
   process group.
-- Google and Microsoft OAuth are not enabled in the baseline manifests, so this
-  first rollout is aimed at ICS, iCloud, and generic CalDAV integrations.
 - PostgreSQL and Redis both expose Prometheus sidecar exporters and are
   discovered automatically by the cluster-wide PodMonitor.
 - Keeper's optional MCP server is not enabled here. If you want it later, add a
