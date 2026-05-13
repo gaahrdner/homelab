@@ -98,7 +98,7 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 5
         - name: redis-exporter
-          image: oliver006/redis_exporter:v1.82.0-alpine
+          image: oliver006/redis_exporter:v1.83.0-alpine
           ports:
             - name: metrics
               containerPort: 9121
