@@ -9,9 +9,9 @@ LiteLLM is deployed as the cluster's internal AI gateway.
 - Reads the gateway master key from 1Password
 - Sends proxy traces to the self-hosted Langfuse deployment
 - Targets the split-mode local endpoints:
-  - `qwen-exec` / `qwen-review` -> `http://100.89.191.81:8000/v1`
+- `qwen-exec` / `qwen-review` -> `http://192.168.0.131:8000/v1`
     - current upstream model: `batsclamp/Huihui-Qwen3.6-35B-A3B-abliterated-FP8`
-  - `ds4-plan` -> `http://100.100.70.24:8000/v1`
+- `ds4-plan` -> `http://192.168.0.123:8000/v1`
 - Keeps Together routing as an optional follow-up once a `TOGETHER_API_KEY` secret is present
 
 ## Required 1Password Items

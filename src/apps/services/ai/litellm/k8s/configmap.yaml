@@ -9,17 +9,17 @@ data:
       - model_name: qwen-exec
         litellm_params:
           model: openai/batsclamp/Huihui-Qwen3.6-35B-A3B-abliterated-FP8
-          api_base: http://100.89.191.81:8000/v1
+          api_base: http://192.168.0.131:8000/v1
           api_key: dummy
       - model_name: qwen-review
         litellm_params:
           model: openai/batsclamp/Huihui-Qwen3.6-35B-A3B-abliterated-FP8
-          api_base: http://100.89.191.81:8000/v1
+          api_base: http://192.168.0.131:8000/v1
           api_key: dummy
       - model_name: ds4-plan
         litellm_params:
           model: openai/deepseek-v4-flash
-          api_base: http://100.100.70.24:8000/v1
+          api_base: http://192.168.0.123:8000/v1
           api_key: dummy
     general_settings:
       master_key: os.environ/PROXY_MASTER_KEY
