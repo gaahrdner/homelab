@@ -6,9 +6,12 @@ LiteLLM is deployed as the cluster's internal AI gateway.
 
 - Exposes LiteLLM at `http://litellm.internal`
 - Persists gateway state in PostgreSQL on Longhorn storage
-- Reads the gateway master key and vLLM upstream settings from 1Password
+- Reads the gateway master key from 1Password
 - Sends proxy traces to the self-hosted Langfuse deployment
-- Targets the GX10 head node at `http://192.168.0.131:8000/v1`
+- Targets the split-mode local endpoints:
+  - `qwen-exec` / `qwen-review` -> `http://100.89.191.81:8000/v1`
+  - `ds4-plan` -> `http://100.100.70.24:8000/v1`
+- Keeps Together routing as an optional follow-up once a `TOGETHER_API_KEY` secret is present
 
 ## Required 1Password Items
 
@@ -19,25 +22,55 @@ Create these items in the `kubernetes` vault:
 - `litellm-postgresql`
   - `postgres-password`
   - `password`
-- `litellm-vllm-upstreams`
-  - `VLLM_1_API_BASE`
-  - `VLLM_1_API_KEY`
 - `langfuse-project-api-keys`
   - `LANGFUSE_PUBLIC_KEY`
   - `LANGFUSE_SECRET_KEY`
 
-## Important Note
+## Model Aliases
 
-This repo configures a single LiteLLM model alias named `vllm` and points it at
-the GX10 head node.
+This repo now configures a small role-based model table:
 
-For requests to work, the upstream vLLM service must either:
+| Alias | Backend | Role |
+|---|---|---|
+| `qwen-exec` | local Qwen 3.6 35B A3B FP8 | default executor |
+| `qwen-review` | local Qwen 3.6 35B A3B FP8 | same local backend, but callers should enable reasoning for review turns |
+| `ds4-plan` | local DeepSeek V4 Flash via `ds4` | local planner / long-context synthesizer |
 
-- expose a served model name that matches `vllm`, or
-- be updated later in this repo so LiteLLM forwards the correct upstream model name
+## Exact Secret Values
 
-Until the vLLM side is finalized, LiteLLM may be healthy but unable to complete
-requests successfully.
+No local upstream secret values are required for the current split-mode setup.
+The local endpoints are hardcoded in the ConfigMap because they are not secrets.
+LiteLLM still wants an upstream `api_key` field for OpenAI-compatible backends,
+so the local aliases use a literal placeholder value `dummy`.
+
+## Routing Policy
+
+- Use `qwen-exec` for the normal local execution loop.
+- Use `qwen-review` for review or recovery turns, with reasoning enabled in the request.
+- Use `ds4-plan` when you want an always-on local planner and long-context lane.
+
+## Optional Together Follow-Up
+
+Once you have a Kubernetes secret containing `TOGETHER_API_KEY`, add optional aliases
+such as:
+
+- `together-planner` -> `zai-org/GLM-5.1`
+- `together-research` -> `deepseek-ai/DeepSeek-V4-Pro`
+- `together-escalate` -> `Qwen/Qwen3-Coder-480B-A35B-Instruct-FP8`
+
+## Request Defaults
+
+- `qwen-exec`
+  - `chat_template_kwargs.enable_thinking=false`
+- `qwen-review`
+  - `chat_template_kwargs.enable_thinking=true`
+  - `chat_template_kwargs.preserve_thinking=true`
+- `ds4-plan`
+  - `model=deepseek-chat` for non-thinking control turns
+  - `model=deepseek-v4-flash` for thinking/planning turns
+
+LiteLLM aliases alone do not toggle Qwen reasoning. Callers should set those request
+fields explicitly.
 
 ## Access
 
