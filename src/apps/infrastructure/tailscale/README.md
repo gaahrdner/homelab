@@ -33,7 +33,6 @@ This keeps the access model consistent:
 Examples that should work the same on and off LAN once Tailscale DNS is
 configured:
 
-- `http://ghostfolio.internal`
 - `http://keeper.internal`
 - `http://grafana.internal`
 
@@ -79,8 +78,8 @@ Tailscale admin console:
 - Domain: `internal`
 - Nameserver: `192.168.0.1`
 
-That tells tailnet clients to resolve `ghostfolio.internal`,
-`keeper.internal`, and similar names against the UniFi DNS server over the
+That tells tailnet clients to resolve `keeper.internal`, `grafana.internal`,
+and similar names against the UniFi DNS server over the
 advertised `/32` route instead of relying on local LAN DNS.
 
 ## Verification

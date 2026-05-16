@@ -131,7 +131,6 @@ Current service workloads include:
 - `texasdust`: WordPress site exposed through Cloudflare Tunnel
 - `paperless-ngx`: internal document management
 - `keeper`: internal calendar sync service at `http://keeper.internal`
-- `ghostfolio`: internal investment portfolio tracker at `http://ghostfolio.internal`
 
 ### System Extensions (`src/talos/extensions.yaml`)
 
