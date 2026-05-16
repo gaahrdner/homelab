@@ -26,7 +26,7 @@ spec:
               emptyDir: {}
           initContainers:
             - name: dump
-              image: postgres:16-alpine
+              image: postgres:18-alpine
               env:
                 - name: PGPASSWORD
                   valueFrom:
