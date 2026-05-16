@@ -8,12 +8,12 @@ data:
     model_list:
       - model_name: qwen-exec
         litellm_params:
-          model: openai/Qwen/Qwen3.6-35B-A3B-FP8
+          model: openai/batsclamp/Huihui-Qwen3.6-35B-A3B-abliterated-FP8
           api_base: http://100.89.191.81:8000/v1
           api_key: dummy
       - model_name: qwen-review
         litellm_params:
-          model: openai/Qwen/Qwen3.6-35B-A3B-FP8
+          model: openai/batsclamp/Huihui-Qwen3.6-35B-A3B-abliterated-FP8
           api_base: http://100.89.191.81:8000/v1
           api_key: dummy
       - model_name: ds4-plan
