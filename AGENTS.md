@@ -336,6 +336,8 @@ Tailscale should run in-cluster, not separately on each Talos node. This repo ma
 **Current advertised routes:**
 - Service CIDR: `10.96.0.0/12`
 - Pod CIDR aggregate: `10.244.0.0/16`
+- UniFi DNS server: `192.168.0.1/32`
+- Internal Gateway API IP: `192.168.0.203/32`
 
 **Required secret:**
 - Add `tailscale-operator-oauth` to the 1Password `kubernetes` vault with fields `client_id` and `client_secret`
@@ -347,7 +349,14 @@ Tailscale should run in-cluster, not separately on each Talos node. This repo ma
 
 **Required tailnet policy shape:**
 - `tag:k8s-operator` must own `tag:k8s`
-- `autoApprovers.routes` should approve `10.96.0.0/12` and `10.244.0.0/16` for `tag:k8s`
+- `autoApprovers.routes` should approve `10.96.0.0/12`, `10.244.0.0/16`, `192.168.0.1/32`, and `192.168.0.203/32` for `tag:k8s`
+
+**Required Tailscale DNS shape:**
+- Use split DNS for the `internal` domain
+- Point that domain at the UniFi DNS server `192.168.0.1`
+
+This keeps `*.internal` hostnames working the same way on LAN and over
+Tailscale without advertising the full `192.168.0.0/24` LAN.
 
 See `src/apps/infrastructure/tailscale/README.md` for the exact manifests and policy snippet.
 

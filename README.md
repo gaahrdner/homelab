@@ -52,8 +52,9 @@ Service-specific restore docs:
 ## Remote Access
 
 - **Tailscale**: deployed in-cluster via the Kubernetes operator
-- **Subnet router**: the cluster advertises the Kubernetes Service CIDR `10.96.0.0/12` and Pod CIDR `10.244.0.0/16` to the tailnet
+- **Subnet router**: the cluster advertises the Kubernetes Service CIDR `10.96.0.0/12`, Pod CIDR `10.244.0.0/16`, UniFi DNS `192.168.0.1/32`, and the internal gateway IP `192.168.0.203/32` to the tailnet
 - **Secrets**: operator OAuth credentials come from the 1Password `kubernetes` vault item `tailscale-operator-oauth`
+- **Remote internal URLs**: use Tailscale split DNS for the `internal` domain via `192.168.0.1` so `*.internal` works the same on LAN and over tailnet
 
 See `src/apps/infrastructure/tailscale/README.md` for setup and policy requirements.
 
