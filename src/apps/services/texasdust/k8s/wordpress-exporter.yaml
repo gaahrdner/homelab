@@ -35,7 +35,7 @@ spec:
     spec:
       containers:
         - name: wordpress-exporter
-          image: ghcr.io/aorfanos/wordpress-exporter/wordpress-exporter:v0.0.8
+          image: ghcr.io/aorfanos/wordpress-exporter/wordpress-exporter:v0.0.13
           args:
             - -host
             - http://wordpress
