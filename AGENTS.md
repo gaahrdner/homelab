@@ -38,7 +38,7 @@ This is a Kubernetes homelab cluster running on Talos Linux. The cluster is name
 - **Infrastructure**: Cilium L2 LoadBalancer, Longhorn distributed storage, external-dns (UniFi), Cloudflare Tunnel
 - **Remote Access**: Tailscale Kubernetes operator with a connector that advertises cluster pod/service CIDRs to the tailnet
 - **Platform Services**: cert-manager (TLS), 1Password Connect (secrets), kube-prometheus-stack
-- **Applications**: texasdust.org (WordPress nonprofit site, exposed via Cloudflare Tunnel), Paperless-ngx (internal document archive), Keeper.sh (internal calendar sync at `keeper.internal`)
+- **Applications**: texasdust.org (WordPress nonprofit site, exposed via Cloudflare Tunnel), Paperless-ngx (internal document archive), Keeper.sh (internal calendar sync at `keeper.internal`), Ghostfolio (internal investment tracker at `ghostfolio.internal`)
 
 ## Common Commands
 
@@ -415,6 +415,8 @@ The cluster has comprehensive observability with automatic discovery of new work
 - paperless SMB ingestion share (session metrics via samba-metrics)
 - keeper PostgreSQL (database metrics via postgres-exporter)
 - keeper Redis (cache metrics via redis-exporter)
+- ghostfolio PostgreSQL (database metrics via postgres-exporter)
+- ghostfolio Redis (cache metrics via redis-exporter)
 
 ### Automatic Discovery for New Workloads
 
@@ -541,6 +543,7 @@ See detailed documentation in:
 - `src/apps/infrastructure/longhorn/k8s/servicemonitor.yaml` - Storage metrics
 - `src/apps/services/texasdust/README.md` - Application monitoring example
 - `src/apps/services/keeper/README.md` - Keeper deployment, 1Password items, and internal access
+- `src/apps/services/ghostfolio/README.md` - Ghostfolio deployment, 1Password items, and internal access
 
 ## Important Notes
 
