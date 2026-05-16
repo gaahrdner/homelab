@@ -11,7 +11,9 @@ LiteLLM is deployed as the cluster's internal AI gateway.
 - Targets the split-mode local endpoints:
 - `qwen-exec` / `qwen-review` -> `http://192.168.0.131:8000/v1`
     - current upstream model: `batsclamp/Huihui-Qwen3.6-35B-A3B-abliterated-FP8`
-- `ds4-plan` -> `http://192.168.0.123:8000/v1`
+    - `qwen-exec` injects `chat_template_kwargs.enable_thinking=false`
+    - `qwen-review` leaves thinking on by default
+  - `ds4-plan` -> `http://192.168.0.123:8000/v1`
 - Keeps Together routing as an optional follow-up once a `TOGETHER_API_KEY` secret is present
 
 ## Required 1Password Items

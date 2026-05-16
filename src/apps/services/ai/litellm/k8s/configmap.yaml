@@ -11,6 +11,9 @@ data:
           model: openai/batsclamp/Huihui-Qwen3.6-35B-A3B-abliterated-FP8
           api_base: http://192.168.0.131:8000/v1
           api_key: dummy
+          extra_body:
+            chat_template_kwargs:
+              enable_thinking: false
       - model_name: qwen-review
         litellm_params:
           model: openai/batsclamp/Huihui-Qwen3.6-35B-A3B-abliterated-FP8
