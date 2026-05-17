@@ -553,6 +553,7 @@ See detailed documentation in:
 
 ## Important Notes
 
+- **Do not blind-bump stateful database major versions**: Treat PostgreSQL, MariaDB, Redis/Valkey, and similar backing-service major image upgrades as explicit migrations. A tag bump can leave existing PVC data unreadable on the next restart.
 - **Secure Boot**: This cluster uses Talos with Secure Boot enabled. Always use `-secureboot` images from Image Factory.
 - **No Dedicated Workers**: Control planes run workloads (`allowSchedulingOnControlPlanes: true`)
 - **High Pod Density**: Configured for 300 max pods per node (default is 110)

@@ -102,6 +102,9 @@ For one-off experiments you can still apply manifests manually, but the normal o
 3. Apply to all nodes: `mise run apply`
 4. Verify health: `mise run health`
 
+Operational note:
+- Treat major version bumps for in-cluster databases as migrations, not routine image updates. Existing PVC data may be unreadable after a blind major upgrade.
+
 ### Cluster Upgrades
 
 1. Upgrade Talos one minor version at a time: `TALOS_IMAGE=<image> mise run upgrade`
