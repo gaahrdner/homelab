@@ -16,7 +16,7 @@ spec:
         app.kubernetes.io/name: hermes
     spec:
       securityContext:
-        fsGroup: 1000
+        fsGroup: 10000
         seccompProfile:
           type: RuntimeDefault
       containers:
@@ -24,8 +24,12 @@ spec:
           image: nousresearch/hermes-agent:latest
           imagePullPolicy: IfNotPresent
           securityContext:
-            allowPrivilegeEscalation: false
+            allowPrivilegeEscalation: true
             capabilities:
+              add:
+                - CHOWN
+                - SETGID
+                - SETUID
               drop:
                 - ALL
           args:
