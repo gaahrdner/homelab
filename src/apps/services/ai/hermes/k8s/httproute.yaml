@@ -16,4 +16,4 @@ spec:
             value: /
       backendRefs:
         - name: hermes
-          port: 8642
+          port: 9119
