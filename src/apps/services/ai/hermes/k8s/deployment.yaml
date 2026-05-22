@@ -26,16 +26,9 @@ spec:
             capabilities:
               drop:
                 - ALL
-          command:
-            - /bin/sh
-            - -c
           args:
-            - |
-              set -eu
-              if [ ! -f /opt/data/config.yaml ]; then
-                cp /bootstrap/config.yaml /opt/data/config.yaml
-              fi
-              exec hermes gateway run
+            - gateway
+            - run
           ports:
             - name: api
               containerPort: 8642
@@ -66,7 +59,8 @@ spec:
             - name: data
               mountPath: /opt/data
             - name: bootstrap
-              mountPath: /bootstrap
+              mountPath: /opt/data/config.yaml
+              subPath: config.yaml
           readinessProbe:
             httpGet:
               path: /health
