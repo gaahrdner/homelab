@@ -61,6 +61,12 @@ spec:
                 secretKeyRef:
                   name: litellm-master-key
                   key: master-key
+            - name: SIGNAL_HTTP_URL
+              value: http://signal-cli.hermes.svc.cluster.local:8080
+          envFrom:
+            - secretRef:
+                name: hermes-signal
+                optional: true
           volumeMounts:
             - name: data
               mountPath: /opt/data
