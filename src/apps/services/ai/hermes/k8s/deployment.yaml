@@ -26,7 +26,6 @@ spec:
             capabilities:
               drop:
                 - ALL
-            runAsNonRoot: true
           command:
             - /bin/sh
             - -c
