@@ -24,6 +24,21 @@ data:
           model: openai/deepseek-v4-flash
           api_base: http://192.168.0.123:8000/v1
           api_key: dummy
+      - model_name: ds4-review
+        litellm_params:
+          model: openai/deepseek-v4-flash
+          api_base: http://192.168.0.123:8000/v1
+          api_key: dummy
+      - model_name: together-mayor
+        litellm_params:
+          model: moonshotai/Kimi-K2.6
+          api_base: https://api.together.ai/v1
+          api_key: os.environ/TOGETHER_API_KEY
+      - model_name: together-hardcode
+        litellm_params:
+          model: zai-org/GLM-5.1
+          api_base: https://api.together.ai/v1
+          api_key: os.environ/TOGETHER_API_KEY
     general_settings:
       master_key: os.environ/PROXY_MASTER_KEY
     litellm_settings:

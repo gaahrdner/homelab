@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hermes-bootstrap
+  namespace: hermes
+data:
+  config.yaml: |
+    model:
+      default: "qwen-exec"
+      provider: "custom"
+      base_url: "http://litellm.litellm.svc.cluster.local:4000/v1"

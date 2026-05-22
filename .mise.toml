@@ -463,7 +463,7 @@ echo "✓ Linked CLAUDE.md to AGENTS.md"
 """
 
 [tasks.generate-ai-1password-items]
-description = "Create missing 1Password items for LiteLLM, Open WebUI, and Langfuse"
+description = "Create missing 1Password items for LiteLLM, Open WebUI, Langfuse, and Hermes"
 run = "./scripts/generate-ai-1password-items.sh"
 
 [tasks.configure-open-webui-langfuse]

@@ -17,10 +17,19 @@ spec:
       labels:
         app.kubernetes.io/name: litellm
     spec:
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: litellm
           image: ghcr.io/berriai/litellm:v1.83.14-stable.patch.2
           imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true
           command:
             - /bin/sh
             - -c
@@ -53,6 +62,9 @@ spec:
           envFrom:
             - secretRef:
                 name: litellm-vllm-upstreams
+            - secretRef:
+                name: litellm-together
+                optional: true
             - secretRef:
                 name: langfuse-project-api-keys
           volumeMounts:

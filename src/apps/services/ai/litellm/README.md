@@ -13,8 +13,8 @@ LiteLLM is deployed as the cluster's internal AI gateway.
     - current upstream model: `batsclamp/Huihui-Qwen3.6-35B-A3B-abliterated-FP8`
     - `qwen-exec` injects `chat_template_kwargs.enable_thinking=false`
     - `qwen-review` leaves thinking on by default
-  - `ds4-plan` -> `http://192.168.0.123:8000/v1`
-- Keeps Together routing as an optional follow-up once a `TOGETHER_API_KEY` secret is present
+  - `ds4-plan` / `ds4-review` -> `http://192.168.0.123:8000/v1`
+- Adds Together-backed escalation aliases for the "mayor" and hard-code lanes once `litellm-together` exists
 
 ## Required 1Password Items
 
@@ -25,6 +25,8 @@ Create these items in the `kubernetes` vault:
 - `litellm-postgresql`
   - `postgres-password`
   - `password`
+- `litellm-together`
+  - `TOGETHER_API_KEY`
 - `langfuse-project-api-keys`
   - `LANGFUSE_PUBLIC_KEY`
   - `LANGFUSE_SECRET_KEY`
@@ -38,6 +40,9 @@ This repo now configures a small role-based model table:
 | `qwen-exec` | local uncensored Qwen 3.6 35B A3B FP8 (`batsclamp/Huihui-Qwen3.6-35B-A3B-abliterated-FP8`) | default executor |
 | `qwen-review` | local uncensored Qwen 3.6 35B A3B FP8 (`batsclamp/Huihui-Qwen3.6-35B-A3B-abliterated-FP8`) | same local backend, but callers should enable reasoning for review turns |
 | `ds4-plan` | local DeepSeek V4 Flash via `ds4` | local planner / long-context synthesizer |
+| `ds4-review` | local DeepSeek V4 Flash via `ds4` | local reviewer / second opinion |
+| `together-mayor` | Together `moonshotai/Kimi-K2.6` | premium planner / arbiter / escalation lane |
+| `together-hardcode` | Together `zai-org/GLM-5.1` | hardest coding and long-horizon implementation tasks |
 
 ## Exact Secret Values
 
@@ -46,20 +51,27 @@ The local endpoints are hardcoded in the ConfigMap because they are not secrets.
 LiteLLM still wants an upstream `api_key` field for OpenAI-compatible backends,
 so the local aliases use a literal placeholder value `dummy`.
 
+The Together aliases are different: create the `litellm-together` 1Password
+item with a `TOGETHER_API_KEY` field before relying on `together-mayor` or
+`together-hardcode`.
+
 ## Routing Policy
 
 - Use `qwen-exec` for the normal local execution loop.
 - Use `qwen-review` for review or recovery turns, with reasoning enabled in the request.
 - Use `ds4-plan` when you want an always-on local planner and long-context lane.
+- Use `ds4-review` when you want a local second opinion before leaving the homelab.
+- Use `together-mayor` when the workflow needs high-confidence planning, arbitration, or final judgment.
+- Use `together-hardcode` for the hardest codegen / repair tasks that justify a premium escalation.
 
-## Optional Together Follow-Up
+## Escalation Policy
 
-Once you have a Kubernetes secret containing `TOGETHER_API_KEY`, add optional aliases
-such as:
+The intended policy is:
 
-- `together-planner` -> `zai-org/GLM-5.1`
-- `together-research` -> `deepseek-ai/DeepSeek-V4-Pro`
-- `together-escalate` -> `Qwen/Qwen3-Coder-480B-A35B-Instruct-FP8`
+- local first with `qwen-exec`
+- local retry / second opinion with `ds4-review`
+- premium escalation only when the task stalls, remains ambiguous, or needs a
+  higher-confidence judgment call
 
 ## Request Defaults
 
@@ -71,6 +83,10 @@ such as:
 - `ds4-plan`
   - `model=deepseek-chat` for non-thinking control turns
   - `model=deepseek-v4-flash` for thinking/planning turns
+
+Together currently exposes an OpenAI-compatible Chat Completions surface, not
+the OpenAI Responses API. Keep the Together aliases for explicit escalation
+turns rather than assuming every agent runtime can transparently swap to them.
 
 LiteLLM aliases alone do not toggle Qwen reasoning. Callers should set those request
 fields explicitly.

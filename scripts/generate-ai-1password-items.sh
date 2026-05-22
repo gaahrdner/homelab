@@ -8,7 +8,7 @@ TAGS="${OP_TAGS:-homelab,ai}"
 
 usage() {
   cat <<'EOF'
-Generate required 1Password items for LiteLLM, Open WebUI, and Langfuse.
+Generate required 1Password items for LiteLLM, Open WebUI, Langfuse, and Hermes.
 
 Usage:
   scripts/generate-ai-1password-items.sh [--vault <name>] [--overwrite]
@@ -19,7 +19,8 @@ Options:
   -h, --help       Show this help text.
 
 Notes:
-  - This script intentionally does not create the optional LiteLLM provider-key item.
+  - This script intentionally does not create optional provider-key items such as
+    litellm-together or messaging-platform credentials such as Signal.
   - Existing items are skipped by default to avoid rotating live credentials by accident.
   - Use --overwrite only before deployment or when you are deliberately rotating secrets.
 EOF
@@ -128,6 +129,10 @@ upsert_item \
 upsert_item \
   "open-webui-secret" \
   "WEBUI_SECRET_KEY[password]=$(rand_b64 32)"
+
+upsert_item \
+  "hermes-core-secrets" \
+  "API_SERVER_KEY[password]=$(rand_hex 32)"
 
 upsert_item \
   "langfuse-core-secrets" \
