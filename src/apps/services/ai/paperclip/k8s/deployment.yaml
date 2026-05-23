@@ -28,8 +28,13 @@ spec:
             - /bin/sh
             - -ec
             - |
-              mkdir -p /paperclip
-              chown -R 1000:1000 /paperclip
+              mkdir -p \
+                /paperclip/.cache \
+                /paperclip/instances/default/data/backups \
+                /paperclip/instances/default/data/storage \
+                /paperclip/instances/default/logs \
+                /paperclip/instances/default/secrets
+              chown -R 1000:1000 /paperclip/.cache /paperclip/instances
           securityContext:
             runAsUser: 0
             runAsGroup: 0
@@ -200,6 +205,13 @@ spec:
               value: "1"
             - name: DO_NOT_TRACK
               value: "1"
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: litellm-master-key
+                  key: master-key
+            - name: OPENAI_BASE_URL
+              value: http://litellm.litellm.svc.cluster.local:4000/v1
           envFrom:
             - secretRef:
                 name: paperclip-app-secrets

@@ -23,12 +23,18 @@ Create these items in the 1Password `kubernetes` vault before syncing:
 - `paperclip-app-secrets`
   - `BETTER_AUTH_SECRET`: generated high-entropy secret
   - `PAPERCLIP_AGENT_JWT_SECRET`: generated high-entropy secret
-  - `OPENAI_API_KEY`: OpenAI project API key for Paperclip/OpenAI-backed adapters
+- `litellm-master-key`
+  - `master-key`: shared LiteLLM gateway key, synced into this namespace
 - `paperclip-postgresql`
   - `password`: generated PostgreSQL password
 
-When `OPENAI_API_KEY` exists in `paperclip-app-secrets`, the deployment writes
-Paperclip's runtime config with `llm.provider=openai` on startup.
+Paperclip's schema supports `llm.provider=openai` or `claude`. For non-OpenAI
+models, this deployment uses the OpenAI-compatible LiteLLM gateway:
+
+- `OPENAI_API_KEY` comes from `litellm-master-key`
+- `OPENAI_BASE_URL` points at `http://litellm.litellm.svc.cluster.local:4000/v1`
+
+LiteLLM owns the actual upstream provider routing, including Together AI aliases.
 
 The deployment reads the PostgreSQL password as a separate secret and URL-encodes
 it before constructing `DATABASE_URL`, so normal generated 1Password passwords
