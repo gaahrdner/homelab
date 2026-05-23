@@ -6,7 +6,7 @@ RUN apt-get update \
   && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     ca-certificates \
     curl \
-    openjdk-17-jre-headless \
+    openjdk-25-jre-headless \
     tini \
   && rm -rf /var/lib/apt/lists/*
 
