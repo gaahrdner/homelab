@@ -1,4 +1,4 @@
-FROM debian:bookworm-slim
+FROM eclipse-temurin:25-jre
 
 ARG SIGNAL_CLI_VERSION=0.14.3
 
@@ -6,7 +6,6 @@ RUN apt-get update \
   && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     ca-certificates \
     curl \
-    openjdk-25-jre-headless \
     tini \
   && rm -rf /var/lib/apt/lists/*
 
