@@ -35,7 +35,7 @@ spec:
               [supervisor]
               bind = "0.0.0.0"
               port = 8372
-              allow_mutations = false
+              allow_mutations = true
               EOF
 
               if [ ! -f /var/lib/gascity/city/city.toml ]; then

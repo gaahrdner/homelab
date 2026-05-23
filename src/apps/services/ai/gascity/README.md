@@ -21,8 +21,8 @@ This is intentionally a pragmatic first deployment:
 - The dashboard is published internally at `http://gascity.internal`
 - DNS-free fallback access is available at `http://192.168.0.203/`
 - The supervisor API is routed on the same host under `/v0` and `/health`
-- The supervisor API is bound read-only when exposed on the pod network; enable
-  mutations only after adding an auth layer in front of the route
+- The supervisor API allows mutations so the dashboard can create convoys and
+  operate the city; keep the route internal-only unless an auth layer is added
 - Hermes is not directly handing jobs to Gas City yet; this gets us the control
   pod, workspace, and Kubernetes permissions in place first
 
