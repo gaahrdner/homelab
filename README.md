@@ -134,7 +134,7 @@ Current service workloads include:
 - `texasdust`: WordPress site exposed through Cloudflare Tunnel
 - `paperless-ngx`: internal document management
 - `keeper`: internal calendar sync service at `http://keeper.internal`
-- `gascity`: internal AI orchestration workspace; access is currently by `kubectl exec`, not an HTTPRoute
+- `gascity`: internal AI orchestration workspace at `http://gascity.internal`
 - `hermes`, `litellm`, `langfuse`, and `open-webui`: internal AI gateway, model proxy, tracing, and chat UI services
 
 ### System Extensions (`src/talos/extensions.yaml`)

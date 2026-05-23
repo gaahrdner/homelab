@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: gascity
+  namespace: gascity
+spec:
+  selector:
+    app.kubernetes.io/name: gascity
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+    - name: api
+      port: 8372
+      targetPort: api

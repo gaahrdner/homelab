@@ -18,9 +18,10 @@ This is intentionally a pragmatic first deployment:
 
 ## Current Limits
 
-- Gas City includes a `gc dashboard` / `gc dashboard serve` command, but this
-  deployment does not start or expose that web dashboard yet
-- No public or internal dashboard route is exposed yet
+- The dashboard is published internally at `http://gascity.internal`
+- The supervisor API is routed on the same host under `/v0` and `/health`
+- The supervisor API is bound read-only when exposed on the pod network; enable
+  mutations only after adding an auth layer in front of the route
 - Hermes is not directly handing jobs to Gas City yet; this gets us the control
   pod, workspace, and Kubernetes permissions in place first
 
@@ -33,6 +34,7 @@ This is intentionally a pragmatic first deployment:
 - Startup path:
   - `gc init /var/lib/gascity/city` on first boot
   - `GC_BEADS=file gc start`
+  - `gc dashboard serve --city /var/lib/gascity/city --port 8080 --api http://gascity.internal`
 
 ## Image Publishing
 
@@ -72,14 +74,12 @@ gc session attach mayor
 ### Check dashboard support
 
 ```bash
-kubectl exec -n gascity deploy/gascity -- gc dashboard --help
-kubectl exec -n gascity deploy/gascity -- gc dashboard serve --help
+curl -I -H 'Host: gascity.internal' http://192.168.0.203/
+curl -I -H 'Host: gascity.internal' http://192.168.0.203/health
 ```
 
-To make the dashboard reachable, add a Service plus an internal HTTPRoute and
-start `gc dashboard serve` in the pod, or run it manually for a short-lived
-debug session. Keep this internal unless there is a concrete reason to expose it
-more broadly.
+The browser entrypoint is `http://gascity.internal`. Keep this internal unless
+there is a concrete reason to expose it more broadly.
 
 ## Sources
 

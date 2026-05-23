@@ -5,6 +5,8 @@ metadata:
   namespace: gascity
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app.kubernetes.io/name: gascity
@@ -22,6 +24,27 @@ spec:
         - name: gascity
           image: ghcr.io/gaahrdner/gascity-controller:main
           imagePullPolicy: Always
+          command:
+            - /bin/bash
+            - -ec
+          args:
+            - |
+              mkdir -p "${HOME}" /var/lib/gascity/city "${HOME}/.gc"
+
+              cat > "${HOME}/.gc/supervisor.toml" <<'EOF'
+              [supervisor]
+              bind = "0.0.0.0"
+              port = 8372
+              allow_mutations = false
+              EOF
+
+              if [ ! -f /var/lib/gascity/city/city.toml ]; then
+                gc init /var/lib/gascity/city
+              fi
+
+              cd /var/lib/gascity/city
+              gc start
+              exec gc dashboard serve --city /var/lib/gascity/city --port 8080 --api http://gascity.internal
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -33,21 +56,30 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /var/lib/gascity
+          ports:
+            - name: http
+              containerPort: 8080
+            - name: api
+              containerPort: 8372
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: api
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
           readinessProbe:
-            exec:
-              command:
-                - /bin/sh
-                - -c
-                - test -f /var/lib/gascity/city/city.toml
+            httpGet:
+              path: /
+              port: http
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3
           startupProbe:
-            exec:
-              command:
-                - /bin/sh
-                - -c
-                - test -f /var/lib/gascity/city/city.toml
+            httpGet:
+              path: /health
+              port: api
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 60
