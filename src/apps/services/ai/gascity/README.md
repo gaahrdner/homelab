@@ -19,6 +19,7 @@ This is intentionally a pragmatic first deployment:
 ## Current Limits
 
 - The dashboard is published internally at `http://gascity.internal`
+- DNS-free fallback access is available at `http://192.168.0.203/`
 - The supervisor API is routed on the same host under `/v0` and `/health`
 - The supervisor API is bound read-only when exposed on the pod network; enable
   mutations only after adding an auth layer in front of the route
@@ -35,6 +36,7 @@ This is intentionally a pragmatic first deployment:
   - `gc init /var/lib/gascity/city` on first boot
   - `GC_BEADS=file gc start`
   - `gc dashboard serve --city /var/lib/gascity/city --port 8080 --api http://gascity.internal`
+  - `gc dashboard serve --city /var/lib/gascity/city --port 8081 --api http://192.168.0.203`
 
 ## Image Publishing
 
@@ -76,9 +78,11 @@ gc session attach mayor
 ```bash
 curl -I -H 'Host: gascity.internal' http://192.168.0.203/
 curl -I -H 'Host: gascity.internal' http://192.168.0.203/health
+curl -I http://192.168.0.203/
 ```
 
-The browser entrypoint is `http://gascity.internal`. Keep this internal unless
+The preferred browser entrypoint is `http://gascity.internal`. If a browser does
+not resolve `.internal`, use `http://192.168.0.203/`. Keep this internal unless
 there is a concrete reason to expose it more broadly.
 
 ## Sources

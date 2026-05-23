@@ -13,3 +13,6 @@ spec:
     - name: api
       port: 8372
       targetPort: api
+    - name: ip-fallback
+      port: 8081
+      targetPort: ip-fallback

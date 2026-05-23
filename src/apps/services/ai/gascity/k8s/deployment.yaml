@@ -44,7 +44,19 @@ spec:
 
               cd /var/lib/gascity/city
               gc start
-              exec gc dashboard serve --city /var/lib/gascity/city --port 8080 --api http://gascity.internal
+
+              gc dashboard serve --city /var/lib/gascity/city --port 8081 --api http://192.168.0.203 &
+              fallback_pid="$!"
+
+              gc dashboard serve --city /var/lib/gascity/city --port 8080 --api http://gascity.internal &
+              primary_pid="$!"
+
+              trap 'kill "${primary_pid}" "${fallback_pid}" 2>/dev/null || true; wait' TERM INT
+              wait -n "${primary_pid}" "${fallback_pid}"
+              status="$?"
+              kill "${primary_pid}" "${fallback_pid}" 2>/dev/null || true
+              wait || true
+              exit "${status}"
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -61,6 +73,8 @@ spec:
               containerPort: 8080
             - name: api
               containerPort: 8372
+            - name: ip-fallback
+              containerPort: 8081
           livenessProbe:
             httpGet:
               path: /health
