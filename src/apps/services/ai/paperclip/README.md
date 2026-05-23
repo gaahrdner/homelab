@@ -23,8 +23,12 @@ Create these items in the 1Password `kubernetes` vault before syncing:
 - `paperclip-app-secrets`
   - `BETTER_AUTH_SECRET`: generated high-entropy secret
   - `PAPERCLIP_AGENT_JWT_SECRET`: generated high-entropy secret
+  - `OPENAI_API_KEY`: OpenAI project API key for Paperclip/OpenAI-backed adapters
 - `paperclip-postgresql`
   - `password`: generated PostgreSQL password
+
+When `OPENAI_API_KEY` exists in `paperclip-app-secrets`, the deployment writes
+Paperclip's runtime config with `llm.provider=openai` on startup.
 
 The deployment reads the PostgreSQL password as a separate secret and URL-encodes
 it before constructing `DATABASE_URL`, so normal generated 1Password passwords

@@ -107,6 +107,16 @@ spec:
                   updatedAt: new Date().toISOString(),
                   source: "configure",
                 },
+                ...(process.env.OPENAI_API_KEY
+                  ? {
+                      llm: {
+                        provider: "openai",
+                        apiKey: process.env.OPENAI_API_KEY,
+                      },
+                    }
+                  : existing.llm
+                    ? { llm: existing.llm }
+                    : {}),
                 database: {
                   mode: "postgres",
                   connectionString: process.env.DATABASE_URL,
