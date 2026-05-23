@@ -22,7 +22,7 @@ spec:
           type: RuntimeDefault
       initContainers:
         - name: prepare-data
-          image: busybox:1.37
+          image: busybox:1.38
           imagePullPolicy: IfNotPresent
           command:
             - /bin/sh

@@ -82,7 +82,7 @@ spec:
               topologyKey: kubernetes.io/hostname
       initContainers:
         - name: init-samba-state
-          image: busybox:1.37
+          image: busybox:1.38
           command:
             - /bin/sh
             - -c
