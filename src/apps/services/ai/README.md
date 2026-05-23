@@ -9,6 +9,7 @@ This directory is the internal and experimental AI tier for the homelab.
 - `langfuse`: internal tracing and evaluation
 - `hermes`: always-on chat/API gateway for remote agent control
 - `gascity`: orchestration control workspace for multi-agent job routing
+- `paperclip`: authenticated/private AI company orchestration workspace
 
 ## Expectations
 
@@ -19,5 +20,5 @@ This directory is the internal and experimental AI tier for the homelab.
 ## Backup Strategy
 
 - Velero covers cluster objects and workload metadata.
-- Longhorn recurring backups cover the persistent volumes used by Open WebUI, LiteLLM PostgreSQL, and the Langfuse stateful components.
-- There is no separate logical dump layer for the AI stack in this repo today because Langfuse spans PostgreSQL, ClickHouse, and MinIO, and the volume layer is the more complete recovery boundary.
+- Longhorn recurring backups cover the persistent volumes used by Open WebUI, LiteLLM PostgreSQL, Paperclip, and the Langfuse stateful components.
+- There is no separate logical dump layer for the AI stack in this repo today because Langfuse spans PostgreSQL, ClickHouse, and MinIO, and the volume layer is the more complete recovery boundary for this tier.

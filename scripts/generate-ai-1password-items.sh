@@ -8,7 +8,7 @@ TAGS="${OP_TAGS:-homelab,ai}"
 
 usage() {
   cat <<'EOF'
-Generate required 1Password items for LiteLLM, Open WebUI, Langfuse, and Hermes.
+Generate required 1Password items for LiteLLM, Open WebUI, Langfuse, Hermes, and Paperclip.
 
 Usage:
   scripts/generate-ai-1password-items.sh [--vault <name>] [--overwrite]
@@ -133,6 +133,16 @@ upsert_item \
 upsert_item \
   "hermes-core-secrets" \
   "API_SERVER_KEY[password]=$(rand_hex 32)"
+
+upsert_item \
+  "paperclip-app-secrets" \
+  "BETTER_AUTH_SECRET[password]=$(rand_hex 32)" \
+  "PAPERCLIP_AGENT_JWT_SECRET[password]=$(rand_hex 32)"
+
+upsert_item \
+  "paperclip-postgresql" \
+  "postgres-password[password]=$(rand_hex 24)" \
+  "password[password]=$(rand_hex 24)"
 
 upsert_item \
   "langfuse-core-secrets" \

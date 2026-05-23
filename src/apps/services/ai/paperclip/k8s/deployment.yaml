@@ -1,0 +1,139 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: paperclip
+  namespace: paperclip
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: paperclip
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: paperclip
+    spec:
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        - name: prepare-data
+          image: busybox:1.37
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - -ec
+            - |
+              mkdir -p /paperclip
+              chown -R 1000:1000 /paperclip
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
+            allowPrivilegeEscalation: false
+            capabilities:
+              add:
+                - CHOWN
+              drop:
+                - ALL
+          volumeMounts:
+            - name: data
+              mountPath: /paperclip
+        - name: wait-for-postgres
+          image: postgres:17-alpine
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - -ec
+            - |
+              until pg_isready -h paperclip-postgresql -p 5432 -U paperclip -d paperclip; do
+                sleep 2
+              done
+      containers:
+        - name: paperclip
+          image: ghcr.io/paperclipai/paperclip@sha256:beb09c3e5e0fd372ab89f5761464b329c201d89bdd4d54b49ef58f7a0532e561
+          imagePullPolicy: IfNotPresent
+          args:
+            - /bin/sh
+            - -ec
+            - |
+              encoded_password="$(node -e 'process.stdout.write(encodeURIComponent(process.env.DATABASE_PASSWORD || ""))')"
+              export DATABASE_URL="postgres://paperclip:${encoded_password}@paperclip-postgresql:5432/paperclip"
+              exec node --import ./server/node_modules/tsx/dist/loader.mjs server/dist/index.js
+          ports:
+            - name: http
+              containerPort: 3100
+          env:
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: paperclip-postgresql
+                  key: password
+            - name: HOST
+              value: "0.0.0.0"
+            - name: PORT
+              value: "3100"
+            - name: SERVE_UI
+              value: "true"
+            - name: PAPERCLIP_DEPLOYMENT_MODE
+              value: authenticated
+            - name: PAPERCLIP_DEPLOYMENT_EXPOSURE
+              value: private
+            - name: PAPERCLIP_PUBLIC_URL
+              value: http://paperclip.internal
+            - name: PAPERCLIP_ALLOWED_HOSTNAMES
+              value: paperclip.internal,paperclip.paperclip.svc.cluster.local,paperclip.paperclip.svc,paperclip,localhost,127.0.0.1
+            - name: PAPERCLIP_TELEMETRY_DISABLED
+              value: "1"
+            - name: DO_NOT_TRACK
+              value: "1"
+          envFrom:
+            - secretRef:
+                name: paperclip-app-secrets
+          volumeMounts:
+            - name: data
+              mountPath: /paperclip
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+              httpHeaders:
+                - name: Host
+                  value: paperclip.internal
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+              httpHeaders:
+                - name: Host
+                  value: paperclip.internal
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 5
+          startupProbe:
+            httpGet:
+              path: /api/health
+              port: http
+              httpHeaders:
+                - name: Host
+                  value: paperclip.internal
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 30
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: 2000m
+              memory: 2Gi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: paperclip-data
