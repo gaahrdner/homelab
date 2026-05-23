@@ -1,4 +1,4 @@
-FROM eclipse-temurin:25-jre
+FROM eclipse-temurin:25.0.3_9-jre
 
 ARG SIGNAL_CLI_VERSION=0.14.3
 
