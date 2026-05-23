@@ -11,6 +11,7 @@ spec:
   template:
     metadata:
       annotations:
+        homelab.gaahrdner.com/config-revision: together-ai-prefix-20260523
         prometheus.io/scrape: "true"
         prometheus.io/port: "4000"
         prometheus.io/path: /metrics

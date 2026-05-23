@@ -41,8 +41,8 @@ This repo now configures a small role-based model table:
 | `qwen-review` | local uncensored Qwen 3.6 35B A3B FP8 (`batsclamp/Huihui-Qwen3.6-35B-A3B-abliterated-FP8`) | same local backend, but callers should enable reasoning for review turns |
 | `ds4-plan` | local DeepSeek V4 Flash via `ds4` | local planner / long-context synthesizer |
 | `ds4-review` | local DeepSeek V4 Flash via `ds4` | local reviewer / second opinion |
-| `together-mayor` | Together `moonshotai/Kimi-K2.6` | premium planner / arbiter / escalation lane |
-| `together-hardcode` | Together `zai-org/GLM-5.1` | hardest coding and long-horizon implementation tasks |
+| `together-mayor` | LiteLLM `together_ai/moonshotai/Kimi-K2.6` | premium planner / arbiter / escalation lane |
+| `together-hardcode` | LiteLLM `together_ai/zai-org/GLM-5.1` | hardest coding and long-horizon implementation tasks |
 
 ## Exact Secret Values
 

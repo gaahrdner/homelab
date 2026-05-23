@@ -31,13 +31,11 @@ data:
           api_key: dummy
       - model_name: together-mayor
         litellm_params:
-          model: moonshotai/Kimi-K2.6
-          api_base: https://api.together.ai/v1
+          model: together_ai/moonshotai/Kimi-K2.6
           api_key: os.environ/TOGETHER_API_KEY
       - model_name: together-hardcode
         litellm_params:
-          model: zai-org/GLM-5.1
-          api_base: https://api.together.ai/v1
+          model: together_ai/zai-org/GLM-5.1
           api_key: os.environ/TOGETHER_API_KEY
     general_settings:
       master_key: os.environ/PROXY_MASTER_KEY
