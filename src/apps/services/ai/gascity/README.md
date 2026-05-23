@@ -18,6 +18,8 @@ This is intentionally a pragmatic first deployment:
 
 ## Current Limits
 
+- Gas City includes a `gc dashboard` / `gc dashboard serve` command, but this
+  deployment does not start or expose that web dashboard yet
 - No public or internal dashboard route is exposed yet
 - Hermes is not directly handing jobs to Gas City yet; this gets us the control
   pod, workspace, and Kubernetes permissions in place first
@@ -66,6 +68,18 @@ cd /var/lib/gascity/city
 gc version
 gc session attach mayor
 ```
+
+### Check dashboard support
+
+```bash
+kubectl exec -n gascity deploy/gascity -- gc dashboard --help
+kubectl exec -n gascity deploy/gascity -- gc dashboard serve --help
+```
+
+To make the dashboard reachable, add a Service plus an internal HTTPRoute and
+start `gc dashboard serve` in the pod, or run it manually for a short-lived
+debug session. Keep this internal unless there is a concrete reason to expose it
+more broadly.
 
 ## Sources
 
