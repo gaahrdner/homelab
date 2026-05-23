@@ -50,6 +50,14 @@ kubectl logs -n paperclip deployment/paperclip --tail=100
 curl -I http://paperclip.internal/api/health
 ```
 
+If the UI reports that no instance admin exists, generate a one-time bootstrap
+invite from the running Paperclip pod:
+
+```bash
+kubectl exec -n paperclip deploy/paperclip -- \
+  pnpm paperclipai auth bootstrap-ceo --config /paperclip/instances/default/config.json
+```
+
 ## Backup Strategy
 
 - Velero covers Kubernetes objects and ArgoCD application state.

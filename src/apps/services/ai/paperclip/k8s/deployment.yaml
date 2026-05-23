@@ -60,8 +60,108 @@ spec:
             - /bin/sh
             - -ec
             - |
+              instance_home="/paperclip/instances/default"
+              config_path="${instance_home}/config.json"
               encoded_password="$(node -e 'process.stdout.write(encodeURIComponent(process.env.DATABASE_PASSWORD || ""))')"
               export DATABASE_URL="postgres://paperclip:${encoded_password}@paperclip-postgresql:5432/paperclip"
+              export PAPERCLIP_CONFIG="${config_path}"
+
+              node <<'NODE'
+              const crypto = require("crypto");
+              const fs = require("fs");
+
+              const home = "/paperclip/instances/default";
+              const configPath = `${home}/config.json`;
+              const keyPath = `${home}/secrets/master.key`;
+              const hosts = [
+                "paperclip.internal",
+                "paperclip.paperclip.svc.cluster.local",
+                "paperclip.paperclip.svc",
+                "paperclip",
+                "localhost",
+                "127.0.0.1",
+              ];
+
+              if (!process.env.DATABASE_URL) {
+                throw new Error("DATABASE_URL is required");
+              }
+
+              fs.mkdirSync(`${home}/data/backups`, { recursive: true });
+              fs.mkdirSync(`${home}/data/storage`, { recursive: true });
+              fs.mkdirSync(`${home}/logs`, { recursive: true });
+              fs.mkdirSync(`${home}/secrets`, { recursive: true });
+
+              if (!fs.existsSync(keyPath)) {
+                fs.writeFileSync(keyPath, `${crypto.randomBytes(32).toString("hex")}\n`, { mode: 0o600 });
+              }
+
+              let existing = {};
+              if (fs.existsSync(configPath)) {
+                existing = JSON.parse(fs.readFileSync(configPath, "utf8"));
+              }
+
+              const config = {
+                ...existing,
+                $meta: {
+                  version: 1,
+                  updatedAt: new Date().toISOString(),
+                  source: "configure",
+                },
+                database: {
+                  mode: "postgres",
+                  connectionString: process.env.DATABASE_URL,
+                  backup: {
+                    enabled: true,
+                    intervalMinutes: 60,
+                    retentionDays: 7,
+                    dir: `${home}/data/backups`,
+                  },
+                },
+                logging: {
+                  mode: "file",
+                  logDir: `${home}/logs`,
+                },
+                server: {
+                  deploymentMode: "authenticated",
+                  exposure: "private",
+                  bind: "lan",
+                  host: "0.0.0.0",
+                  port: 3100,
+                  allowedHostnames: hosts,
+                  serveUi: true,
+                },
+                auth: {
+                  baseUrlMode: "explicit",
+                  disableSignUp: false,
+                  publicBaseUrl: "http://paperclip.internal",
+                },
+                telemetry: {
+                  enabled: false,
+                },
+                storage: existing.storage ?? {
+                  provider: "local_disk",
+                  localDisk: {
+                    baseDir: `${home}/data/storage`,
+                  },
+                  s3: {
+                    bucket: "paperclip",
+                    region: "us-east-1",
+                    prefix: "",
+                    forcePathStyle: false,
+                  },
+                },
+                secrets: existing.secrets ?? {
+                  provider: "local_encrypted",
+                  strictMode: false,
+                  localEncrypted: {
+                    keyFilePath: keyPath,
+                  },
+                },
+              };
+
+              fs.writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`);
+              NODE
+
               exec node --import ./server/node_modules/tsx/dist/loader.mjs server/dist/index.js
           ports:
             - name: http
