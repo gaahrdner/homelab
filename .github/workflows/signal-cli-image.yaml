@@ -40,7 +40,7 @@ jobs:
             type=sha,prefix=sha-
 
       - name: Build and push image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: src/apps/services/ai/hermes/image/signal-cli
           file: src/apps/services/ai/hermes/image/signal-cli/Dockerfile
