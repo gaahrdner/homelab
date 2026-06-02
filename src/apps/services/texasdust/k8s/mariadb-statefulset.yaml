@@ -85,7 +85,7 @@ spec:
         runAsNonRoot: true
       containers:
       - name: mariadb
-        image: mariadb:12.2
+        image: mariadb:12.3
         ports:
         - containerPort: 3306
           name: mysql
