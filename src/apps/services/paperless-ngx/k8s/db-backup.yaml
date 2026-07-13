@@ -49,7 +49,7 @@ spec:
                   mountPath: /backup
           containers:
             - name: upload
-              image: amazon/aws-cli:2.34.54
+              image: amazon/aws-cli:2.35.22
               env:
                 - name: AWS_ACCESS_KEY_ID
                   valueFrom:
