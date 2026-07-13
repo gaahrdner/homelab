@@ -33,7 +33,7 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: postgres:18-alpine
+          image: postgres:17-alpine
           imagePullPolicy: IfNotPresent
           ports:
             - name: postgres
