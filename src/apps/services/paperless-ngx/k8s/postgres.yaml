@@ -54,7 +54,6 @@ spec:
       containers:
         - name: postgresql
           image: postgres:18-alpine
-          command: ["sleep", "3600"]
           ports:
             - name: postgresql
               containerPort: 5432
