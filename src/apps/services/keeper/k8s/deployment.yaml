@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: keeper
-          image: ghcr.io/ridafkih/keeper-services:2.9
+          image: ghcr.io/ridafkih/keeper-services:2.12
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
