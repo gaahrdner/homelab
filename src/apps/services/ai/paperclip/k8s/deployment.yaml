@@ -59,7 +59,7 @@ spec:
               done
       containers:
         - name: paperclip
-          image: ghcr.io/paperclipai/paperclip@sha256:09b7d38eb7d15a57b6a179dd06355f1c11f67548ce60bb81f87d9681ac1f713e
+          image: ghcr.io/paperclipai/paperclip@sha256:394e7d557becb1da3264f9f85d30527b17b9d6c86c6ce44fea494ba0cb2d3b1c
           imagePullPolicy: IfNotPresent
           args:
             - /bin/sh
