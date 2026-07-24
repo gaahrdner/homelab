@@ -4,7 +4,7 @@
 image:
   repository: ghcr.io/paperless-ngx/paperless-ngx
   pullPolicy: IfNotPresent
-  tag: 2.20.15
+  tag: 3.0.2
 
 env:
   TZ: America/Chicago
