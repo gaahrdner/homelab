@@ -75,7 +75,7 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 5
         - name: redis-exporter
-          image: oliver006/redis_exporter:v1.87.0-alpine
+          image: oliver006/redis_exporter:v1.88.0-alpine
           imagePullPolicy: IfNotPresent
           ports:
             - name: metrics
