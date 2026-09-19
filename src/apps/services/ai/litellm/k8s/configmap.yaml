@@ -19,14 +19,19 @@ data:
           model: openai/batsclamp/Huihui-Qwen3.6-35B-A3B-abliterated-FP8
           api_base: http://192.168.0.131:8000/v1
           api_key: dummy
+      - model_name: ds4-vision
+        litellm_params:
+          model: openai/deepseek-ai/DeepSeek-V4-Flash-Vision-Exp
+          api_base: http://192.168.0.123:8000/v1
+          api_key: dummy
       - model_name: ds4-plan
         litellm_params:
-          model: openai/deepseek-v4-flash
+          model: openai/deepseek-ai/DeepSeek-V4-Flash-Vision-Exp
           api_base: http://192.168.0.123:8000/v1
           api_key: dummy
       - model_name: ds4-review
         litellm_params:
-          model: openai/deepseek-v4-flash
+          model: openai/deepseek-ai/DeepSeek-V4-Flash-Vision-Exp
           api_base: http://192.168.0.123:8000/v1
           api_key: dummy
       - model_name: together-mayor
