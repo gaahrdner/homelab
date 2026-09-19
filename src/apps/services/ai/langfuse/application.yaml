@@ -32,13 +32,17 @@ spec:
                 type: ClusterIP
                 port: 3000
               replicas: 1
+              pod:
+                additionalEnv:
+                  - name: NODE_OPTIONS
+                    value: "--max-old-space-size=1280"
               resources:
                 requests:
                   cpu: 200m
                   memory: 512Mi
                 limits:
                   cpu: 1000m
-                  memory: 1Gi
+                  memory: 2Gi
             worker:
               replicas: 1
               resources:
