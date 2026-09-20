@@ -8,7 +8,7 @@ spec:
   sources:
     - repoURL: https://helm.openwebui.com
       chart: open-webui
-      targetRevision: 14.4.0
+      targetRevision: 16.5.0
       helm:
         releaseName: open-webui
         valuesObject:
@@ -22,7 +22,7 @@ spec:
             enabled: false
           replicaCount: 1
           image:
-            tag: v0.9.5
+            tag: v0.11.3
             pullPolicy: IfNotPresent
           service:
             type: ClusterIP
