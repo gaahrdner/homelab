@@ -9,8 +9,10 @@
       "\\.yaml$"
     ]
   },
-  "regexManagers": [
+  "customManagers": [
     {
+      "customType": "regex",
+      "description": "helm upgrade --version pins in .mise.toml (cluster bootstrap commands)",
       "fileMatch": [
         "\\.mise\\.toml$"
       ],
@@ -18,9 +20,7 @@
         "helm upgrade --install (?<depName>.*?) (?<packageName>.*?) --version (?<currentValue>.*?)( |\\n)"
       ],
       "datasourceTemplate": "helm"
-    }
-  ],
-  "customManagers": [
+    },
     {
       "customType": "regex",
       "description": "Argo CD Application helm chart targetRevision (both repoURL/chart field orders; git sources without an adjacent chart: never match). The argocd manager only parses spec.source, so multi-source apps are invisible to it.",
