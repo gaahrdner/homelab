@@ -6,18 +6,74 @@
   ],
   "kubernetes": {
     "fileMatch": [
-      "\.yaml$"
+      "\\.yaml$"
     ]
   },
   "regexManagers": [
     {
       "fileMatch": [
-        "\.mise\.toml$"
+        "\\.mise\\.toml$"
       ],
       "matchStrings": [
-        "helm upgrade --install (?<depName>.*?) (?<packageName>.*?) --version (?<currentValue>.*?)( |\n)"
+        "helm upgrade --install (?<depName>.*?) (?<packageName>.*?) --version (?<currentValue>.*?)( |\\n)"
       ],
       "datasourceTemplate": "helm"
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Argo CD Application helm chart targetRevision (both repoURL/chart field orders; git sources without an adjacent chart: never match). The argocd manager only parses spec.source, so multi-source apps are invisible to it.",
+      "fileMatch": [
+        "^src/apps/.*application.*\\.yaml$"
+      ],
+      "matchStrings": [
+        "repoURL: (?<registryUrl>\\S+)\\s+chart: (?<depName>\\S+)\\s+targetRevision: (?<currentValue>\\S+)",
+        "chart: (?<depName>\\S+)\\s+repoURL: (?<registryUrl>\\S+)\\s+targetRevision: (?<currentValue>\\S+)"
+      ],
+      "datasource": "helm"
+    },
+    {
+      "customType": "regex",
+      "description": "Image pins in helm valuesObject where repository + tag are pinned together (invisible to the docker/kubernetes managers). v-prefixed semver only.",
+      "fileMatch": [
+        "^src/apps/.*application.*\\.yaml$"
+      ],
+      "matchStrings": [
+        "repository: (?<depName>\\S+)\\s+tag: (?<currentValue>\\S+)"
+      ],
+      "datasource": "docker",
+      "versioning": "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$"
+    },
+    {
+      "customType": "regex",
+      "description": "open-webui image tag (repository comes from chart defaults; only the tag is pinned in valuesObject)",
+      "fileMatch": [
+        "^src/apps/services/ai/open-webui/application\\.yaml$"
+      ],
+      "matchStrings": [
+        "tag: (?<currentValue>v\\S+)"
+      ],
+      "datasource": "docker",
+      "depNameTemplate": "ghcr.io/open-webui/open-webui",
+      "packageNameTemplate": "ghcr.io/open-webui/open-webui",
+      "versioning": "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$"
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "Helm chart bumps: PR for manual review only (values keys / templates / migrations can break an app)",
+      "matchDatasources": [
+        "helm"
+      ],
+      "automerge": false
+    },
+    {
+      "description": "Deps extracted from Argo Application manifests (chart versions + valuesObject image pins): PR for manual review only",
+      "matchPaths": [
+        "^src/apps/.*application.*\\.yaml$"
+      ],
+      "automerge": false
     }
   ]
 }
