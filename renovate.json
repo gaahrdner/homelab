@@ -31,7 +31,7 @@
         "repoURL: (?<registryUrl>\\S+)\\s+chart: (?<depName>\\S+)\\s+targetRevision: (?<currentValue>\\S+)",
         "chart: (?<depName>\\S+)\\s+repoURL: (?<registryUrl>\\S+)\\s+targetRevision: (?<currentValue>\\S+)"
       ],
-      "datasource": "helm"
+      "datasourceTemplate": "helm"
     },
     {
       "customType": "regex",
@@ -42,8 +42,8 @@
       "matchStrings": [
         "repository: (?<depName>\\S+)\\s+tag: (?<currentValue>\\S+)"
       ],
-      "datasource": "docker",
-      "versioning": "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$"
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$"
     },
     {
       "customType": "regex",
@@ -54,10 +54,10 @@
       "matchStrings": [
         "tag: (?<currentValue>v\\S+)"
       ],
-      "datasource": "docker",
       "depNameTemplate": "ghcr.io/open-webui/open-webui",
       "packageNameTemplate": "ghcr.io/open-webui/open-webui",
-      "versioning": "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$"
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$"
     }
   ],
   "packageRules": [
