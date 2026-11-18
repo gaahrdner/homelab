@@ -227,6 +227,9 @@ spec:
             httpGet:
               path: /
               port: 8000
+              httpHeaders:
+                - name: Host
+                  value: docs.internal
             initialDelaySeconds: 60
             periodSeconds: 30
             timeoutSeconds: 5
@@ -236,6 +239,9 @@ spec:
             httpGet:
               path: /
               port: 8000
+              httpHeaders:
+                - name: Host
+                  value: docs.internal
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
