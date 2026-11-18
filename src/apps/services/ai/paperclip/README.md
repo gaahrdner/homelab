@@ -10,10 +10,10 @@ workspace at `http://paperclip.internal`.
 - `PVC/paperclip-data`: Paperclip home, config, local files, and runtime state
 - `HTTPRoute/paperclip`: internal Gateway API route for `paperclip.internal`
 
-The Paperclip image is pinned to the current `latest` multi-arch digest:
+The Paperclip image is pinned to the `latest` multi-arch digest (with the `:latest` tag retained so Renovate tracks digest updates):
 
 ```text
-ghcr.io/paperclipai/paperclip@sha256:beb09c3e5e0fd372ab89f5761464b329c201d89bdd4d54b49ef58f7a0532e561
+ghcr.io/paperclipai/paperclip:latest@sha256:3621579c4bd86ac3bba74f00d77287a3e8c95a95d9b87d838745d225c03fd6e5
 ```
 
 ## Secrets

@@ -35,7 +35,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: mqtt-exporter
-          image: kpetrem/mqtt-exporter:master
+          image: kpetrem/mqtt-exporter:1.12.1
           env:
             - name: MQTT_ADDRESS
               value: mosquitto-client.awtrix.svc.cluster.local
