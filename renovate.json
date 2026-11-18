@@ -9,17 +9,35 @@
       "\\.yaml$"
     ]
   },
+  "helm-values": {
+    "fileMatch": [
+      "(^|/)[^/]*values\\.ya?ml$"
+    ]
+  },
   "customManagers": [
     {
       "customType": "regex",
-      "description": "helm upgrade --version pins in .mise.toml (cluster bootstrap commands)",
+      "description": "helm upgrade --install --repo --version pins in .mise.toml (cluster bootstrap commands)",
       "fileMatch": [
-        "\\.mise\\.toml$"
+        "^\\.mise\\.toml$"
       ],
       "matchStrings": [
-        "helm upgrade --install (?<depName>.*?) (?<packageName>.*?) --version (?<currentValue>.*?)( |\\n)"
+        "helm upgrade --install \\S+ (?<depName>\\S+) --repo (?<registryUrl>\\S+) --version (?<currentValue>\\S+)"
       ],
       "datasourceTemplate": "helm"
+    },
+    {
+      "customType": "regex",
+      "description": "Explicit # renovate: version annotations in Dockerfiles, .mise.toml, and Talos patches",
+      "fileMatch": [
+        "(^|/)Dockerfile$",
+        "^\\.mise\\.toml$",
+        "^src/talos/patches/image\\.yaml$"
+      ],
+      "matchStrings": [
+        "#\\s*renovate:\\s*datasource=(?<datasource>\\S+)\\s+depName=(?<depName>\\S+)(?:\\s+extractVersion=(?<extractVersion>\\S+))?\\n\\s*(?:ARG\\s+)?[A-Z0-9_]+\\s*=\\s*\"?(?<currentValue>[^\"\\s]+)\"?",
+        "#\\s*renovate:\\s*datasource=(?<datasource>\\S+)\\s+depName=(?<depName>\\S+)(?:\\s+extractVersion=(?<extractVersion>\\S+))?\\n\\s*image:\\s*\\S+:(?<currentValue>\\S+)"
+      ]
     },
     {
       "customType": "regex",
@@ -72,6 +90,54 @@
       "description": "Deps extracted from Argo Application manifests (chart versions + valuesObject image pins): PR for manual review only",
       "matchPaths": [
         "^src/apps/.*application.*\\.yaml$"
+      ],
+      "automerge": false
+    },
+    {
+      "description": "Keep digest updates enabled for images that only publish floating :latest tags",
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchPackageNames": [
+        "ghcr.io/paperclipai/paperclip",
+        "dperson/samba",
+        "quay.io/samba.org/samba-metrics"
+      ],
+      "pinDigests": true
+    },
+    {
+      "description": "Cluster OS, Kubernetes, and Gateway API release bumps: manual review only",
+      "matchPackageNames": [
+        "siderolabs/talos",
+        "kubernetes/kubernetes",
+        "kubernetes-sigs/gateway-api"
+      ],
+      "automerge": false
+    },
+    {
+      "description": "Longhorn forbids skipping minor versions on upgrade; open one PR per minor release",
+      "matchDatasources": [
+        "helm"
+      ],
+      "matchPackageNames": [
+        "longhorn"
+      ],
+      "separateMultipleMinor": true,
+      "automerge": false
+    },
+    {
+      "description": "Stateful database major version bumps require explicit migration planning",
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchPackageNames": [
+        "postgres",
+        "mariadb",
+        "valkey/valkey",
+        "redis"
+      ],
+      "matchUpdateTypes": [
+        "major"
       ],
       "automerge": false
     }

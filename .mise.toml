@@ -25,8 +25,12 @@ VERDANDI_IP = "192.168.0.121"
 SKULD_IP = "192.168.0.122"
 CONTROL_PLANE_ENDPOINT = "https://192.168.0.120:6443"
 KUBECTL_CONTEXT = "admin@norns"
+# renovate: datasource=github-releases depName=siderolabs/talos
 CLUSTER_TALOS_VERSION = "v1.12.5"
+# renovate: datasource=github-releases depName=kubernetes/kubernetes extractVersion=^v(?<version>.*)$
 CLUSTER_KUBERNETES_VERSION = "1.35.4"
+# renovate: datasource=github-releases depName=kubernetes-sigs/gateway-api
+GATEWAY_API_VERSION = "v1.3.0"
 
 # ============================================================================
 # PHASE 1: Image & Extension Management
@@ -181,12 +185,12 @@ echo "╚═══════════════════════�
 echo ""
 
 echo "==> [1/5] Installing Gateway API CRDs..."
-kubectl apply -f src/bootstrap/gateway-api/crds.yaml
+kubectl apply --server-side -f src/bootstrap/gateway-api/crds.yaml
 echo "✓ Gateway API CRDs installed"
 echo ""
 
 echo "==> [2/5] Installing Cilium with Hubble and Gateway API support..."
-helm upgrade --install cilium cilium/cilium --version 1.18.3 \
+helm upgrade --install cilium cilium --repo https://helm.cilium.io --version 1.18.3 \
   --namespace kube-system \
   --values src/bootstrap/cilium/values.yaml
 echo "✓ Cilium installed"
@@ -290,7 +294,7 @@ echo "✓ Namespace created"
 echo ""
 
 echo "==> [2/4] Installing ArgoCD via Helm..."
-helm upgrade --install argocd argo/argo-cd --version 9.1.0 \
+helm upgrade --install argocd argo-cd --repo https://argoproj.github.io/argo-helm --version 9.1.0 \
   --namespace argocd \
   --values src/bootstrap/argocd/values.yaml
 echo "✓ ArgoCD installed"
@@ -469,6 +473,17 @@ run = "./scripts/generate-ai-1password-items.sh"
 [tasks.configure-open-webui-langfuse]
 description = "Persist Open WebUI -> LiteLLM Langfuse trace headers and restart Open WebUI"
 run = "./scripts/configure-open-webui-langfuse.sh"
+
+[tasks.update-gateway-api-crds]
+description = "Download Gateway API standard CRDs for GATEWAY_API_VERSION into Git"
+run = """
+echo "==> Downloading Gateway API ${GATEWAY_API_VERSION} standard CRDs..."
+curl -fsSL \
+  "https://github.com/kubernetes-sigs/gateway-api/releases/download/${GATEWAY_API_VERSION}/standard-install.yaml" \
+  -o src/bootstrap/gateway-api/crds.yaml
+echo "✓ Updated src/bootstrap/gateway-api/crds.yaml to ${GATEWAY_API_VERSION}"
+echo "Commit and push so ArgoCD (gateway-api-crds) syncs the CRDs."
+"""
 
 [tasks.upgrade]
 description = "Upgrade all nodes to new Talos version (requires TALOS_IMAGE env var)"
