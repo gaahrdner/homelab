@@ -23,4 +23,4 @@ Applied via `mise run bootstrap-gitops`:
 
 ## Post-Install
 
-After bootstrap, all persisted workloads in `src/apps/` are managed by ArgoCD. Changes pushed to Git are auto-synced.
+After bootstrap, all persisted workloads in `src/apps/` are managed by ArgoCD. ArgoCD also self-manages via `src/apps/infrastructure/argocd/application.yaml` (referencing `src/bootstrap/argocd/values.yaml` with `prune: false` and `ServerSideApply=true`) so Renovate chart updates roll out cleanly once merged. Changes pushed to Git are auto-synced.

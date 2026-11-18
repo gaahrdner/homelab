@@ -1,0 +1,41 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argocd
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://argoproj.github.io/argo-helm
+      chart: argo-cd
+      targetRevision: 9.1.0
+      helm:
+        releaseName: argocd
+        valueFiles:
+          - $values/src/bootstrap/argocd/values.yaml
+    - repoURL: https://github.com/gaahrdner/homelab.git
+      targetRevision: HEAD
+      ref: values
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+
+  ignoreDifferences:
+    - kind: Service
+      jqPathExpressions:
+        - .spec.ports[].nodePort
+
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+      - ServerSideApply=true
+      - RespectIgnoreDifferences=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

@@ -39,7 +39,7 @@ This is a Kubernetes homelab cluster running on Talos Linux. The cluster is name
 - **Remote Access**: Tailscale Kubernetes operator with a connector that advertises cluster pod/service CIDRs to the tailnet
 - **Platform Services**: cert-manager (TLS), 1Password Connect (secrets), kube-prometheus-stack
 - **Applications**: texasdust.org (WordPress nonprofit site, exposed via Cloudflare Tunnel), Paperless-ngx (internal document archive), Keeper.sh (internal calendar sync at `keeper.internal`)
-- **AI/Internal Tools**: Hermes, Gas City (`gascity.internal`, fallback `192.168.0.203`, internal dashboard mutations enabled), Paperclip (`paperclip.internal`), LiteLLM, Langfuse, Open WebUI, AWTRIX MQTT
+- **AI/Internal Tools**: Hermes, Paperclip (`paperclip.internal`), LiteLLM, Langfuse, Open WebUI, AWTRIX MQTT
 
 ## Common Commands
 
@@ -101,7 +101,7 @@ talosctl --nodes <ip> health  # Check node health
 
 The cluster uses Cilium as the CNI with the following components:
 
-- **Gateway API v1.2.1**: Modern ingress/routing (replaces traditional Ingress)
+- **Gateway API v1.3.0**: Modern ingress/routing (replaces traditional Ingress; synced by ArgoCD via `gateway-api-crds`, refreshed into Git with `mise run update-gateway-api-crds`)
 - **Cilium v1.18.3**: CNI with kube-proxy replacement, eBPF-based networking
 - **Hubble**: Network observability (relay + UI)
 - **Cilium L2 Announcements**: LoadBalancer IP advertisement via ARP (IP range: 192.168.0.200-253)
@@ -196,8 +196,8 @@ src/
 3. ArgoCD syncs automatically (or immediately via UI)
 
 **Why separate bootstrap/ from apps/?**
-- **bootstrap/**: Infrastructure requiring special handling (CNI transitions, node reboots, ArgoCD itself)
-- **apps/**: Everything else that ArgoCD can safely manage
+- **bootstrap/**: Initial installation assets (CNI transitions, node reboots, Gateway API CRDs, CSI snapshot controller/CRDs, ArgoCD bootstrap values and root app)
+- **apps/**: Everything ArgoCD manages continuously—including self-managing ArgoCD (`src/apps/infrastructure/argocd/application.yaml`), `snapshot-controller`, and `gateway-api-crds` (all with `prune: false` and `ServerSideApply=true`). Cilium stays intentionally manual via `.mise.toml` so CNI upgrades are never auto-synced mid-flight.
 
 You can still use `kubectl apply` manually for short-lived experiments, but it is not the normal path for persisted workloads in this repo.
 
