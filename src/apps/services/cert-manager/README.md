@@ -4,11 +4,11 @@ Automated TLS certificate management for Kubernetes using ACME (Let's Encrypt).
 
 ## Installation
 
-Helm chart v1.19.1 managed by ArgoCD. The schema layer and ClusterIssuers live under `src/apps/crds/cert-manager/`, while this app owns the cert-manager controller deployment itself.
+Helm chart `v1.21.3` managed by ArgoCD. The schema layer and ClusterIssuers live under `src/apps/crds/cert-manager/`, while this app owns the cert-manager controller deployment itself.
 
 ## Configuration
 
-- **CRDs**: Installed separately from `src/apps/crds/cert-manager/crds.yaml`
+- **CRDs**: Installed separately from `src/apps/crds/cert-manager/crds.yaml` (`v1.21.3`, annotated with `argocd.argoproj.io/sync-options: Prune=false,Delete=false,ServerSideApply=true` so they fit cleanly under the 256 KiB annotation limit and can be safely transitioned to Helm-managed `crds.enabled: true` after sync)
 - **Issuers**: staging and prod ClusterIssuers for Let's Encrypt
 - **Components**: cert-manager, webhook, cainjector (1 replica each)
 
