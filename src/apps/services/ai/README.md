@@ -8,7 +8,6 @@ This directory is the internal and experimental AI tier for the homelab.
 - `open-webui`: internal chat UI
 - `langfuse`: internal tracing and evaluation
 - `hermes`: always-on chat/API gateway for remote agent control
-- `gascity`: orchestration control workspace for multi-agent job routing
 - `paperclip`: authenticated/private AI company orchestration workspace
 
 ## Expectations
