@@ -71,6 +71,54 @@ spec:
             migration:
               clusterEnabled: false
             replicaCount: 1
+            extraOverrides: |
+              <clickhouse>
+                <trace_log>
+                  <partition_by>toYYYYMMDD(event_date)</partition_by>
+                  <ttl>event_date + INTERVAL 7 DAY DELETE</ttl>
+                </trace_log>
+                <metric_log>
+                  <partition_by>toYYYYMMDD(event_date)</partition_by>
+                  <ttl>event_date + INTERVAL 7 DAY DELETE</ttl>
+                </metric_log>
+                <asynchronous_metric_log>
+                  <partition_by>toYYYYMMDD(event_date)</partition_by>
+                  <ttl>event_date + INTERVAL 7 DAY DELETE</ttl>
+                </asynchronous_metric_log>
+                <text_log>
+                  <partition_by>toYYYYMMDD(event_date)</partition_by>
+                  <level>information</level>
+                  <ttl>event_date + INTERVAL 7 DAY DELETE</ttl>
+                </text_log>
+                <latency_log>
+                  <partition_by>toYYYYMMDD(event_date)</partition_by>
+                  <ttl>event_date + INTERVAL 7 DAY DELETE</ttl>
+                </latency_log>
+                <query_log>
+                  <partition_by>toYYYYMMDD(event_date)</partition_by>
+                  <ttl>event_date + INTERVAL 7 DAY DELETE</ttl>
+                </query_log>
+                <query_thread_log>
+                  <partition_by>toYYYYMMDD(event_date)</partition_by>
+                  <ttl>event_date + INTERVAL 7 DAY DELETE</ttl>
+                </query_thread_log>
+                <query_views_log>
+                  <partition_by>toYYYYMMDD(event_date)</partition_by>
+                  <ttl>event_date + INTERVAL 7 DAY DELETE</ttl>
+                </query_views_log>
+                <part_log>
+                  <partition_by>toYYYYMMDD(event_date)</partition_by>
+                  <ttl>event_date + INTERVAL 7 DAY DELETE</ttl>
+                </part_log>
+                <error_log>
+                  <partition_by>toYYYYMMDD(event_date)</partition_by>
+                  <ttl>event_date + INTERVAL 7 DAY DELETE</ttl>
+                </error_log>
+                <query_metric_log>
+                  <partition_by>toYYYYMMDD(event_date)</partition_by>
+                  <ttl>event_date + INTERVAL 7 DAY DELETE</ttl>
+                </query_metric_log>
+              </clickhouse>
           s3:
             auth:
               existingSecret: langfuse-minio
