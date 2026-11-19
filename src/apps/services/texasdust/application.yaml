@@ -10,7 +10,7 @@ spec:
   # Source 1: WordPress Helm chart
   - repoURL: https://groundhog2k.github.io/helm-charts/
     chart: wordpress
-    targetRevision: 0.14.5
+    targetRevision: 0.16.8
     helm:
       releaseName: wordpress
       valueFiles:
