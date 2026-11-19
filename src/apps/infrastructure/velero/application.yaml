@@ -16,7 +16,7 @@ spec:
             velero:
               image:
                 repository: velero/velero
-                tag: v1.17.1
+                tag: v1.18.4
             backupStorageLocation:
               - name: default
                 provider: aws
