@@ -1,7 +1,7 @@
 FROM eclipse-temurin:25.0.4_7-jre
 
 # renovate: datasource=github-releases depName=AsamK/signal-cli extractVersion=^v(?<version>.*)$
-ARG SIGNAL_CLI_VERSION=0.14.3
+ARG SIGNAL_CLI_VERSION=0.14.10
 
 RUN apt-get update \
   && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
