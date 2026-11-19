@@ -257,18 +257,17 @@ The cluster uses 1Password Connect to sync secrets from 1Password vaults into Ku
 
 Before deploying 1Password Connect, you must create bootstrap secrets in `secrets/`:
 
-1. **onepassword-credentials.yaml** - Connect server credentials
+1. **onepassword-credentials.yaml** - Connect server credentials (`onepassword-connect-credentials`)
    ```bash
-   # CRITICAL: Must be DOUBLE base64-encoded
-   # Reason: K8s decodes when injecting as env var, but Connect expects base64
-   cat 1password-credentials.json | base64 | tr -d '\n' | base64 > creds.txt
-   # Then use creds.txt content in the secret yaml
+   # Standard single base64-encoded JSON in Secret.data (Connect chart v2.4+ mounts it as a JSON file at OP_SESSION)
+   kubectl create secret generic onepassword-connect-credentials \
+     --from-file=1password-credentials.json=./1password-credentials.json \
+     --namespace onepassword --dry-run=client -o yaml
    ```
 
-2. **onepassword-token.yaml** - Access token for the operator
+2. **onepassword-token.yaml** - Access token for the operator (`onepassword-connect-token`)
    ```bash
-   # This is NOT base64-encoded, use raw token value
-   kubectl create secret generic onepassword-token \
+   kubectl create secret generic onepassword-connect-token \
      --from-literal=token="YOUR_TOKEN" \
      --namespace onepassword --dry-run=client -o yaml
    ```

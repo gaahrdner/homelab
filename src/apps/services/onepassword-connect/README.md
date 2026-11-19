@@ -12,16 +12,23 @@ The secret YAML files are located in the `secrets/` directory (gitignored).
 
 **CRITICAL: The credentials secret requires special handling:**
 
-1. **onepassword-credentials.yaml** - Must be DOUBLE base64-encoded
+1. **onepassword-credentials.yaml** - Standard Kubernetes Secret (`onepassword-connect-credentials`) containing raw `1password-credentials.json` (single base64-encoded in `data:`)
 
-   Why? The 1Password Connect server expects `OP_SESSION` to contain base64-encoded JSON, but Kubernetes automatically decodes secret values when injecting them as environment variables. To work around this, we double-encode so that after K8s decodes once, the value is still base64-encoded.
+   Connect chart `v2.4+` mounts the secret key as a file at `/home/opuser/.op/1password-credentials.json` (`OP_SESSION=/home/opuser/.op/1password-credentials.json`) and parses raw JSON directly. Do **not** double base64-encode it.
 
    ```bash
-   # Generate the double-encoded value:
-   cat 1password-credentials.json | base64 | tr -d '\n' | base64
+   kubectl create secret generic onepassword-connect-credentials \
+     --from-file=1password-credentials.json=./1password-credentials.json \
+     --namespace onepassword --dry-run=client -o yaml > secrets/onepassword-credentials.yaml
    ```
 
-2. **onepassword-token.yaml** - Use raw token value (NOT base64-encoded)
+2. **onepassword-token.yaml** - Operator access token (`onepassword-connect-token`)
+
+   ```bash
+   kubectl create secret generic onepassword-connect-token \
+     --from-literal=token="YOUR_TOKEN" \
+     --namespace onepassword --dry-run=client -o yaml > secrets/onepassword-token.yaml
+   ```
 
 See `secrets/secrets.example.yaml` for detailed setup instructions.
 
