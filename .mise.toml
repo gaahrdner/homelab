@@ -190,7 +190,7 @@ echo "✓ Gateway API CRDs installed"
 echo ""
 
 echo "==> [2/5] Installing Cilium with Hubble and Gateway API support..."
-helm upgrade --install cilium cilium --repo https://helm.cilium.io --version 1.18.3 \
+helm upgrade --install cilium cilium --repo https://helm.cilium.io --version 1.20.5 \
   --namespace kube-system \
   --values src/bootstrap/cilium/values.yaml
 echo "✓ Cilium installed"
