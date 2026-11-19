@@ -75,7 +75,7 @@ spec:
     spec:
       containers:
         - name: redis-exporter
-          image: oliver006/redis_exporter:v1.91.1-alpine
+          image: oliver006/redis_exporter:v1.97.0-alpine
           imagePullPolicy: IfNotPresent
           ports:
             - name: metrics
