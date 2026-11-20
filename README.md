@@ -10,8 +10,8 @@ A GitOps-managed Kubernetes homelab cluster running on Talos Linux.
   - `verdandi`: 192.168.0.121 (Control Plane)
   - `skuld`: 192.168.0.122 (Control Plane)
 - **Control Plane Endpoint**: `https://192.168.0.120:6443`
-- **Talos Version**: v1.12.5
-- **Kubernetes Version**: v1.35.4
+- **Talos Version**: v1.13.12
+- **Kubernetes Version**: v1.36.6
 
 ## Prerequisites
 
@@ -109,7 +109,7 @@ Operational note:
 ### Cluster Upgrades
 
 1. Upgrade Talos one minor version at a time: `TALOS_IMAGE=<image> mise run upgrade`
-2. Upgrade Kubernetes after Talos is on a compatible version: `KUBERNETES_VERSION=1.35.4 mise run upgrade-k8s`
+2. Upgrade Kubernetes after Talos is on a compatible version: `KUBERNETES_VERSION=1.36.6 mise run upgrade-k8s`
 3. Verify health and confirm `kube-proxy` did not return: `mise run health`
 
 ### Configuration Patches (`src/talos/`)

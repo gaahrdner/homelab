@@ -28,7 +28,7 @@ KUBECTL_CONTEXT = "admin@norns"
 # renovate: datasource=github-releases depName=siderolabs/talos
 CLUSTER_TALOS_VERSION = "v1.13.12"
 # renovate: datasource=github-releases depName=kubernetes/kubernetes extractVersion=^v(?<version>.*)$
-CLUSTER_KUBERNETES_VERSION = "1.35.4"
+CLUSTER_KUBERNETES_VERSION = "1.36.6"
 # renovate: datasource=github-releases depName=kubernetes-sigs/gateway-api
 GATEWAY_API_VERSION = "v1.7.0"
 
@@ -526,7 +526,7 @@ if [ -z "$KUBERNETES_VERSION" ]; then
   echo "❌ KUBERNETES_VERSION environment variable not set"
   echo ""
   echo "Usage:"
-  echo "  KUBERNETES_VERSION=1.35.4 mise run upgrade-k8s"
+  echo "  KUBERNETES_VERSION=1.36.6 mise run upgrade-k8s"
   exit 1
 fi
 

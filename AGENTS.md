@@ -28,8 +28,8 @@ This is a Kubernetes homelab cluster running on Talos Linux. The cluster is name
 
 **Key Details:**
 - **Cluster Name**: norns
-- **Talos Version**: v1.12.5
-- **Kubernetes Version**: v1.35.4
+- **Talos Version**: v1.13.12
+- **Kubernetes Version**: v1.36.6
 - **Control Plane Nodes**: urd (192.168.0.120), verdandi (192.168.0.121), skuld (192.168.0.122)
 - **Control Plane Endpoint**: https://192.168.0.120:6443
 - **Task Runner**: mise (configured in `.mise.toml`)
@@ -84,7 +84,7 @@ mise run apply-skuld          # Apply config to skuld only
 ```bash
 mise run health               # Check Talos + Kubernetes health
 TALOS_IMAGE=<image> mise run upgrade  # Upgrade all nodes to new Talos version
-KUBERNETES_VERSION=1.35.4 mise run upgrade-k8s  # Upgrade Kubernetes after Talos
+KUBERNETES_VERSION=1.36.6 mise run upgrade-k8s  # Upgrade Kubernetes after Talos
 NODE=<ip> mise run reset-node # Reset specific node (DESTRUCTIVE)
 ```
 
