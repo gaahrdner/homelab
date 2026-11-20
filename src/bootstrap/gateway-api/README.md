@@ -1,6 +1,6 @@
 # Gateway API CRDs
 
-Kubernetes Gateway API v1.3.0 Custom Resource Definitions.
+Kubernetes Gateway API v1.7.0 Custom Resource Definitions.
 
 ## Installation
 
@@ -16,8 +16,8 @@ mise run update-gateway-api-crds
 
 ## Configuration
 
-- **Version**: v1.3.0 (standard channel)
-- **Source**: https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/standard-install.yaml
+- **Version**: v1.7.0 (standard channel)
+- **Source**: https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.7.0/standard-install.yaml
 
 ## Dependencies
 

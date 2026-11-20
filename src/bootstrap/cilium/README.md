@@ -13,7 +13,7 @@ Installed via `mise run setup-networking`:
 
 ## Configuration
 
-- **Version**: v1.18.3
+- **Version**: v1.20.5
 - **kube-proxy replacement**: Enabled
 - **Gateway API**: Enabled
 - **L2 Announcements**: Enabled (LB2 mode)

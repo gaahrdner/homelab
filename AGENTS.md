@@ -101,8 +101,8 @@ talosctl --nodes <ip> health  # Check node health
 
 The cluster uses Cilium as the CNI with the following components:
 
-- **Gateway API v1.3.0**: Modern ingress/routing (replaces traditional Ingress; synced by ArgoCD via `gateway-api-crds`, refreshed into Git with `mise run update-gateway-api-crds`)
-- **Cilium v1.18.3**: CNI with kube-proxy replacement, eBPF-based networking
+- **Gateway API v1.7.0**: Modern ingress/routing (replaces traditional Ingress; synced by ArgoCD via `gateway-api-crds`, refreshed into Git with `mise run update-gateway-api-crds`)
+- **Cilium v1.20.5**: CNI with kube-proxy replacement, eBPF-based networking
 - **Hubble**: Network observability (relay + UI)
 - **Cilium L2 Announcements**: LoadBalancer IP advertisement via ARP (IP range: 192.168.0.200-253)
 
