@@ -53,6 +53,11 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /var/lib/postgresql/data
+          resizePolicy:
+            - resourceName: cpu
+              restartPolicy: NotRequired
+            - resourceName: memory
+              restartPolicy: NotRequired
           resources:
             requests:
               cpu: 100m

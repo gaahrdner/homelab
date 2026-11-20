@@ -72,6 +72,11 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /data
+          resizePolicy:
+            - resourceName: cpu
+              restartPolicy: NotRequired
+            - resourceName: memory
+              restartPolicy: NotRequired
           resources:
             requests:
               cpu: 50m

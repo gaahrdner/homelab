@@ -112,6 +112,11 @@ spec:
             - name: config
               mountPath: /etc/clickhouse-server/config.d/system-logs-ttl.xml
               subPath: system-logs-ttl.xml
+          resizePolicy:
+            - resourceName: cpu
+              restartPolicy: NotRequired
+            - resourceName: memory
+              restartPolicy: NotRequired
           resources:
             requests:
               cpu: 250m
