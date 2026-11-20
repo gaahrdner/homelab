@@ -87,7 +87,7 @@ spec:
     spec:
       containers:
         - name: clickhouse
-          image: clickhouse/clickhouse-server:26.8.36.3
+          image: clickhouse/clickhouse-server:26.10.8.34
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
