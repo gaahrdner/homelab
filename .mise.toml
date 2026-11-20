@@ -26,7 +26,7 @@ SKULD_IP = "192.168.0.122"
 CONTROL_PLANE_ENDPOINT = "https://192.168.0.120:6443"
 KUBECTL_CONTEXT = "admin@norns"
 # renovate: datasource=github-releases depName=siderolabs/talos
-CLUSTER_TALOS_VERSION = "v1.13.12"
+CLUSTER_TALOS_VERSION = "v1.14.6"
 # renovate: datasource=github-releases depName=kubernetes/kubernetes extractVersion=^v(?<version>.*)$
 CLUSTER_KUBERNETES_VERSION = "1.35.4"
 # renovate: datasource=github-releases depName=kubernetes-sigs/gateway-api
