@@ -53,7 +53,7 @@ spec:
     spec:
       containers:
         - name: postgresql
-          image: postgres:18-alpine
+          image: postgres:19-alpine
           ports:
             - name: postgresql
               containerPort: 5432
@@ -68,7 +68,7 @@ spec:
                   name: paperless-postgresql
                   key: password
             - name: PGDATA
-              value: /var/lib/postgresql/data/pgdata
+              value: /var/lib/postgresql/data/pg19
           volumeMounts:
             - name: data
               mountPath: /var/lib/postgresql/data
