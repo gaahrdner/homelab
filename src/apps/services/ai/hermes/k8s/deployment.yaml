@@ -21,7 +21,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: hermes
-          image: nousresearch/hermes-agent:v0.23.2
+          image: nousresearch/hermes-agent:v0.23.3
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: true
