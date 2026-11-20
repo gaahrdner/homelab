@@ -1,0 +1,123 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-psi-cilium
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  cluster-psi-cilium.json: |-
+    {
+      "uid": "norns-psi-cilium",
+      "title": "Cluster Pressure (PSI) & Cilium",
+      "tags": ["kubernetes", "psi", "cilium", "homelab"],
+      "timezone": "browser",
+      "schemaVersion": 39,
+      "version": 1,
+      "refresh": "30s",
+      "time": { "from": "now-3h", "to": "now" },
+      "panels": [
+        {
+          "id": 1,
+          "type": "timeseries",
+          "title": "Node Pressure Stalls (CPU wait / Mem full / IO full)",
+          "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": { "defaults": { "unit": "percentunit", "min": 0 } },
+          "targets": [
+            {
+              "expr": "rate(node_pressure_io_stalled_seconds_total[5m])",
+              "legendFormat": "{{instance}} IO full"
+            },
+            {
+              "expr": "rate(node_pressure_memory_stalled_seconds_total[5m])",
+              "legendFormat": "{{instance}} Mem full"
+            },
+            {
+              "expr": "rate(node_pressure_cpu_waiting_seconds_total[5m])",
+              "legendFormat": "{{instance}} CPU wait"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "type": "timeseries",
+          "title": "Top 10 Containers — Memory PSI Stall",
+          "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": { "defaults": { "unit": "percentunit", "min": 0 } },
+          "targets": [
+            {
+              "expr": "topk(10, rate(container_pressure_memory_stalled_seconds_total{container!=\"\"}[5m]))",
+              "legendFormat": "{{namespace}}/{{pod}} ({{container}})"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "type": "timeseries",
+          "title": "Top 10 Containers — I/O PSI Stall",
+          "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": { "defaults": { "unit": "percentunit", "min": 0 } },
+          "targets": [
+            {
+              "expr": "topk(10, rate(container_pressure_io_stalled_seconds_total{container!=\"\"}[5m]))",
+              "legendFormat": "{{namespace}}/{{pod}} ({{container}})"
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "type": "timeseries",
+          "title": "Top 10 Containers — CPU PSI Waiting",
+          "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": { "defaults": { "unit": "percentunit", "min": 0 } },
+          "targets": [
+            {
+              "expr": "topk(10, rate(container_pressure_cpu_waiting_seconds_total{container!=\"\"}[5m]))",
+              "legendFormat": "{{namespace}}/{{pod}} ({{container}})"
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "type": "stat",
+          "title": "Cilium Config Drift Keys (0 = In Sync)",
+          "gridPos": { "x": 0, "y": 16, "w": 8, "h": 6 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 1 }
+                ]
+              }
+            }
+          },
+          "targets": [
+            {
+              "expr": "sum by (node) (cilium_drift_checker_config_delta)",
+              "legendFormat": "{{node}}"
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "type": "timeseries",
+          "title": "Cilium BPF Map Pressure (Max by Map)",
+          "gridPos": { "x": 8, "y": 16, "w": 16, "h": 6 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": { "defaults": { "unit": "percentunit", "min": 0, "max": 1 } },
+          "targets": [
+            {
+              "expr": "topk(10, max by (map_name) (cilium_bpf_map_pressure))",
+              "legendFormat": "{{map_name}}"
+            }
+          ]
+        }
+      ]
+    }

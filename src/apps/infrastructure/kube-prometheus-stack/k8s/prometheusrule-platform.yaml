@@ -1,0 +1,57 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: platform-psi-cilium-rules
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: psi.pressure
+      rules:
+        - alert: NodeHighIOPressure
+          expr: rate(node_pressure_io_stalled_seconds_total[5m]) > 0.25
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High I/O pressure stall on node {{ $labels.instance }}"
+            description: "Node {{ $labels.instance }} has been I/O stalled {{ $value | humanizePercentage }} of the time for over 10 minutes (check NVMe / Longhorn rebuilds)."
+
+        - alert: NodeHighMemoryPressure
+          expr: rate(node_pressure_memory_stalled_seconds_total[5m]) > 0.2
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High memory pressure stall on node {{ $labels.instance }}"
+            description: "Node {{ $labels.instance }} has been memory stalled {{ $value | humanizePercentage }} of the time for over 10 minutes."
+
+        - alert: ContainerHighMemoryPressure
+          expr: rate(container_pressure_memory_stalled_seconds_total{container!=""}[5m]) > 0.2
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Container {{ $labels.namespace }}/{{ $labels.pod }} ({{ $labels.container }}) memory stalled"
+            description: "Container {{ $labels.namespace }}/{{ $labels.pod }}/{{ $labels.container }} has sustained memory PSI stall ({{ $value | humanizePercentage }}), indicating imminent OOM pressure."
+
+        - alert: ContainerHighIOPressure
+          expr: rate(container_pressure_io_stalled_seconds_total{container!=""}[5m]) > 0.25
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Container {{ $labels.namespace }}/{{ $labels.pod }} ({{ $labels.container }}) I/O stalled"
+            description: "Container {{ $labels.namespace }}/{{ $labels.pod }}/{{ $labels.container }} has sustained I/O PSI stall ({{ $value | humanizePercentage }})."
+
+    - name: cilium.health
+      rules:
+        - alert: CiliumConfigDriftDetected
+          expr: cilium_drift_checker_config_delta > 0
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Cilium config drift on {{ $labels.node }}"
+            description: "Cilium agent {{ $labels.pod }} on {{ $labels.node }} reports {{ $value }} unapplied ConfigMap key(s); restart the Cilium DaemonSet if intentional."
