@@ -8,7 +8,7 @@ spec:
   sources:
     - repoURL: https://langfuse.github.io/langfuse-k8s
       chart: langfuse
-      targetRevision: 1.5.41
+      targetRevision: 2.2.5
       helm:
         releaseName: langfuse
         valuesObject:
@@ -53,77 +53,48 @@ spec:
                   cpu: 1000m
                   memory: 1Gi
           postgresql:
+            deploy: false
+            host: langfuse-postgresql
+            port: 5432
             auth:
               username: langfuse
+              database: postgres_langfuse
               existingSecret: langfuse-postgresql
               secretKeys:
                 userPasswordKey: password
-                adminPasswordKey: postgres-password
-              database: postgres_langfuse
           redis:
+            deploy: false
+            host: langfuse-redis
+            port: 6379
             auth:
               existingSecret: langfuse-redis
               existingSecretPasswordKey: password
           clickhouse:
+            deploy: false
+            host: langfuse-clickhouse
+            httpPort: 8123
+            nativePort: 9000
+            database: default
+            cluster:
+              enabled: false
             auth:
+              username: default
               existingSecret: langfuse-clickhouse
               existingSecretKey: password
-            migration:
-              clusterEnabled: false
-            replicaCount: 1
-            extraOverrides: |
-              <clickhouse>
-                <trace_log>
-                  <partition_by>toYYYYMMDD(event_date)</partition_by>
-                  <ttl>event_date + INTERVAL 7 DAY DELETE</ttl>
-                </trace_log>
-                <metric_log>
-                  <partition_by>toYYYYMMDD(event_date)</partition_by>
-                  <ttl>event_date + INTERVAL 7 DAY DELETE</ttl>
-                </metric_log>
-                <asynchronous_metric_log>
-                  <partition_by>toYYYYMMDD(event_date)</partition_by>
-                  <ttl>event_date + INTERVAL 7 DAY DELETE</ttl>
-                </asynchronous_metric_log>
-                <text_log>
-                  <partition_by>toYYYYMMDD(event_date)</partition_by>
-                  <level>information</level>
-                  <ttl>event_date + INTERVAL 7 DAY DELETE</ttl>
-                </text_log>
-                <latency_log>
-                  <partition_by>toYYYYMMDD(event_date)</partition_by>
-                  <ttl>event_date + INTERVAL 7 DAY DELETE</ttl>
-                </latency_log>
-                <query_log>
-                  <partition_by>toYYYYMMDD(event_date)</partition_by>
-                  <ttl>event_date + INTERVAL 7 DAY DELETE</ttl>
-                </query_log>
-                <query_thread_log>
-                  <partition_by>toYYYYMMDD(event_date)</partition_by>
-                  <ttl>event_date + INTERVAL 7 DAY DELETE</ttl>
-                </query_thread_log>
-                <query_views_log>
-                  <partition_by>toYYYYMMDD(event_date)</partition_by>
-                  <ttl>event_date + INTERVAL 7 DAY DELETE</ttl>
-                </query_views_log>
-                <part_log>
-                  <partition_by>toYYYYMMDD(event_date)</partition_by>
-                  <ttl>event_date + INTERVAL 7 DAY DELETE</ttl>
-                </part_log>
-                <error_log>
-                  <partition_by>toYYYYMMDD(event_date)</partition_by>
-                  <ttl>event_date + INTERVAL 7 DAY DELETE</ttl>
-                </error_log>
-                <query_metric_log>
-                  <partition_by>toYYYYMMDD(event_date)</partition_by>
-                  <ttl>event_date + INTERVAL 7 DAY DELETE</ttl>
-                </query_metric_log>
-              </clickhouse>
           s3:
-            auth:
-              existingSecret: langfuse-minio
-              rootUserSecretKey: root-user
-              rootPasswordSecretKey: root-password
+            deploy: false
+            bucket: langfuse
+            region: auto
+            endpoint: http://langfuse-s3:9000
+            forcePathStyle: true
+            accessKeyId:
+              secretKeyRef:
+                name: langfuse-minio
+                key: root-user
+            secretAccessKey:
+              secretKeyRef:
+                name: langfuse-minio
+                key: root-password
     - repoURL: https://github.com/gaahrdner/homelab.git
       targetRevision: HEAD
       path: src/apps/services/ai/langfuse/k8s
@@ -138,6 +109,7 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - ServerSideApply=true
     retry:
       limit: 5
       backoff:

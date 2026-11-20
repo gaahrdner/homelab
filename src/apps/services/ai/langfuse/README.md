@@ -5,8 +5,8 @@ Langfuse provides internal LLM observability and evaluation tooling.
 ## What This Deployment Does
 
 - Exposes Langfuse at `http://langfuse.internal`
-- Deploys Langfuse web and worker pods
-- Deploys in-cluster PostgreSQL, Valkey, ClickHouse, and MinIO via the chart
+- Deploys Langfuse v2 web and worker pods via the `langfuse` Helm chart (`deploy: false` on bundled subcharts so chart upgrades stay clean and in-place)
+- Deploys repo-managed in-cluster PostgreSQL 19, Valkey 8, standalone ClickHouse (with 7-day `system.*_log` TTLs), and SeaweedFS S3 under `k8s/`
 - Sources all application and backing-service secrets from 1Password
 
 ## Required 1Password Items
