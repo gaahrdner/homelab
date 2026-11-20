@@ -8,15 +8,14 @@ spec:
   sources:
     - chart: velero
       repoURL: https://vmware-tanzu.github.io/helm-charts
-      targetRevision: 11.4.0
+      targetRevision: 12.2.5
       helm:
         valuesObject:
+          image:
+            repository: velero/velero
+            tag: v1.18.4
           configuration:
             features: EnableCSI
-            velero:
-              image:
-                repository: velero/velero
-                tag: v1.18.4
             backupStorageLocation:
               - name: default
                 provider: aws
@@ -29,7 +28,7 @@ spec:
                 provider: csi
                 config:
                   snapshotClass: longhorn
-          upgradeCRDs: false
+          upgradeCRDs: true
           installCRDs: false
           credentials:
             existingSecret: velero-cloud-credentials
