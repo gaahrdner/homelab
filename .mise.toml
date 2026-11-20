@@ -26,7 +26,7 @@ SKULD_IP = "192.168.0.122"
 CONTROL_PLANE_ENDPOINT = "https://192.168.0.120:6443"
 KUBECTL_CONTEXT = "admin@norns"
 # renovate: datasource=github-releases depName=siderolabs/talos
-CLUSTER_TALOS_VERSION = "v1.12.5"
+CLUSTER_TALOS_VERSION = "v1.13.12"
 # renovate: datasource=github-releases depName=kubernetes/kubernetes extractVersion=^v(?<version>.*)$
 CLUSTER_KUBERNETES_VERSION = "1.35.4"
 # renovate: datasource=github-releases depName=kubernetes-sigs/gateway-api
@@ -501,19 +501,19 @@ fi
 echo "==> Upgrading all nodes to: $TALOS_IMAGE"
 echo ""
 
-echo "==> Upgrading urd (${URD_IP})..."
-talosctl upgrade --nodes ${URD_IP} --image "$TALOS_IMAGE" --preserve
-echo "✓ urd upgraded"
-echo ""
-
 echo "==> Upgrading skuld (${SKULD_IP})..."
-talosctl upgrade --nodes ${SKULD_IP} --image "$TALOS_IMAGE" --preserve
+talosctl upgrade --nodes ${SKULD_IP} --image "$TALOS_IMAGE"
 echo "✓ skuld upgraded"
 echo ""
 
 echo "==> Upgrading verdandi (${VERDANDI_IP})..."
-talosctl upgrade --nodes ${VERDANDI_IP} --image "$TALOS_IMAGE" --preserve
+talosctl upgrade --nodes ${VERDANDI_IP} --image "$TALOS_IMAGE"
 echo "✓ verdandi upgraded"
+echo ""
+
+echo "==> Upgrading urd (${URD_IP})..."
+talosctl upgrade --nodes ${URD_IP} --endpoints ${VERDANDI_IP},${SKULD_IP},${URD_IP} --image "$TALOS_IMAGE"
+echo "✓ urd upgraded"
 echo ""
 
 echo "✓ All nodes upgraded to $TALOS_IMAGE"
