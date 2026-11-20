@@ -48,7 +48,7 @@ spec:
             - name: data
               mountPath: /paperclip
         - name: wait-for-postgres
-          image: postgres:18-alpine
+          image: postgres:19-alpine
           imagePullPolicy: IfNotPresent
           command:
             - /bin/sh
