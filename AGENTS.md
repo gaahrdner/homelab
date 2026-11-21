@@ -208,6 +208,8 @@ The cluster uses a layered patching system for machine configurations:
 1. **Base Configuration** (`controlplane.yaml`): Generated from patches, not edited directly
 2. **Shared Patches** (`src/talos/patches/`):
    - `image.yaml` - Custom Talos installer image from Image Factory (includes extensions)
+   - `kernel-i915.yaml` - Loads the Intel `i915` GPU kernel module (`KernelModuleConfig`)
+   - `filesystem-trim.yaml` - Weekly SSD/NVMe TRIM (`FilesystemTrimConfig`, `168h`)
    - `scheduling.yaml` - Enables pod scheduling on control planes (`allowSchedulingOnControlPlanes: true`)
    - `kubelet.yaml` - Kubelet settings (max-pods: 300)
    - `cilium.yaml` - Disables default CNI and kube-proxy (applied during networking setup)

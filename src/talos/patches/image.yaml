@@ -7,9 +7,6 @@ machine:
     wipe: true
   network:
     hostname: norns
-  kernel:
-    modules:
-      - name: i915
   certSANs:
     - 192.168.0.120
     - 192.168.0.121

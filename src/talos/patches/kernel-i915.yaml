@@ -1,0 +1,4 @@
+# Load Intel i915 GPU kernel module (replaces deprecated .machine.kernel in Talos v1.14+)
+apiVersion: v1alpha1
+kind: KernelModuleConfig
+name: i915

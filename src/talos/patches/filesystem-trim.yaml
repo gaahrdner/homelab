@@ -1,0 +1,5 @@
+# Enable periodic SSD/NVMe TRIM (fstrim) on Talos v1.14+
+# Fresh Talos v1.14 installs include this by default; upgraded clusters require it explicitly.
+apiVersion: v1alpha1
+kind: FilesystemTrimConfig
+interval: 168h0m0s

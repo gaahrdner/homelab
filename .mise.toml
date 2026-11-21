@@ -99,6 +99,8 @@ talosctl gen config \
   --config-patch-control-plane @src/talos/patches/scheduling.yaml \
   --config-patch-control-plane @src/talos/patches/controlplane-metrics.yaml \
   --config-patch @src/talos/patches/image.yaml \
+  --config-patch @src/talos/patches/kernel-i915.yaml \
+  --config-patch @src/talos/patches/filesystem-trim.yaml \
   --config-patch @src/talos/patches/kubelet.yaml \
   norns ${CONTROL_PLANE_ENDPOINT} --force
 
@@ -151,6 +153,8 @@ talosctl gen config \
   --config-patch-control-plane @src/talos/patches/scheduling.yaml \
   --config-patch-control-plane @src/talos/patches/controlplane-metrics.yaml \
   --config-patch @src/talos/patches/image.yaml \
+  --config-patch @src/talos/patches/kernel-i915.yaml \
+  --config-patch @src/talos/patches/filesystem-trim.yaml \
   --config-patch @src/talos/patches/kubelet.yaml \
   --config-patch @src/talos/patches/cilium.yaml \
   norns ${CONTROL_PLANE_ENDPOINT} --force
@@ -206,6 +210,8 @@ talosctl gen config \
   --with-secrets secrets.yaml \
   --config-patch-control-plane @src/talos/patches/scheduling.yaml \
   --config-patch @src/talos/patches/image.yaml \
+  --config-patch @src/talos/patches/kernel-i915.yaml \
+  --config-patch @src/talos/patches/filesystem-trim.yaml \
   --config-patch @src/talos/patches/kubelet.yaml \
   --config-patch @src/talos/patches/cilium.yaml \
   norns ${CONTROL_PLANE_ENDPOINT} --force
