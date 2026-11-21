@@ -1,0 +1,41 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: substrate-podcert
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  project: default
+  source:
+    repoURL: ghcr.io/kagent-dev/substrate/helm
+    chart: substrate-podcert
+    targetRevision: 1.0.1
+    helm:
+      releaseName: substrate-podcert
+      valuesObject:
+        postgresClientNamespace: ate-system
+        postgresClientServiceAccount: ate-api-server
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ate-system
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+        pod-security.kubernetes.io/audit: privileged
+        pod-security.kubernetes.io/warn: privileged
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

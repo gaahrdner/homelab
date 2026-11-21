@@ -139,4 +139,14 @@ upsert_item \
   "ownerConnectionString[password]=postgresql://kagent_owner_user:${kagent_owner_pw}@kagent-postgresql.kagent.svc.cluster.local:5432/kagent?sslmode=disable" \
   "readWriteConnectionString[password]=postgresql://kagent_readwrite_user:${kagent_rw_pw}@kagent-postgresql.kagent.svc.cluster.local:5432/kagent?sslmode=disable"
 
+substrate_owner_pw="$(rand_hex 24)"
+substrate_rw_pw="$(rand_hex 24)"
+upsert_item \
+  "substrate-postgresql" \
+  "postgres-password[password]=$(rand_hex 24)" \
+  "owner-password[password]=${substrate_owner_pw}" \
+  "readwrite-password[password]=${substrate_rw_pw}" \
+  "ownerConnectionString[password]=postgresql://substrate_owner_user:${substrate_owner_pw}@substrate-postgresql.ate-system.svc.cluster.local:5432/substrate?sslmode=disable" \
+  "readWriteConnectionString[password]=postgresql://substrate_readwrite_user:${substrate_rw_pw}@substrate-postgresql.ate-system.svc.cluster.local:5432/substrate?sslmode=disable"
+
 echo "Done."

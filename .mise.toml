@@ -102,6 +102,7 @@ talosctl gen config \
   --config-patch @src/talos/patches/kernel-i915.yaml \
   --config-patch @src/talos/patches/filesystem-trim.yaml \
   --config-patch @src/talos/patches/kubelet.yaml \
+  --config-patch @src/talos/patches/pod-certificates.yaml \
   norns ${CONTROL_PLANE_ENDPOINT} --force
 
 echo "==> Patching node-specific configs (hostnames)..."
@@ -156,6 +157,7 @@ talosctl gen config \
   --config-patch @src/talos/patches/kernel-i915.yaml \
   --config-patch @src/talos/patches/filesystem-trim.yaml \
   --config-patch @src/talos/patches/kubelet.yaml \
+  --config-patch @src/talos/patches/pod-certificates.yaml \
   --config-patch @src/talos/patches/cilium.yaml \
   norns ${CONTROL_PLANE_ENDPOINT} --force
 
@@ -213,6 +215,7 @@ talosctl gen config \
   --config-patch @src/talos/patches/kernel-i915.yaml \
   --config-patch @src/talos/patches/filesystem-trim.yaml \
   --config-patch @src/talos/patches/kubelet.yaml \
+  --config-patch @src/talos/patches/pod-certificates.yaml \
   --config-patch @src/talos/patches/cilium.yaml \
   norns ${CONTROL_PLANE_ENDPOINT} --force
 

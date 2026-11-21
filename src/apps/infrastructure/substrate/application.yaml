@@ -1,0 +1,51 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: substrate
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: ghcr.io/kagent-dev/substrate/helm
+      chart: substrate
+      targetRevision: 1.0.1
+      helm:
+        releaseName: substrate
+        valuesObject:
+          postgres:
+            ownerConnectionStringSecretRef:
+              name: substrate-postgresql
+              key: ownerConnectionString
+            readWriteConnectionStringSecretRef:
+              name: substrate-postgresql
+              key: readWriteConnectionString
+          rustfs:
+            enabled: true
+            storageSize: 1Gi
+    - repoURL: https://github.com/gaahrdner/homelab.git
+      targetRevision: HEAD
+      path: src/apps/infrastructure/substrate/k8s
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ate-system
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - RespectIgnoreDifferences=true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+        pod-security.kubernetes.io/audit: privileged
+        pod-security.kubernetes.io/warn: privileged
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
