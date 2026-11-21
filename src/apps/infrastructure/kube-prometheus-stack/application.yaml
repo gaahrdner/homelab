@@ -58,6 +58,8 @@ spec:
           # ====================================================================
           grafana:
             enabled: true
+            deploymentStrategy:
+              type: Recreate
 
             # Admin credentials from 1Password
             admin:
