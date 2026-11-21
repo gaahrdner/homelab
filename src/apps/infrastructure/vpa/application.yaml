@@ -21,6 +21,9 @@ spec:
         recommender:
           enabled: true
           replicas: 1
+          extraArgs:
+            - --pod-recommendation-min-memory-mb=32
+            - --pod-recommendation-min-cpu-millicores=10
           podDisruptionBudget:
             enabled: false
           resources:
