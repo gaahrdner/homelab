@@ -16,6 +16,8 @@ kind: StatefulSet
 metadata:
   name: langfuse-redis
   namespace: langfuse
+  annotations:
+    reloader.stakater.com/auto: "true"
 spec:
   serviceName: langfuse-redis
   replicas: 1

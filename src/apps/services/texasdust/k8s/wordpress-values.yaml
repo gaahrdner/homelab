@@ -4,6 +4,9 @@
 
 replicaCount: 1
 
+customAnnotations:
+  reloader.stakater.com/auto: "true"
+
 # Deployment strategy (Recreate prevents multi-attach errors with RWO storage)
 strategy:
   type: Recreate

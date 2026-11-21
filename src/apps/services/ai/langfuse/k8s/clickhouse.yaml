@@ -74,6 +74,8 @@ kind: StatefulSet
 metadata:
   name: langfuse-clickhouse
   namespace: langfuse
+  annotations:
+    reloader.stakater.com/auto: "true"
 spec:
   serviceName: langfuse-clickhouse
   replicas: 1

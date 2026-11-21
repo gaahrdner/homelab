@@ -16,6 +16,8 @@ kind: StatefulSet
 metadata:
   name: litellm-postgresql
   namespace: litellm
+  annotations:
+    reloader.stakater.com/auto: "true"
 spec:
   serviceName: litellm-postgresql
   replicas: 1

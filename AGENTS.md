@@ -20,6 +20,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 7. **Default new workload Services to Tailscale exposure** - Do not expose new workload `Service` resources through Tailscale by default. Prefer routed access through the cluster subnet router and existing internal DNS or Gateway API entrypoints. Add explicit Tailscale-published ingress only for concrete cases that benefit from tailnet-native discovery or ACLs.
 
+8. **Auto-reload workloads sourcing 1Password secrets** - Always add `reloader.stakater.com/auto: "true"` to the workload `metadata.annotations` (or the corresponding Helm chart workload annotations value) of every `Deployment`, `StatefulSet`, and `DaemonSet` that sources secrets from a `OnePasswordItem`, and ensure its ArgoCD `Application` includes `RespectIgnoreDifferences=true` in `syncPolicy.syncOptions` (ArgoCD globally ignores `reloader.stakater.com/last-reloaded-from`).
+
 ## Project Overview
 
 This is a Kubernetes homelab cluster running on Talos Linux. The cluster is named "norns" and consists of three control plane nodes (urd, verdandi, skuld) that also run workloads.

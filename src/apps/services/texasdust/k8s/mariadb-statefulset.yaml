@@ -63,6 +63,8 @@ kind: StatefulSet
 metadata:
   name: mariadb
   namespace: texasdust
+  annotations:
+    reloader.stakater.com/auto: "true"
   labels:
     app: mariadb
 spec:

@@ -11,6 +11,8 @@ spec:
       targetRevision: 12.2.5
       helm:
         valuesObject:
+          annotations:
+            reloader.stakater.com/auto: "true"
           image:
             repository: velero/velero
             tag: v1.18.4
@@ -40,6 +42,9 @@ spec:
                 - mountPath: /target
                   name: plugins
           deployNodeAgent: true
+          nodeAgent:
+            annotations:
+              reloader.stakater.com/auto: "true"
           csi:
             enable: true
             defaultVolumesnapshotClass: longhorn

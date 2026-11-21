@@ -84,6 +84,18 @@ configs:
         clusters:
         - "*"
 
+    # Allow Stakater Reloader (reloadStrategy: annotations) to stamp rollout annotations
+    # without triggering ArgoCD OutOfSync/selfHeal loops (apps opt in via RespectIgnoreDifferences=true).
+    resource.customizations.ignoreDifferences.apps_Deployment: |
+      jsonPointers:
+        - /spec/template/metadata/annotations/reloader.stakater.com~1last-reloaded-from
+    resource.customizations.ignoreDifferences.apps_StatefulSet: |
+      jsonPointers:
+        - /spec/template/metadata/annotations/reloader.stakater.com~1last-reloaded-from
+    resource.customizations.ignoreDifferences.apps_DaemonSet: |
+      jsonPointers:
+        - /spec/template/metadata/annotations/reloader.stakater.com~1last-reloaded-from
+
     resource.customizations.health.gateway.networking.k8s.io_HTTPRoute: |
       hs = {}
 

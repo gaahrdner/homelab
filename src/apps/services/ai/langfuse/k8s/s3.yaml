@@ -16,6 +16,8 @@ kind: StatefulSet
 metadata:
   name: langfuse-s3
   namespace: langfuse
+  annotations:
+    reloader.stakater.com/auto: "true"
 spec:
   serviceName: langfuse-s3
   replicas: 1

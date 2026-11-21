@@ -16,6 +16,8 @@ kind: StatefulSet
 metadata:
   name: langfuse-postgresql
   namespace: langfuse
+  annotations:
+    reloader.stakater.com/auto: "true"
 spec:
   serviceName: langfuse-postgresql
   replicas: 1

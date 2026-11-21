@@ -16,6 +16,8 @@ kind: StatefulSet
 metadata:
   name: keeper-postgresql
   namespace: keeper
+  annotations:
+    reloader.stakater.com/auto: "true"
 spec:
   serviceName: keeper-postgresql
   replicas: 1

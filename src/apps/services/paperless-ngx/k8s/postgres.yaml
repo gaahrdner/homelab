@@ -35,6 +35,8 @@ kind: StatefulSet
 metadata:
   name: paperless-postgresql
   namespace: paperless-ngx
+  annotations:
+    reloader.stakater.com/auto: "true"
   labels:
     app: paperless-postgresql
 spec:

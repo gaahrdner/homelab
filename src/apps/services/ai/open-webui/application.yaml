@@ -12,6 +12,8 @@ spec:
       helm:
         releaseName: open-webui
         valuesObject:
+          annotations:
+            reloader.stakater.com/auto: "true"
           ollama:
             enabled: false
           pipelines:
@@ -70,6 +72,7 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - RespectIgnoreDifferences=true
     retry:
       limit: 5
       backoff:

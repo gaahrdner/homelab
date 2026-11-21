@@ -16,6 +16,8 @@ kind: StatefulSet
 metadata:
   name: keeper-redis
   namespace: keeper
+  annotations:
+    reloader.stakater.com/auto: "true"
 spec:
   serviceName: keeper-redis
   replicas: 1

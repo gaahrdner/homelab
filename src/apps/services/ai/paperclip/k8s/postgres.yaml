@@ -16,6 +16,8 @@ kind: StatefulSet
 metadata:
   name: paperclip-postgresql
   namespace: paperclip
+  annotations:
+    reloader.stakater.com/auto: "true"
 spec:
   serviceName: paperclip-postgresql
   replicas: 1

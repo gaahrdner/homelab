@@ -55,6 +55,8 @@ kind: StatefulSet
 metadata:
   name: mosquitto
   namespace: awtrix
+  annotations:
+    reloader.stakater.com/auto: "true"
 spec:
   serviceName: mosquitto-hs
   replicas: 1
