@@ -15,6 +15,7 @@ spec:
           watchGlobally: true
           autoReloadAll: false
           enableHA: false
+          reloadStrategy: annotations
           deployment:
             resources:
               requests:
