@@ -4,11 +4,11 @@ This directory is the internal and experimental AI tier for the homelab.
 
 ## Scope
 
-- `litellm`: internal model gateway
-- `open-webui`: internal chat UI
-- `langfuse`: internal tracing and evaluation
-- `hermes`: always-on chat/API gateway for remote agent control
-- `paperclip`: authenticated/private AI company orchestration workspace
+- `litellm`: internal stateless model gateway (`http://litellm.internal`)
+- `open-webui`: internal chat UI (`http://open-webui.internal`)
+- `hermes`: always-on chat/API/Signal gateway (`http://hermes.internal`)
+- `kagent`: Kubernetes-native CRD agent platform (`http://kagent.internal`)
+- `zeroclaw`: lightweight Rust agent runtime and dashboard (`http://zeroclaw.internal`)
 
 ## Expectations
 
@@ -19,5 +19,4 @@ This directory is the internal and experimental AI tier for the homelab.
 ## Backup Strategy
 
 - Velero covers cluster objects and workload metadata.
-- Longhorn recurring backups cover the persistent volumes used by Open WebUI, LiteLLM PostgreSQL, Paperclip, and the Langfuse stateful components.
-- There is no separate logical dump layer for the AI stack in this repo today because Langfuse spans PostgreSQL, ClickHouse, and MinIO, and the volume layer is the more complete recovery boundary for this tier.
+- Longhorn recurring backups cover the persistent volumes used by Open WebUI, Hermes, kagent PostgreSQL, and ZeroClaw.
