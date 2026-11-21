@@ -121,13 +121,16 @@ spec:
                 cpu: 200m
                 memory: 128Mi
 
+          # Cilium replaces kube-proxy; disable kube-proxy scraping and alerts
+          kubeProxy:
+            enabled: false
+
           prometheus-node-exporter:
             resources:
               requests:
                 cpu: 10m
                 memory: 32Mi
               limits:
-                cpu: 100m
                 memory: 64Mi
 
           kube-state-metrics:
@@ -153,7 +156,7 @@ spec:
               kubeApiserverAvailability: true
               kubeApiserverSlos: true
               kubelet: true
-              kubeProxy: true
+              kubeProxy: false
               kubePrometheusGeneral: true
               kubePrometheusNodeRecording: true
               kubernetesApps: true
