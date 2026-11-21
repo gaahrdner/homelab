@@ -12,10 +12,10 @@ spec:
       helm:
         releaseName: tailscale-operator
         valuesObject:
+          annotations:
+            reloader.stakater.com/auto: "true"
           operatorConfig:
             hostname: norns-operator
-            annotations:
-              reloader.stakater.com/auto: "true"
             podAnnotations:
               prometheus.io/scrape: "true"
               prometheus.io/port: "8080"
