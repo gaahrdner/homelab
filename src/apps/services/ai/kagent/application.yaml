@@ -8,7 +8,7 @@ spec:
   sources:
     - repoURL: ghcr.io/kagent-dev/kagent/helm
       chart: kagent
-      targetRevision: 0.10.6
+      targetRevision: 1.0.1
       helm:
         releaseName: kagent
         valuesObject:
@@ -16,9 +16,12 @@ spec:
             reloader.stakater.com/auto: "true"
           database:
             postgres:
-              bundled:
-                enabled: false
-              urlFile: /etc/kagent-db/ownerConnectionString
+              ownerConnectionStringSecretRef:
+                name: kagent-postgresql
+                key: ownerConnectionString
+              readWriteConnectionStringSecretRef:
+                name: kagent-postgresql
+                key: readWriteConnectionString
           providers:
             default: openAI
             openAI:
@@ -29,17 +32,8 @@ spec:
               config:
                 baseUrl: http://litellm.litellm.svc.cluster.local:4000/v1
           controller:
-            volumes:
-              - name: kagent-db-url
-                secret:
-                  secretName: kagent-postgresql
-                  items:
-                    - key: ownerConnectionString
-                      path: ownerConnectionString
-            volumeMounts:
-              - name: kagent-db-url
-                mountPath: /etc/kagent-db
-                readOnly: true
+            substrateClientCertificate:
+              enabled: true
             resources:
               requests:
                 cpu: 100m
@@ -47,7 +41,17 @@ spec:
               limits:
                 cpu: 1000m
                 memory: 512Mi
+          substrateWorkerPool:
+            create: true
+            name: kagent-default
+            replicas: 1
+            workerImage: ghcr.io/kagent-dev/substrate/ateworker-gvisor:v1.0.1
+            sandboxClass: gvisor
+          harnesses:
+            enabled: true
+            snapshotLocation: s3://ate-snapshots/kagent/
           ui:
+            externalUrl: http://kagent.internal
             resources:
               requests:
                 cpu: 50m
@@ -64,28 +68,6 @@ spec:
               limits:
                 cpu: 500m
                 memory: 256Mi
-          k8s-agent:
-            enabled: true
-          kgateway-agent:
-            enabled: false
-          istio-agent:
-            enabled: false
-          promql-agent:
-            enabled: false
-          observability-agent:
-            enabled: false
-          argo-rollouts-agent:
-            enabled: false
-          helm-agent:
-            enabled: false
-          cilium-policy-agent:
-            enabled: false
-          cilium-manager-agent:
-            enabled: false
-          cilium-debug-agent:
-            enabled: false
-          grafana-mcp:
-            enabled: false
     - repoURL: https://github.com/gaahrdner/homelab.git
       targetRevision: HEAD
       path: src/apps/services/ai/kagent/k8s
@@ -102,6 +84,12 @@ spec:
       - CreateNamespace=true
       - ServerSideApply=true
       - RespectIgnoreDifferences=true
+    managedNamespaceMetadata:
+      labels:
+        ate.dev/api-access: "true"
+        pod-security.kubernetes.io/enforce: privileged
+        pod-security.kubernetes.io/audit: privileged
+        pod-security.kubernetes.io/warn: privileged
     retry:
       limit: 5
       backoff:
