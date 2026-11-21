@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: zeroclaw-config
+  namespace: zeroclaw
+data:
+  config.toml: |
+    schema_version = 4
+
+    [providers.models.openai.litellm]
+    model = "ds4-plan"
+    uri = "http://litellm.litellm.svc.cluster.local:4000/v1"
+    temperature = 0.7
+
+    [agents.default]
+    enabled = true
+    model_provider = "openai.litellm"
+    risk_profile = "default"
+    runtime_profile = "default"
+
+    [agents.default.workspace]
+    path = "/zeroclaw-data/workspace"
+
+    [risk_profiles.default]
+    level = "supervised"
+    auto_approve = ["file_read", "file_write", "file_edit", "memory_recall", "memory_store", "web_search_tool", "web_fetch", "calculator", "glob_search", "content_search", "image_info", "weather", "git_operations"]
+
+    [runtime_profiles.default]
+
+    [gateway]
+    port = 42617
+    host = "0.0.0.0"
+    allow_public_bind = true
+    require_pairing = false
+    web_dist_dir = "/usr/share/zeroclawlabs/web/dist"
+    websocket_ping_interval_secs = 30
+
+    [tools]
+    optional = ["*"]
