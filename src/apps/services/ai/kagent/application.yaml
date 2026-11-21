@@ -1,0 +1,81 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kagent
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: ghcr.io/kagent-dev/kagent/helm
+      chart: kagent
+      targetRevision: 1.0.1
+      helm:
+        releaseName: kagent
+        valuesObject:
+          annotations:
+            reloader.stakater.com/auto: "true"
+          database:
+            postgres:
+              ownerConnectionStringSecretRef:
+                name: kagent-postgresql
+                key: ownerConnectionString
+              readWriteConnectionStringSecretRef:
+                name: kagent-postgresql
+                key: readWriteConnectionString
+          providers:
+            default: openAI
+            openAI:
+              provider: OpenAI
+              model: ds4-plan
+              apiKeySecretRef: litellm-master-key
+              apiKeySecretKey: master-key
+              config:
+                baseUrl: http://litellm.litellm.svc.cluster.local:4000/v1
+          controller:
+            resources:
+              requests:
+                cpu: 100m
+                memory: 128Mi
+              limits:
+                cpu: 1000m
+                memory: 512Mi
+          ui:
+            externalUrl: http://kagent.internal
+            resources:
+              requests:
+                cpu: 50m
+                memory: 128Mi
+              limits:
+                cpu: 500m
+                memory: 512Mi
+          kagent-tools:
+            enabled: true
+            resources:
+              requests:
+                cpu: 50m
+                memory: 64Mi
+              limits:
+                cpu: 500m
+                memory: 256Mi
+    - repoURL: https://github.com/gaahrdner/homelab.git
+      targetRevision: HEAD
+      path: src/apps/services/ai/kagent/k8s
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kagent
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - RespectIgnoreDifferences=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

@@ -2,19 +2,19 @@
 
 set -euo pipefail
 
-VAULT="${OP_VAULT:-kubernetes}"
+VAULT="${OP_VAULT:-mbn7rk3d5gfgofrv3a2zt2tdoe}"
 OVERWRITE=0
 TAGS="${OP_TAGS:-homelab,ai}"
 
 usage() {
   cat <<'EOF'
-Generate required 1Password items for LiteLLM, Open WebUI, Langfuse, Hermes, and Paperclip.
+Generate required 1Password items for LiteLLM, Open WebUI, Hermes, and kagent.
 
 Usage:
-  scripts/generate-ai-1password-items.sh [--vault <name>] [--overwrite]
+  scripts/generate-ai-1password-items.sh [--vault <name-or-id>] [--overwrite]
 
 Options:
-  --vault <name>   1Password vault name. Defaults to "kubernetes" or OP_VAULT.
+  --vault <id>     1Password vault ID or name. Defaults to mbn7rk3d5gfgofrv3a2zt2tdoe or OP_VAULT.
   --overwrite      Replace generated values on existing items.
   -h, --help       Show this help text.
 
@@ -122,11 +122,6 @@ upsert_item \
   "master-key[password]=$(rand_hex 32)"
 
 upsert_item \
-  "litellm-postgresql" \
-  "postgres-password[password]=$(rand_hex 24)" \
-  "password[password]=$(rand_hex 24)"
-
-upsert_item \
   "open-webui-secret" \
   "WEBUI_SECRET_KEY[password]=$(rand_b64 32)"
 
@@ -134,38 +129,14 @@ upsert_item \
   "hermes-core-secrets" \
   "API_SERVER_KEY[password]=$(rand_hex 32)"
 
+kagent_owner_pw="$(rand_hex 24)"
+kagent_rw_pw="$(rand_hex 24)"
 upsert_item \
-  "paperclip-app-secrets" \
-  "BETTER_AUTH_SECRET[password]=$(rand_hex 32)" \
-  "PAPERCLIP_AGENT_JWT_SECRET[password]=$(rand_hex 32)"
-
-upsert_item \
-  "paperclip-postgresql" \
+  "kagent-postgresql" \
   "postgres-password[password]=$(rand_hex 24)" \
-  "password[password]=$(rand_hex 24)"
-
-upsert_item \
-  "langfuse-core-secrets" \
-  "salt[password]=$(rand_b64 32)" \
-  "nextauth-secret[password]=$(rand_b64 32)" \
-  "encryption-key[password]=$(rand_hex 32)"
-
-upsert_item \
-  "langfuse-postgresql" \
-  "postgres-password[password]=$(rand_hex 24)" \
-  "password[password]=$(rand_hex 24)"
-
-upsert_item \
-  "langfuse-redis" \
-  "password[password]=$(rand_hex 24)"
-
-upsert_item \
-  "langfuse-clickhouse" \
-  "password[password]=$(rand_hex 24)"
-
-upsert_item \
-  "langfuse-minio" \
-  "root-user[text]=langfuse" \
-  "root-password[password]=$(rand_hex 24)"
+  "owner-password[password]=${kagent_owner_pw}" \
+  "readwrite-password[password]=${kagent_rw_pw}" \
+  "ownerConnectionString[password]=postgresql://kagent_owner_user:${kagent_owner_pw}@kagent-postgresql.kagent.svc.cluster.local:5432/kagent?sslmode=disable" \
+  "readWriteConnectionString[password]=postgresql://kagent_readwrite_user:${kagent_rw_pw}@kagent-postgresql.kagent.svc.cluster.local:5432/kagent?sslmode=disable"
 
 echo "Done."
