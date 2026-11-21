@@ -1,0 +1,86 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: paperless-documents-backup
+  namespace: paperless-ngx
+spec:
+  schedule: "20 6 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          # Schedule on the same node as paperless-ngx to mount RWO paperless-media read-only
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchLabels:
+                      app: paperless-ngx
+                  topologyKey: kubernetes.io/hostname
+          volumes:
+            - name: media
+              persistentVolumeClaim:
+                claimName: paperless-media
+                readOnly: true
+          containers:
+            - name: rclone
+              image: rclone/rclone:1.76.0
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: RCLONE_CONFIG_R2_TYPE
+                  value: s3
+                - name: RCLONE_CONFIG_R2_PROVIDER
+                  value: Cloudflare
+                - name: RCLONE_CONFIG_R2_ACL
+                  value: private
+                - name: RCLONE_CONFIG_R2_NO_CHECK_BUCKET
+                  value: "true"
+                - name: RCLONE_CONFIG_R2_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: velero-r2-credentials
+                      key: AWS_ACCESS_KEY_ID
+                - name: RCLONE_CONFIG_R2_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: velero-r2-credentials
+                      key: AWS_SECRET_ACCESS_KEY
+                - name: RCLONE_CONFIG_R2_ENDPOINT
+                  valueFrom:
+                    secretKeyRef:
+                      name: velero-r2-credentials
+                      key: AWS_ENDPOINTS
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -eu
+                  stamp="$(date -u +%Y-%m-%d_%H%M%SZ)"
+                  for dir in originals archive; do
+                    if [ -d "/media/documents/${dir}" ]; then
+                      echo "==> Syncing ${dir} to R2..."
+                      rclone sync "/media/documents/${dir}" \
+                        "r2:homelab-backup/paperless/documents/${dir}" \
+                        --backup-dir "r2:homelab-backup/paperless/documents/_deleted/${stamp}/${dir}" \
+                        --fast-list \
+                        --transfers 4 \
+                        --stats-one-line \
+                        --stats 30s \
+                        -v
+                    fi
+                  done
+                  echo "==> Paperless document sync complete."
+              volumeMounts:
+                - name: media
+                  mountPath: /media
+                  readOnly: true
+              resources:
+                requests:
+                  cpu: 25m
+                  memory: 64Mi
+                limits:
+                  memory: 256Mi

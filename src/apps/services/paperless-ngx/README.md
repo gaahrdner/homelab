@@ -187,11 +187,12 @@ The consumption folder is mounted at `/usr/src/paperless/consume` inside the pod
 
 ### Backup
 
-Paperless now has three backup layers:
+Paperless now has four backup layers:
 
 1. Velero for cluster objects and workload metadata
 2. Longhorn recurring offsite volume backups for the application and PostgreSQL PVCs
 3. A daily logical PostgreSQL dump uploaded to `s3://homelab-backup/logical-dumps/paperless/postgresql/`
+4. A daily `rclone` sync of readable PDFs (`originals/` and `archive/`) to `s3://homelab-backup/paperless/documents/` (with deleted/modified versions archived under `_deleted/`)
 
 Paperless exports are stored in the `export` volume. You can:
 ```bash
