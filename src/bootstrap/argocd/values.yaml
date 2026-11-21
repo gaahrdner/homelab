@@ -33,6 +33,12 @@ notifications:
 # Application controller - manages sync
 controller:
   replicas: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 640Mi
+    limits:
+      memory: 1536Mi
   metrics:
     enabled: true
     serviceMonitor:

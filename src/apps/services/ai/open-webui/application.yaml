@@ -21,6 +21,12 @@ spec:
           terminals:
             enabled: false
           replicaCount: 1
+          resources:
+            requests:
+              cpu: 100m
+              memory: 768Mi
+            limits:
+              memory: 2Gi
           image:
             tag: v0.13.4
             pullPolicy: IfNotPresent
