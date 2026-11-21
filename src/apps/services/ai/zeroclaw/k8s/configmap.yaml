@@ -23,7 +23,7 @@ data:
 
     [risk_profiles.default]
     level = "supervised"
-    auto_approve = ["file_read", "file_write", "file_edit", "memory_recall", "memory_store", "web_search_tool", "web_fetch", "calculator", "glob_search", "content_search", "image_info", "weather", "git_operations"]
+    auto_approve = ["file_read", "file_write", "file_edit", "memory_recall", "memory_store", "web_search_tool", "web_fetch", "calculator", "glob_search", "content_search", "image_info", "weather", "git_operations", "tool_search", "browser_open"]
 
     [runtime_profiles.default]
 

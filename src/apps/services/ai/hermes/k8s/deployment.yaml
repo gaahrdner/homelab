@@ -56,7 +56,14 @@ spec:
               value: "1"
             - name: HERMES_DASHBOARD_HOST
               value: "0.0.0.0"
-            - name: HERMES_DASHBOARD_SESSION_TOKEN
+            - name: HERMES_DASHBOARD_BASIC_AUTH_USERNAME
+              value: "admin"
+            - name: HERMES_DASHBOARD_BASIC_AUTH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-core-secrets
+                  key: API_SERVER_KEY
+            - name: HERMES_DASHBOARD_BASIC_AUTH_SECRET
               valueFrom:
                 secretKeyRef:
                   name: hermes-core-secrets
