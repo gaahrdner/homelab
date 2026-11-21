@@ -6,6 +6,6 @@ metadata:
 data:
   config.yaml: |
     model:
-      default: "qwen-exec"
+      default: "ds4-plan"
       provider: "custom"
       base_url: "http://litellm.litellm.svc.cluster.local:4000/v1"

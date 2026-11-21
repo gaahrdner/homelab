@@ -4,32 +4,20 @@ LiteLLM is deployed as the cluster's internal AI gateway.
 
 ## What This Deployment Does
 
+- Runs stateless from [configmap.yaml](k8s/configmap.yaml) (no PostgreSQL backing database)
 - Exposes LiteLLM at `http://litellm.internal`
-- Persists gateway state in PostgreSQL on Longhorn storage
-- Reads the gateway master key from 1Password
-- Sends proxy traces to the self-hosted Langfuse deployment
-- Targets the split-mode local endpoints:
-- `qwen-exec` / `qwen-review` -> `http://192.168.0.131:8000/v1`
-    - current upstream model: `batsclamp/Huihui-Qwen3.6-35B-A3B-abliterated-FP8`
-    - `qwen-exec` injects `chat_template_kwargs.enable_thinking=false`
-    - `qwen-review` leaves thinking on by default
-  - `ds4-plan` / `ds4-review` -> `http://192.168.0.123:8000/v1`
-- Adds Together-backed escalation aliases for the "mayor" and hard-code lanes once `litellm-together` exists
+- Reads the gateway master key and upstream provider keys from 1Password
+- Exports Prometheus metrics on `/metrics`
+- Routes local aliases (`ds4-vision`, `ds4-plan`, `ds4-review`) to `http://192.168.0.123:8000/v1` and Together-backed escalation aliases (`together-mayor`, `together-hardcode`) once `litellm-together` exists
 
 ## Required 1Password Items
 
-Create these items in the `kubernetes` vault:
+Create these items in the `kubernetes` vault (`mbn7rk3d5gfgofrv3a2zt2tdoe`):
 
 - `litellm-master-key`
   - `master-key`
-- `litellm-postgresql`
-  - `postgres-password`
-  - `password`
 - `litellm-together`
   - `TOGETHER_API_KEY`
-- `langfuse-project-api-keys`
-  - `LANGFUSE_PUBLIC_KEY`
-  - `LANGFUSE_SECRET_KEY`
 
 ## Model Aliases
 
@@ -98,18 +86,10 @@ fields explicitly.
 
 ## Metrics
 
-- LiteLLM proxy metrics are exposed on `/metrics`
-- LiteLLM PostgreSQL metrics are exposed via the `postgres-exporter` sidecar
-- Both are scraped through the cluster-wide auto-discovery `PodMonitor`
-
-## Tracing
-
-- LiteLLM exports traces directly to the in-cluster Langfuse service
-- The Langfuse project API keys are sourced from 1Password
+- LiteLLM proxy metrics are exposed on `/metrics` and scraped through the cluster-wide auto-discovery `PodMonitor`
 
 ## Layout
 
 - `k8s/configmap.yaml`: LiteLLM proxy config
-- `k8s/postgres.yaml`: backing PostgreSQL
-- `k8s/deployment.yaml`: gateway deployment
+- `k8s/deployment.yaml`: stateless gateway deployment
 - `k8s/httproute.yaml`: internal DNS/Gateway API exposure

@@ -473,12 +473,8 @@ echo "✓ Linked CLAUDE.md to AGENTS.md"
 """
 
 [tasks.generate-ai-1password-items]
-description = "Create missing 1Password items for LiteLLM, Open WebUI, Langfuse, Hermes, and Paperclip"
+description = "Create missing 1Password items for LiteLLM, Open WebUI, Hermes, and kagent"
 run = "./scripts/generate-ai-1password-items.sh"
-
-[tasks.configure-open-webui-langfuse]
-description = "Persist Open WebUI -> LiteLLM Langfuse trace headers and restart Open WebUI"
-run = "./scripts/configure-open-webui-langfuse.sh"
 
 [tasks.update-gateway-api-crds]
 description = "Download Gateway API standard CRDs for GATEWAY_API_VERSION into Git"

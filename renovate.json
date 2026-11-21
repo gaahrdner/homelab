@@ -99,7 +99,6 @@
         "docker"
       ],
       "matchPackageNames": [
-        "ghcr.io/paperclipai/paperclip",
         "dperson/samba",
         "quay.io/samba.org/samba-metrics"
       ],

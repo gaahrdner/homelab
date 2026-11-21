@@ -33,32 +33,19 @@ spec:
               drop:
                 - ALL
           command:
-            - /bin/sh
-            - -c
+            - litellm
           args:
-            - |
-              export DATABASE_URL="postgresql://litellm:${DATABASE_PASSWORD}@litellm-postgresql/litellm"
-              exec litellm --config /app/config/config.yaml
+            - --config
+            - /app/config/config.yaml
           ports:
             - name: http
               containerPort: 4000
           env:
-            - name: DATABASE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: litellm-postgresql
-                  key: password
             - name: PROXY_MASTER_KEY
               valueFrom:
                 secretKeyRef:
                   name: litellm-master-key
                   key: master-key
-            - name: LANGFUSE_RELEASE
-              value: litellm-v1.83.14-stable.patch.2
-            - name: LANGFUSE_OTEL_HOST
-              value: http://langfuse-web.langfuse.svc.cluster.local:3000
-            - name: LANGFUSE_TRACING_ENVIRONMENT
-              value: norns
             - name: LITELLM_LOG
               value: INFO
           envFrom:
@@ -67,8 +54,6 @@ spec:
             - secretRef:
                 name: litellm-together
                 optional: true
-            - secretRef:
-                name: langfuse-project-api-keys
           volumeMounts:
             - name: config
               mountPath: /app/config

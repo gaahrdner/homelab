@@ -42,7 +42,8 @@ reach the internal alias table at `http://litellm.internal/v1`.
 
 ## Notes
 
-- The seeded Hermes config defaults to the local `qwen-exec` alias through LiteLLM.
+- The seeded Hermes config defaults to the local `ds4-plan` alias through LiteLLM.
+- `HERMES_DASHBOARD_SESSION_TOKEN` is sourced from `hermes-core-secrets` (`API_SERVER_KEY`) so the dashboard can bind `0.0.0.0:9119` cleanly.
 - Premium Together aliases are intended as explicit escalation lanes, not the default chat path.
 - Signal is scaffolded in-cluster through a companion `signal-cli` deployment.
 - Hermes only enables the Signal adapter after the optional `hermes-signal`
