@@ -87,7 +87,7 @@ fi
 
 echo "==> Updating persisted Open WebUI OpenAI connection config in pod $pod (release: open-webui-${OPENWEBUI_VERSION#v})"
 
-kubectl --context "$KUBECTL_CONTEXT" exec -n "$NAMESPACE" -c open-webui "$pod" -- \
+kubectl --context "$KUBECTL_CONTEXT" exec -i -n "$NAMESPACE" -c open-webui "$pod" -- \
   env TRACE_NAME="$TRACE_NAME" \
       GENERATION_NAME="$GENERATION_NAME" \
       OPENWEBUI_VERSION="$OPENWEBUI_VERSION" \
@@ -139,7 +139,7 @@ new_pod="$(
     -o jsonpath='{.items[0].metadata.name}'
 )"
 
-kubectl --context "$KUBECTL_CONTEXT" exec -n "$NAMESPACE" -c open-webui "$new_pod" -- \
+kubectl --context "$KUBECTL_CONTEXT" exec -i -n "$NAMESPACE" -c open-webui "$new_pod" -- \
   python - <<'PY'
 import asyncio
 import json
