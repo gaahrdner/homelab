@@ -28,7 +28,7 @@ This is a Kubernetes homelab cluster running on Talos Linux. The cluster is name
 
 **Key Details:**
 - **Cluster Name**: norns
-- **Talos Version**: v1.13.12
+- **Talos Version**: v1.14.6
 - **Kubernetes Version**: v1.36.6
 - **Control Plane Nodes**: urd (192.168.0.120), verdandi (192.168.0.121), skuld (192.168.0.122)
 - **Control Plane Endpoint**: https://192.168.0.120:6443

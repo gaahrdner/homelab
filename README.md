@@ -10,7 +10,7 @@ A GitOps-managed Kubernetes homelab cluster running on Talos Linux.
   - `verdandi`: 192.168.0.121 (Control Plane)
   - `skuld`: 192.168.0.122 (Control Plane)
 - **Control Plane Endpoint**: `https://192.168.0.120:6443`
-- **Talos Version**: v1.13.12
+- **Talos Version**: v1.14.6
 - **Kubernetes Version**: v1.36.6
 
 ## Prerequisites
