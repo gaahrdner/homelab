@@ -1,0 +1,59 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: goldilocks
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - chart: goldilocks
+      repoURL: https://charts.fairwinds.com/stable
+      targetRevision: 11.3.1
+      helm:
+        valuesObject:
+          vpa:
+            enabled: false
+          metrics-server:
+            enabled: false
+          controller:
+            enabled: true
+            flags:
+              on-by-default: true
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 256Mi
+          dashboard:
+            enabled: true
+            replicaCount: 1
+            flags:
+              on-by-default: true
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 256Mi
+    - repoURL: https://github.com/gaahrdner/homelab.git
+      targetRevision: HEAD
+      path: src/apps/infrastructure/goldilocks/k8s
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: goldilocks
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
