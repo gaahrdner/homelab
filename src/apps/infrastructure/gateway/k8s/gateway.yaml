@@ -4,9 +4,23 @@ metadata:
   name: internal-gateway-config
   namespace: gateway
 spec:
+  description: Internal GatewayClass config with gRPC-Web passthrough
   httpOptions:
     grpcWebTranslation:
       enabled: false
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: cilium-internal
+spec:
+  controllerName: io.cilium/gateway-controller
+  description: Cilium GatewayClass for internal HTTP services
+  parametersRef:
+    group: cilium.io
+    kind: CiliumGatewayClassConfig
+    name: internal-gateway-config
+    namespace: gateway
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
@@ -16,12 +30,7 @@ metadata:
   annotations:
     io.cilium/lb-ipam-ips: "192.168.0.202"
 spec:
-  gatewayClassName: cilium
-  infrastructure:
-    parametersRef:
-      group: cilium.io
-      kind: CiliumGatewayClassConfig
-      name: internal-gateway-config
+  gatewayClassName: cilium-internal
   listeners:
   - name: http
     protocol: HTTP
