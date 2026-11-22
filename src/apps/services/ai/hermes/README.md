@@ -42,7 +42,7 @@ reach the internal alias table at `http://litellm.internal/v1`.
 
 ## Notes
 
-- The seeded Hermes config defaults to the local `ds4-plan` alias through LiteLLM.
+- The seeded Hermes config defaults to the local `gx10-fast` alias through LiteLLM.
 - Browser dashboard login uses `BasicAuthProvider` (`HERMES_DASHBOARD_BASIC_AUTH_USERNAME=admin`, password and session signing secret sourced from `hermes-core-secrets` `API_SERVER_KEY`).
 - Premium Together aliases are intended as explicit escalation lanes, not the default chat path.
 - Signal is scaffolded in-cluster through a companion `signal-cli` deployment.

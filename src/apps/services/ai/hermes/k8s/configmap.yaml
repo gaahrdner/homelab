@@ -6,6 +6,6 @@ metadata:
 data:
   config.yaml: |
     model:
-      default: "ds4-plan"
+      default: "gx10-fast"
       provider: "custom"
       base_url: "http://litellm.litellm.svc.cluster.local:4000/v1"

@@ -4,7 +4,7 @@ This directory is the internal and experimental AI tier for the homelab.
 
 ## Scope
 
-- `litellm`: internal stateless model gateway (`http://litellm.internal`)
+- `litellm`: internal model gateway (`http://litellm.internal`)
 - `open-webui`: internal chat UI (`http://open-webui.internal`)
 - `hermes`: always-on chat/API/Signal gateway (`http://hermes.internal`)
 - `kagent`: Kubernetes-native CRD agent platform (`http://kagent.internal`)
@@ -19,4 +19,4 @@ This directory is the internal and experimental AI tier for the homelab.
 ## Backup Strategy
 
 - Velero covers cluster objects and workload metadata.
-- Longhorn recurring backups cover the persistent volumes used by Open WebUI, Hermes, kagent PostgreSQL, and ZeroClaw.
+- Longhorn recurring backups cover the persistent volumes used by Open WebUI, LiteLLM PostgreSQL, Hermes, kagent PostgreSQL, and ZeroClaw.

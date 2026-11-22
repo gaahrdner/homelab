@@ -5,25 +5,26 @@ metadata:
   namespace: litellm
 data:
   config.yaml: |
-    # Drop-in model_list snippet for litellm.internal
-    # Matches the Split Dual-Lane default AND Linked TP=2 modes managed via http://freki.internal:8080
+    # LiteLLM proxy config for litellm.internal.
+    # Backed by litellm-postgresql so the Admin UI (/ui, /v2/model/info) and DB-persisted model edits work.
+    # Managed via the web control panel at http://freki.internal:8080 (Split Dual-Lane vs Linked TP=2).
 
     model_list:
-      # --- Split Dual-Lane: Dedicated Coding Workhorse (geri:8000) ---
+      # --- LIVE (Split Dual-Lane): Dedicated Coding Workhorse (geri:8000) ---
       - model_name: gx10-coding
         litellm_params:
           model: openai/nvidia/Qwen3.8-27B-NVFP4
           api_base: http://geri.internal:8000/v1
           api_key: "EMPTY"
 
-      # --- Split Dual-Lane: Fast Chat / Reasoning / Vision (freki:8000) ---
+      # --- LIVE (Split Dual-Lane): Fast Chat / Reasoning / Vision (freki:8000) ---
       - model_name: gx10-fast
         litellm_params:
           model: openai/thinkingmachines/Inkling-2-Mini
           api_base: http://freki.internal:8000/v1
           api_key: "EMPTY"
 
-      # --- Split Dual-Lane Alternates (when swapped via Web Control Panel) ---
+      # --- INERT ALTERNATES (pending Web Control Panel backend swap) ---
       - model_name: gx10-nemotron
         litellm_params:
           model: openai/nvidia/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-NVFP4
@@ -36,7 +37,7 @@ data:
           api_base: http://freki.internal:8000/v1
           api_key: "EMPTY"
 
-      # --- Linked TP=2 Frontier Modes (served on freki:8000 across both GX10s) ---
+      # --- INERT ALTERNATES (Linked TP=2; pending Web Control Panel mode swap) ---
       - model_name: gx10-qwen38-next
         litellm_params:
           model: openai/nvidia/Qwen3.8-Flash-Next-FP4-Local
@@ -55,7 +56,7 @@ data:
           api_base: http://freki.internal:8000/v1
           api_key: "EMPTY"
 
-      # --- Always-On OpenAI Image Generation (freki:8091) ---
+      # --- ALWAYS-ON w/ long gen latency; not yet smoke-probed (freki:8091) ---
       - model_name: gx10-image
         litellm_params:
           model: openai/Qwen/Qwen-Image-2.1-Turbo
@@ -68,5 +69,7 @@ data:
 
     general_settings:
       master_key: os.environ/PROXY_MASTER_KEY
+      database_url: os.environ/DATABASE_URL
+      store_model_in_db: true
     litellm_settings:
       callbacks: ["prometheus"]

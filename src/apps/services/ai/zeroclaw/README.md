@@ -6,7 +6,7 @@ ZeroClaw is an ultra-lightweight Rust AI agent runtime with a built-in web dashb
 
 - Runs `ghcr.io/zeroclaw-labs/zeroclaw:v0.9.0` (distroless non-root Rust binary)
 - Persists memory, SQLite state, and workspace files on a 5Gi Longhorn PVC (`zeroclaw-data`)
-- Routes inference through the in-cluster stateless LiteLLM gateway (`ds4-plan` by default)
+- Routes inference through the in-cluster LiteLLM gateway (`gx10-fast` by default)
 - Exposes the bundled web dashboard and gateway at `http://zeroclaw.internal`
 
 ## Required 1Password Items

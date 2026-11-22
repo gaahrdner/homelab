@@ -33,14 +33,21 @@ spec:
               drop:
                 - ALL
           command:
-            - litellm
+            - /bin/sh
+            - -c
           args:
-            - --config
-            - /app/config/config.yaml
+            - |
+              export DATABASE_URL="postgresql://litellm:${DATABASE_PASSWORD}@litellm-postgresql/litellm"
+              exec litellm --config /app/config/config.yaml
           ports:
             - name: http
               containerPort: 4000
           env:
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: litellm-postgresql
+                  key: password
             - name: PROXY_MASTER_KEY
               valueFrom:
                 secretKeyRef:

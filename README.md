@@ -127,14 +127,14 @@ Operational note:
 - `src/apps/crds/`: cluster-scoped schema and migration-sensitive primitives
 - `src/apps/infrastructure/`: core cluster platform services and shared singleton resources
 - `src/apps/services/`: user-facing or platform-adjacent workloads
-- `src/apps/services/ai/`: internal and experimental AI workloads built around stateless LiteLLM, Open WebUI, Hermes, kagent, and ZeroClaw
+- `src/apps/services/ai/`: internal and experimental AI workloads built around LiteLLM, Open WebUI, Hermes, kagent, and ZeroClaw
 
 Current service workloads include:
 
 - `texasdust`: WordPress site exposed through Cloudflare Tunnel
 - `paperless-ngx`: internal document management
 - `keeper`: internal calendar sync service at `http://keeper.internal`
-- `litellm`, `open-webui`, `hermes`, `kagent`, and `zeroclaw`: internal stateless model proxy, chat UI, and agent runtimes (`*.internal`)
+- `litellm`, `open-webui`, `hermes`, `kagent`, and `zeroclaw`: internal model proxy, chat UI, and agent runtimes (`*.internal`)
 
 ### System Extensions (`src/talos/extensions.yaml`)
 

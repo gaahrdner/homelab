@@ -4,85 +4,48 @@ LiteLLM is deployed as the cluster's internal AI gateway.
 
 ## What This Deployment Does
 
-- Runs stateless from [configmap.yaml](k8s/configmap.yaml) (no PostgreSQL backing database)
+- Runs from [configmap.yaml](k8s/configmap.yaml) backed by `litellm-postgresql` (`store_model_in_db: true`) so the LiteLLM Admin UI (`/ui`, `/v2/model/info`) and UI model edits work cleanly
 - Exposes LiteLLM at `http://litellm.internal`
-- Reads the gateway master key and upstream provider keys from 1Password
-- Exports Prometheus metrics on `/metrics`
-- Routes local aliases (`ds4-vision`, `ds4-plan`, `ds4-review`) to `http://192.168.0.123:8000/v1` and Together-backed escalation aliases (`together-mayor`, `together-hardcode`) once `litellm-together` exists
-
-## Required 1Password Items
-
-Create these items in the `kubernetes` vault (`mbn7rk3d5gfgofrv3a2zt2tdoe`):
-
-- `litellm-master-key`
-  - `master-key`
-- `litellm-together`
-  - `TOGETHER_API_KEY`
+- Reads the gateway master key and PostgreSQL credentials from 1Password
+- Exports Prometheus metrics on `/metrics` (and PostgreSQL metrics via `postgres-exporter` on `:9187`)
 
 ## Model Aliases
 
-This repo now configures a small role-based model table:
+State as of commit `325d4cd`. All aliases use a literal placeholder upstream `api_key` because the local backends do not require auth; only the gateway master key matters for clients.
 
-| Alias | Backend | Role |
+| Alias | Backend | Status |
 |---|---|---|
-| `qwen-exec` | local uncensored Qwen 3.6 35B A3B FP8 (`batsclamp/Huihui-Qwen3.6-35B-A3B-abliterated-FP8`) | default executor |
-| `qwen-review` | local uncensored Qwen 3.6 35B A3B FP8 (`batsclamp/Huihui-Qwen3.6-35B-A3B-abliterated-FP8`) | same local backend, but callers should enable reasoning for review turns |
-| `ds4-plan` | local DeepSeek V4 Flash via `ds4` | local planner / long-context synthesizer |
-| `ds4-review` | local DeepSeek V4 Flash via `ds4` | local reviewer / second opinion |
-| `together-mayor` | LiteLLM `together_ai/moonshotai/Kimi-K2.6` | premium planner / arbiter / escalation lane |
-| `together-hardcode` | LiteLLM `together_ai/zai-org/GLM-5.1` | hardest coding and long-horizon implementation tasks |
+| `gx10-coding` | geri:8000 — `nvidia/Qwen3.8-27B-NVFP4` (Coding Workhorse) | LIVE — verified completion (0.2s) |
+| `gx10-fast` | freki:8000 — `thinkingmachines/Inkling-2-Mini` (Fast Chat/Reasoning/Vision) | LIVE — verified completion (0.1s) |
+| `gx10-nemotron` | geri:8000 — `nvidia/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-NVFP4` | inert alternate — returns 404 until the backend swaps |
+| `gx10-gemma4` | freki:8000 — `nvidia/Gemma-4-26B-A4B-NVFP4` | inert alternate — returns 404 until the backend swaps |
+| `gx10-qwen38-next` | freki:8000 — `nvidia/Qwen3.8-Flash-Next-FP4-Local` (Linked TP=2) | inert alternate — returns 404 until the backend swaps |
+| `gx10-glm53` | freki:8000 — `nvidia/GLM-5.3-Flash-FP4-Local` (Linked TP=2) | inert alternate — returns 404 until the backend swaps |
+| `gx10-inkling-small` | freki:8000 — `thinkingmachines/Inkling-Small-NVFP4` (Linked TP=2) | inert alternate — returns 404 until the backend swaps |
+| `gx10-image` | freki:8091 — `Qwen/Qwen-Image-2.1-Turbo` (Always-On image gen) | not yet smoke-probed (180s+ request); expects long generation latency |
 
-## Exact Secret Values
+How alternates load: each GX10 backend (`freki.internal:8000`/`geri.internal:8000`) serves exactly one model at a time. The web control panel at `http://freki.internal:8080` manages the Split Dual-Lane vs Linked TP=2 mode; swapping backends there is what makes an alternate alias answerable. Until the backend serves the model, the alias 404s. The configmap owns the full inventory so the swap is config-ready; do not remove the inert entries.
 
-No local upstream secret values are required for the current split-mode setup.
-The local endpoints are hardcoded in the ConfigMap because they are not secrets.
-LiteLLM still wants an upstream `api_key` field for OpenAI-compatible backends,
-so the local aliases use a literal placeholder value `dummy`.
+## Required 1Password Items
 
-The Together aliases are different: create the `litellm-together` 1Password
-item with a `TOGETHER_API_KEY` field before relying on `together-mayor` or
-`together-hardcode`.
+In the `kubernetes` vault (`mbn7rk3d5gfgofrv3a2zt2tdoe`):
+
+- `litellm-master-key` (field `master-key`) — required; merged into the proxy env as `PROXY_MASTER_KEY`
+- `litellm-postgresql` (fields `postgres-password`, `password`) — required for `litellm-postgresql` StatefulSet and `DATABASE_URL`
+- `litellm-together` — present but **not wired into the config** (no Together-backed aliases in the current configmap)
+- `litellm-vllm-upstreams` — present but unused by the current local-backend config
 
 ## Routing Policy
 
-- Use `qwen-exec` for the normal local execution loop.
-- Use `qwen-review` for review or recovery turns, with reasoning enabled in the request.
-- Use `ds4-plan` when you want an always-on local planner and long-context lane.
-- Use `ds4-review` when you want a local second opinion before leaving the homelab.
-- Use `together-mayor` when the workflow needs high-confidence planning, arbitration, or final judgment.
-- Use `together-hardcode` for the hardest codegen / repair tasks that justify a premium escalation.
-
-## Escalation Policy
-
-The intended policy is:
-
-- local first with `qwen-exec`
-- local retry / second opinion with `ds4-review`
-- premium escalation only when the task stalls, remains ambiguous, or needs a
-  higher-confidence judgment call
-
-## Request Defaults
-
-- `qwen-exec`
-  - `chat_template_kwargs.enable_thinking=false`
-- `qwen-review`
-  - `chat_template_kwargs.enable_thinking=true`
-  - `chat_template_kwargs.preserve_thinking=true`
-- `ds4-plan`
-  - `model=deepseek-chat` for non-thinking control turns
-  - `model=deepseek-v4-flash` for thinking/planning turns
-
-Together currently exposes an OpenAI-compatible Chat Completions surface, not
-the OpenAI Responses API. Keep the Together aliases for explicit escalation
-turns rather than assuming every agent runtime can transparently swap to them.
-
-LiteLLM aliases alone do not toggle Qwen reasoning. Callers should set those request
-fields explicitly.
+- `gx10-coding` — dedicated coding lane (geri)
+- `gx10-fast` — fast chat/reasoning/vision lane (freki); default for agents
+- `gx10-image` — image generation lane (freki:8091)
 
 ## Access
 
 - LiteLLM endpoint: `http://litellm.internal`
 - OpenAI-compatible base URL: `http://litellm.internal/v1`
+- Auth header for clients: `Authorization: Bearer <master-key>` (master key is never committed; read from the `litellm-master-key` 1Password item)
 
 ## Metrics
 
@@ -91,5 +54,7 @@ fields explicitly.
 ## Layout
 
 - `k8s/configmap.yaml`: LiteLLM proxy config
-- `k8s/deployment.yaml`: stateless gateway deployment
+- `k8s/postgres.yaml`: backing PostgreSQL 19 StatefulSet + `postgres-exporter`
+- `k8s/deployment.yaml`: gateway deployment
 - `k8s/httproute.yaml`: internal DNS/Gateway API exposure
+- `k8s/service.yaml`: ClusterIP service

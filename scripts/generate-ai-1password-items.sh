@@ -122,6 +122,11 @@ upsert_item \
   "master-key[password]=$(rand_hex 32)"
 
 upsert_item \
+  "litellm-postgresql" \
+  "postgres-password[password]=$(rand_hex 24)" \
+  "password[password]=$(rand_hex 24)"
+
+upsert_item \
   "open-webui-secret" \
   "WEBUI_SECRET_KEY[password]=$(rand_b64 32)"
 

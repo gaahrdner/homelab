@@ -8,7 +8,7 @@ kagent (`v1.0.1`) is a Kubernetes-native AI agent platform (CNCF Sandbox) runnin
 - Provisions a dedicated PostgreSQL 17 StatefulSet (`kagent-postgresql`) initialized with kagent's dual-role `kagent_owner` / `kagent_readwrite` schema
 - Authenticates `kagent-controller` to Agent Substrate (`api.ate-system.svc:443`) using native `PodCertificateRequest` mTLS (`controller.substrateClientCertificate.enabled: true`)
 - Provisions a gVisor `WorkerPool` (`kagent-default`) and default `Harness` resources (`kagent-default`, `claude-default`, `codex-default`) snapshotting to `s3://ate-snapshots/kagent/`
-- Wires the default `ModelConfig` (`ds4-plan`) through the in-cluster stateless LiteLLM gateway
+- Wires the default `ModelConfig` (`gx10-fast`) through the in-cluster LiteLLM gateway
 - Exposes the kagent web UI at `http://kagent.internal`
 
 ## Required 1Password Items
