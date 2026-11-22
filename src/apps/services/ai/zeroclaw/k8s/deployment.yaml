@@ -68,7 +68,42 @@ spec:
               value: /zeroclaw-data/data
             - name: HOME
               value: /zeroclaw-data
-            - name: ZEROCLAW_providers__models__openai__litellm__api_key
+            - name: ZEROCLAW_providers__models__openai__gx10_fast__api_key
+              valueFrom:
+                secretKeyRef:
+                  name: litellm-master-key
+                  key: master-key
+            - name: ZEROCLAW_providers__models__openai__gx10_coding__api_key
+              valueFrom:
+                secretKeyRef:
+                  name: litellm-master-key
+                  key: master-key
+            - name: ZEROCLAW_providers__models__openai__gx10_nemotron__api_key
+              valueFrom:
+                secretKeyRef:
+                  name: litellm-master-key
+                  key: master-key
+            - name: ZEROCLAW_providers__models__openai__gx10_gemma4__api_key
+              valueFrom:
+                secretKeyRef:
+                  name: litellm-master-key
+                  key: master-key
+            - name: ZEROCLAW_providers__models__openai__gx10_qwen38_next_1m__api_key
+              valueFrom:
+                secretKeyRef:
+                  name: litellm-master-key
+                  key: master-key
+            - name: ZEROCLAW_providers__models__openai__gx10_qwen38_next__api_key
+              valueFrom:
+                secretKeyRef:
+                  name: litellm-master-key
+                  key: master-key
+            - name: ZEROCLAW_providers__models__openai__gx10_glm53__api_key
+              valueFrom:
+                secretKeyRef:
+                  name: litellm-master-key
+                  key: master-key
+            - name: ZEROCLAW_providers__models__openai__gx10_inkling_small__api_key
               valueFrom:
                 secretKeyRef:
                   name: litellm-master-key

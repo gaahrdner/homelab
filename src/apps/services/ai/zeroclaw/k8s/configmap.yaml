@@ -7,14 +7,65 @@ data:
   config.toml: |
     schema_version = 4
 
-    [providers.models.openai.litellm]
+    [providers.models.openai.gx10_fast]
     model = "gx10-fast"
     uri = "http://litellm.litellm.svc.cluster.local:4000/v1"
+    wire_api = "chat_completions"
+    context_window = 262144
+    temperature = 0.7
+
+    [providers.models.openai.gx10_coding]
+    model = "gx10-coding"
+    uri = "http://litellm.litellm.svc.cluster.local:4000/v1"
+    wire_api = "chat_completions"
+    context_window = 262144
+    temperature = 0.2
+
+    [providers.models.openai.gx10_nemotron]
+    model = "gx10-nemotron"
+    uri = "http://litellm.litellm.svc.cluster.local:4000/v1"
+    wire_api = "chat_completions"
+    context_window = 1048576
+    temperature = 0.7
+
+    [providers.models.openai.gx10_gemma4]
+    model = "gx10-gemma4"
+    uri = "http://litellm.litellm.svc.cluster.local:4000/v1"
+    wire_api = "chat_completions"
+    context_window = 262144
+    temperature = 0.7
+
+    [providers.models.openai.gx10_qwen38_next_1m]
+    model = "gx10-qwen38-next-1m"
+    uri = "http://litellm.litellm.svc.cluster.local:4000/v1"
+    wire_api = "chat_completions"
+    context_window = 1000000
+    temperature = 0.7
+
+    [providers.models.openai.gx10_qwen38_next]
+    model = "gx10-qwen38-next"
+    uri = "http://litellm.litellm.svc.cluster.local:4000/v1"
+    wire_api = "chat_completions"
+    context_window = 262144
+    temperature = 0.7
+
+    [providers.models.openai.gx10_glm53]
+    model = "gx10-glm53"
+    uri = "http://litellm.litellm.svc.cluster.local:4000/v1"
+    wire_api = "chat_completions"
+    context_window = 512000
+    temperature = 0.7
+
+    [providers.models.openai.gx10_inkling_small]
+    model = "gx10-inkling-small"
+    uri = "http://litellm.litellm.svc.cluster.local:4000/v1"
+    wire_api = "chat_completions"
+    context_window = 262144
     temperature = 0.7
 
     [agents.default]
     enabled = true
-    model_provider = "openai.litellm"
+    model_provider = "openai.gx10_fast"
     risk_profile = "default"
     runtime_profile = "default"
 
