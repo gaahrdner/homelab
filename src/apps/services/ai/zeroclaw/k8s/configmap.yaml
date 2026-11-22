@@ -88,3 +88,12 @@ data:
 
     [tools]
     optional = ["*"]
+
+    [mcp]
+    enabled = true
+
+    [[mcp.servers]]
+    name = "gx10"
+    transport = "http"
+    url = "http://gx10-mcp.litellm.svc.cluster.local:8080/mcp"
+    tool_timeout_secs = 300

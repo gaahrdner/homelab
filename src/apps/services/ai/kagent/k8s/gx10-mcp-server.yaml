@@ -1,0 +1,12 @@
+apiVersion: api.kagent.dev/v1alpha3
+kind: RemoteMCPServer
+metadata:
+  name: gx10-tools
+  namespace: kagent
+spec:
+  description: GX10 cluster MCP server (Laya System 1 classifier, Qwen-Image-2.1-Turbo image generation, GX10 telemetry)
+  protocol: STREAMABLE_HTTP
+  sseReadTimeout: 5m0s
+  terminateOnClose: true
+  timeout: 5m0s
+  url: http://gx10-mcp.litellm.svc.cluster.local:8080/mcp

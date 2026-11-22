@@ -56,6 +56,14 @@ spec:
                   key: master-key
             - name: ENABLE_OPENAI_API
               value: "true"
+            - name: ENABLE_IMAGE_GENERATION
+              value: "true"
+            - name: IMAGE_GENERATION_ENGINE
+              value: "openai"
+            - name: IMAGE_GENERATION_MODEL
+              value: "gx10-image"
+            - name: IMAGE_SIZE
+              value: "1024x1024"
             - name: UVICORN_WORKERS
               value: "1"
     - repoURL: https://github.com/gaahrdner/homelab.git

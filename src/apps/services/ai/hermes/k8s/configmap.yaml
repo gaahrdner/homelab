@@ -35,3 +35,8 @@ data:
             context_length: 512000
           gx10-inkling-small:
             context_length: 262144
+
+    mcp_servers:
+      gx10:
+        url: "http://gx10-mcp.litellm.svc.cluster.local:8080/mcp"
+        timeout: 300
