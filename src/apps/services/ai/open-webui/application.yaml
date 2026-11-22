@@ -41,21 +41,16 @@ spec:
             accessModes:
               - ReadWriteOnce
             storageClass: longhorn
+          enableOpenaiApi: true
+          openaiBaseApiUrl: http://litellm.litellm.svc.cluster.local:4000/v1
+          openaiApiKeyExistingSecret: litellm-master-key
+          openaiApiKeyExistingSecretKey: master-key
           extraEnvVars:
             - name: WEBUI_SECRET_KEY
               valueFrom:
                 secretKeyRef:
                   name: open-webui-secret
                   key: WEBUI_SECRET_KEY
-            - name: OPENAI_API_BASE_URL
-              value: http://litellm.litellm.svc.cluster.local:4000/v1
-            - name: OPENAI_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: litellm-master-key
-                  key: master-key
-            - name: ENABLE_OPENAI_API
-              value: "true"
             - name: ENABLE_IMAGE_GENERATION
               value: "true"
             - name: IMAGE_GENERATION_ENGINE
