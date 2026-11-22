@@ -3,8 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
-	"encoding/base64"
-	"encoding/json"
+	"encoding/json/v2"
 	"errors"
 	"fmt"
 	"io"
@@ -48,8 +47,8 @@ func envOr(key, fallback string) string {
 }
 
 type metrics struct {
-	mu       sync.Mutex
-	calls    map[string]uint64
+	mu        sync.Mutex
+	calls     map[string]uint64
 	durations map[string]float64
 }
 
@@ -89,7 +88,7 @@ func (m *metrics) serveHTTP(w http.ResponseWriter, _ *http.Request) {
 type LayaQuestion struct {
 	Type         string `json:"type" jsonschema:"Question type: 'choice' (pick one label), 'score' (ordered scale), or 'noul' (boolean/presence)"`
 	Instructions string `json:"instructions" jsonschema:"The question text Laya should answer based on the state"`
-	Criteria     any    `json:"criteria,omitempty" jsonschema:"For 'choice': list of label strings or map of label->description. For 'score': list of ordered level descriptions starting at index 0."`
+	Criteria     any    `json:"criteria,omitzero" jsonschema:"For 'choice': list of label strings or map of label->description. For 'score': list of ordered level descriptions starting at index 0."`
 }
 
 type LayaPredictInput struct {
@@ -99,13 +98,36 @@ type LayaPredictInput struct {
 
 type GenerateImageInput struct {
 	Prompt            string `json:"prompt" jsonschema:"Detailed text description of the image to generate"`
-	NegativePrompt    string `json:"negative_prompt,omitempty" jsonschema:"Optional elements to avoid in the generated image"`
-	Size              string `json:"size,omitempty" jsonschema:"Image dimensions in WxH format (e.g. 1024x1024, 768x768, 512x512). Defaults to 1024x1024."`
-	NumInferenceSteps int    `json:"num_inference_steps,omitempty" jsonschema:"Number of diffusion steps (defaults to 8 for Qwen-Image-2.1-Turbo)"`
-	Seed              *int   `json:"seed,omitempty" jsonschema:"Optional deterministic RNG seed"`
+	NegativePrompt    string `json:"negative_prompt,omitzero" jsonschema:"Optional elements to avoid in the generated image"`
+	Size              string `json:"size,omitzero" jsonschema:"Image dimensions in WxH format (e.g. 1024x1024, 768x768, 512x512). Defaults to 1024x1024."`
+	NumInferenceSteps int    `json:"num_inference_steps,omitzero" jsonschema:"Number of diffusion steps (defaults to 8 for Qwen-Image-2.1-Turbo)"`
+	Seed              *int   `json:"seed,omitzero" jsonschema:"Optional deterministic RNG seed"`
 }
 
 type GX10StatusInput struct{}
+
+type imageGenRequest struct {
+	Model             string `json:"model"`
+	Prompt            string `json:"prompt"`
+	NegativePrompt    string `json:"negative_prompt,omitzero"`
+	N                 int    `json:"n"`
+	Size              string `json:"size"`
+	ResponseFormat    string `json:"response_format"`
+	NumInferenceSteps int    `json:"num_inference_steps,omitzero"`
+	Seed              *int   `json:"seed,omitzero"`
+}
+
+type imageGenResponse struct {
+	Data []struct {
+		B64JSON []byte `json:"b64_json"`
+	} `json:"data"`
+}
+
+type gx10CompactStatus struct {
+	ActivePreset any `json:"active_preset"`
+	Nodes        any `json:"nodes"`
+	Sidecars     any `json:"sidecars"`
+}
 
 type app struct {
 	cfg        config
@@ -210,24 +232,16 @@ func (a *app) handleGenerateImage(ctx context.Context, _ *mcp.CallToolRequest, i
 		size = "1024x1024"
 	}
 
-	reqBody := map[string]any{
-		"model":           a.cfg.ImageModel,
-		"prompt":          in.Prompt,
-		"n":               1,
-		"size":            size,
-		"response_format": "b64_json",
-	}
-	if in.NegativePrompt != "" {
-		reqBody["negative_prompt"] = in.NegativePrompt
-	}
-	if in.NumInferenceSteps > 0 {
-		reqBody["num_inference_steps"] = in.NumInferenceSteps
-	}
-	if in.Seed != nil {
-		reqBody["seed"] = *in.Seed
-	}
-
-	payload, err := json.Marshal(reqBody)
+	payload, err := json.Marshal(imageGenRequest{
+		Model:             a.cfg.ImageModel,
+		Prompt:            in.Prompt,
+		NegativePrompt:    in.NegativePrompt,
+		N:                 1,
+		Size:              size,
+		ResponseFormat:    "b64_json",
+		NumInferenceSteps: in.NumInferenceSteps,
+		Seed:              in.Seed,
+	})
 	if err != nil {
 		a.metrics.observe("generate_image", "error", time.Since(start))
 		return nil, nil, fmt.Errorf("marshal request: %w", err)
@@ -250,36 +264,23 @@ func (a *app) handleGenerateImage(ctx context.Context, _ *mcp.CallToolRequest, i
 	}
 	defer resp.Body.Close()
 
-	body, err := io.ReadAll(io.LimitReader(resp.Body, 25<<20))
-	if err != nil {
-		a.metrics.observe("generate_image", "error", time.Since(start))
-		return nil, nil, fmt.Errorf("read image response: %w", err)
-	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		errBody, _ := io.ReadAll(io.LimitReader(resp.Body, 64<<10))
 		a.metrics.observe("generate_image", "error", time.Since(start))
-		return nil, nil, fmt.Errorf("image generation returned HTTP %d: %s", resp.StatusCode, strings.TrimSpace(string(body)))
+		return nil, nil, fmt.Errorf("image generation returned HTTP %d: %s", resp.StatusCode, strings.TrimSpace(string(errBody)))
 	}
 
-	var parsed struct {
-		Data []struct {
-			B64JSON string `json:"b64_json"`
-		} `json:"data"`
-	}
-	if err := json.Unmarshal(body, &parsed); err != nil {
+	var parsed imageGenResponse
+	if err := json.UnmarshalRead(io.LimitReader(resp.Body, 25<<20), &parsed); err != nil {
 		a.metrics.observe("generate_image", "error", time.Since(start))
 		return nil, nil, fmt.Errorf("decode image response: %w", err)
 	}
-	if len(parsed.Data) == 0 || parsed.Data[0].B64JSON == "" {
+	if len(parsed.Data) == 0 || len(parsed.Data[0].B64JSON) == 0 {
 		a.metrics.observe("generate_image", "error", time.Since(start))
 		return nil, nil, errors.New("image generation returned no image data")
 	}
 
-	pngBytes, err := base64.StdEncoding.DecodeString(parsed.Data[0].B64JSON)
-	if err != nil {
-		a.metrics.observe("generate_image", "error", time.Since(start))
-		return nil, nil, fmt.Errorf("decode base64 image: %w", err)
-	}
-
+	pngBytes := parsed.Data[0].B64JSON
 	elapsed := time.Since(start)
 	a.metrics.observe("generate_image", "ok", elapsed)
 	summary := fmt.Sprintf("Generated %s PNG image via %s (%d bytes in %.1fs).", size, a.cfg.ImageModel, len(pngBytes), elapsed.Seconds())
@@ -309,33 +310,28 @@ func (a *app) handleGX10Status(ctx context.Context, _ *mcp.CallToolRequest, _ GX
 	}
 	defer resp.Body.Close()
 
-	body, err := io.ReadAll(io.LimitReader(resp.Body, 2<<20))
-	if err != nil {
-		a.metrics.observe("gx10_status", "error", time.Since(start))
-		return nil, nil, fmt.Errorf("read gx10 status: %w", err)
-	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		errBody, _ := io.ReadAll(io.LimitReader(resp.Body, 64<<10))
 		a.metrics.observe("gx10_status", "error", time.Since(start))
-		return nil, nil, fmt.Errorf("gx10 control returned HTTP %d: %s", resp.StatusCode, strings.TrimSpace(string(body)))
+		return nil, nil, fmt.Errorf("gx10 control returned HTTP %d: %s", resp.StatusCode, strings.TrimSpace(string(errBody)))
 	}
 
-	// Trim bulky presets/logs fields so agents receive a compact, high-signal status payload.
-	var raw map[string]any
-	if err := json.Unmarshal(body, &raw); err == nil {
-		compact := map[string]any{
-			"active_preset": raw["active_preset"],
-			"nodes":         raw["nodes"],
-			"sidecars":      raw["sidecars"],
-		}
-		if trimmed, err := json.Marshal(compact); err == nil {
-			body = trimmed
-		}
+	// Stream-decode only the high-signal fields, skipping bulky preset/log payloads.
+	var compact gx10CompactStatus
+	if err := json.UnmarshalRead(io.LimitReader(resp.Body, 2<<20), &compact); err != nil {
+		a.metrics.observe("gx10_status", "error", time.Since(start))
+		return nil, nil, fmt.Errorf("decode gx10 status: %w", err)
+	}
+	out, err := json.Marshal(compact)
+	if err != nil {
+		a.metrics.observe("gx10_status", "error", time.Since(start))
+		return nil, nil, fmt.Errorf("marshal gx10 status: %w", err)
 	}
 
 	a.metrics.observe("gx10_status", "ok", time.Since(start))
 	return &mcp.CallToolResult{
 		Content: []mcp.Content{
-			&mcp.TextContent{Text: string(body)},
+			&mcp.TextContent{Text: string(out)},
 		},
 	}, nil, nil
 }

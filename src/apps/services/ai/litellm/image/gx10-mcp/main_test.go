@@ -2,8 +2,7 @@ package main
 
 import (
 	"context"
-	"encoding/base64"
-	"encoding/json"
+	"encoding/json/v2"
 	"io"
 	"log/slog"
 	"net/http"
@@ -36,14 +35,19 @@ func TestMCPToolsEndToEnd(t *testing.T) {
 			http.Error(w, "unauthorized", http.StatusUnauthorized)
 			return
 		}
-		resp := map[string]any{
-			"created": 123456,
-			"data": []map[string]string{
-				{"b64_json": base64.StdEncoding.EncodeToString(fakePNG)},
-			},
+		resp := struct {
+			Created int `json:"created"`
+			Data    []struct {
+				B64JSON []byte `json:"b64_json"`
+			} `json:"data"`
+		}{
+			Created: 123456,
+			Data: []struct {
+				B64JSON []byte `json:"b64_json"`
+			}{{B64JSON: fakePNG}},
 		}
 		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		_ = json.MarshalWrite(w, resp)
 	}))
 	defer litellmSrv.Close()
 
@@ -68,14 +72,12 @@ func TestMCPToolsEndToEnd(t *testing.T) {
 	mcpSrv := httptest.NewServer(a.routes())
 	defer mcpSrv.Close()
 
-	// Check /healthz
 	hr, err := http.Get(mcpSrv.URL + "/healthz")
 	if err != nil || hr.StatusCode != http.StatusOK {
 		t.Fatalf("healthz failed: err=%v resp=%v", err, hr)
 	}
 	hr.Body.Close()
 
-	// Connect with official MCP Streamable HTTP client
 	ctx := context.Background()
 	client := mcp.NewClient(&mcp.Implementation{Name: "test-client", Version: "1.0.0"}, nil)
 	session, err := client.Connect(ctx, &mcp.StreamableClientTransport{Endpoint: mcpSrv.URL + "/mcp"}, nil)
@@ -92,7 +94,6 @@ func TestMCPToolsEndToEnd(t *testing.T) {
 		t.Fatalf("expected 3 tools, got %d", len(toolsResp.Tools))
 	}
 
-	// Test laya_predict
 	layaRes, err := session.CallTool(ctx, &mcp.CallToolParams{
 		Name: "laya_predict",
 		Arguments: map[string]any{
@@ -113,7 +114,6 @@ func TestMCPToolsEndToEnd(t *testing.T) {
 		t.Fatalf("unexpected laya content: %+v", layaRes.Content)
 	}
 
-	// Test generate_image
 	imgRes, err := session.CallTool(ctx, &mcp.CallToolParams{
 		Name:      "generate_image",
 		Arguments: map[string]any{"prompt": "a tiny homelab rack", "size": "512x512"},
@@ -129,7 +129,6 @@ func TestMCPToolsEndToEnd(t *testing.T) {
 		t.Fatalf("unexpected image content: %+v", imgRes.Content[1])
 	}
 
-	// Test gx10_status
 	stRes, err := session.CallTool(ctx, &mcp.CallToolParams{
 		Name:      "gx10_status",
 		Arguments: map[string]any{},
@@ -141,7 +140,6 @@ func TestMCPToolsEndToEnd(t *testing.T) {
 		t.Fatalf("unexpected status content: %+v", stRes.Content)
 	}
 
-	// Check /metrics
 	mr, err := http.Get(mcpSrv.URL + "/metrics")
 	if err != nil || mr.StatusCode != http.StatusOK {
 		t.Fatalf("metrics failed: err=%v resp=%v", err, mr)

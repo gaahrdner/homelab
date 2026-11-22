@@ -1,6 +1,6 @@
 module github.com/gaahrdner/homelab/gx10-mcp
 
-go 1.26.3
+go 1.27
 
 require github.com/modelcontextprotocol/go-sdk v1.8.0
 

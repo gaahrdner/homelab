@@ -125,6 +125,19 @@
       "automerge": false
     },
     {
+      "description": "Pin substrate and kagent PostgreSQL to upstream major v17 to avoid incompatible PGDATA major upgrades",
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchPackageNames": [
+        "postgres"
+      ],
+      "matchPaths": [
+        "^src/apps/(infrastructure/substrate|services/ai/kagent)/.*\\.yaml$"
+      ],
+      "allowedVersions": "<18"
+    },
+    {
       "description": "Stateful database major version bumps require explicit migration planning",
       "matchDatasources": [
         "docker"
