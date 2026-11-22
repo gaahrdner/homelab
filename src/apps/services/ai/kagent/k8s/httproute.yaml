@@ -10,25 +10,6 @@ spec:
   hostnames:
     - kagent.internal
   rules:
-    # Cilium Gateway's built-in envoy.filters.http.grpc_web filter translates
-    # browser gRPC-Web requests under /api/ into native gRPC; rewrite /api -> /
-    # and forward over h2c directly to kagent-controller:8083.
-    - matches:
-        - path:
-            type: PathPrefix
-            value: /api
-      filters:
-        - type: URLRewrite
-          urlRewrite:
-            path:
-              type: ReplacePrefixMatch
-              replacePrefixMatch: /
-      timeouts:
-        request: "0s"
-        backendRequest: "0s"
-      backendRefs:
-        - name: kagent-controller-grpc
-          port: 8083
     - matches:
         - path:
             type: PathPrefix
