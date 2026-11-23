@@ -15,7 +15,7 @@ spec:
             reloader.stakater.com/auto: "true"
           image:
             repository: velero/velero
-            tag: v1.18.4
+            tag: v1.19.0
           configuration:
             features: EnableCSI
             backupStorageLocation:
