@@ -303,7 +303,7 @@ echo "✓ Namespace created"
 echo ""
 
 echo "==> [2/4] Installing ArgoCD via Helm..."
-helm upgrade --install argocd argo-cd --repo https://argoproj.github.io/argo-helm --version 10.18.2 \
+helm upgrade --install argocd argo-cd --repo https://argoproj.github.io/argo-helm --version 10.20.0 \
   --namespace argocd \
   --values src/bootstrap/argocd/values.yaml
 echo "✓ ArgoCD installed"
