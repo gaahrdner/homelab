@@ -1,0 +1,170 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grimmory
+  namespace: books
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: grimmory
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: grimmory
+    spec:
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        - name: init-library-and-wait-db
+          image: busybox:1.38
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - -ec
+            - |
+              mkdir -p /shared/books /shared/bookdrop
+              chown 1000:1000 /shared /shared/books /shared/bookdrop
+              until nc -z -w 3 mariadb.books.svc.cluster.local 3306; do
+                echo "Waiting for mariadb..."
+                sleep 2
+              done
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
+            allowPrivilegeEscalation: false
+            capabilities:
+              add:
+                - CHOWN
+              drop:
+                - ALL
+          volumeMounts:
+            - name: library
+              mountPath: /shared
+      containers:
+        - name: grimmory
+          image: ghcr.io/grimmory-tools/grimmory:v3.5.1
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: true
+            capabilities:
+              add:
+                - CHOWN
+                - DAC_OVERRIDE
+                - SETGID
+                - SETUID
+              drop:
+                - ALL
+          ports:
+            - name: http
+              containerPort: 6060
+          env:
+            - name: USER_ID
+              value: "1000"
+            - name: GROUP_ID
+              value: "1000"
+            - name: TZ
+              value: America/Chicago
+            - name: DATABASE_URL
+              value: jdbc:mariadb://mariadb.books.svc.cluster.local:3306/grimmory
+            - name: DATABASE_USERNAME
+              value: grimmory
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: grimmory-mariadb
+                  key: password
+            - name: DISK_TYPE
+              value: NETWORK
+            - name: API_DOCS_ENABLED
+              value: "false"
+            - name: JDK_JAVA_OPTIONS
+              value: "-Xmx1024m"
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+            - name: library
+              mountPath: /books
+              subPath: books
+            - name: library
+              mountPath: /bookdrop
+              subPath: bookdrop
+          startupProbe:
+            httpGet:
+              path: /api/v1/healthcheck
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /api/v1/healthcheck
+              port: http
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /api/v1/healthcheck
+              port: http
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512Mi
+            limits:
+              cpu: 1500m
+              memory: 1536Mi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: grimmory-data
+        - name: library
+          persistentVolumeClaim:
+            claimName: books-library
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grimmory
+  namespace: books
+  labels:
+    app.kubernetes.io/name: grimmory
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: grimmory
+  ports:
+    - name: http
+      port: 6060
+      targetPort: http
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: grimmory
+  namespace: books
+spec:
+  parentRefs:
+    - name: internal
+      namespace: gateway
+  hostnames:
+    - books.internal
+    - grimmory.internal
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: grimmory
+          port: 6060

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: arr-mcp
+  namespace: arr-mcp
+  labels:
+    app.kubernetes.io/name: arr-mcp
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: arr-mcp
+  ports:
+    - name: http
+      port: 6060
+      targetPort: http
