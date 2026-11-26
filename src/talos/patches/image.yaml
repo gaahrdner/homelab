@@ -2,7 +2,7 @@ machine:
   install:
     # https://factory.talos.dev/
     # renovate: datasource=github-releases depName=siderolabs/talos
-    image: factory.talos.dev/installer-secureboot/bbdb2fb8f886104868f647ffbe8eab12b403bc00db5d39d0ccd73751b4fa472c:v1.14.6
+    image: factory.talos.dev/installer-secureboot/bbdb2fb8f886104868f647ffbe8eab12b403bc00db5d39d0ccd73751b4fa472c:v1.14.7
     disk: /dev/nvme0n1
     wipe: true
   network:
