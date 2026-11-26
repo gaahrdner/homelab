@@ -38,6 +38,30 @@ spec:
       port: 3000
       targetPort: 3000
       protocol: TCP
+    - name: seerr
+      port: 5055
+      targetPort: 5055
+      protocol: TCP
+    - name: prowlarr
+      port: 9696
+      targetPort: 9696
+      protocol: TCP
+    - name: profilarr
+      port: 6868
+      targetPort: 6868
+      protocol: TCP
+    - name: cleanuparr
+      port: 11011
+      targetPort: 11011
+      protocol: TCP
+    - name: reclaimerr
+      port: 7474
+      targetPort: 7474
+      protocol: TCP
+    - name: dispatcharr
+      port: 9191
+      targetPort: 9191
+      protocol: TCP
 ---
 apiVersion: discovery.k8s.io/v1
 kind: EndpointSlice
@@ -68,6 +92,24 @@ ports:
     protocol: TCP
   - name: dockhand
     port: 3000
+    protocol: TCP
+  - name: seerr
+    port: 5055
+    protocol: TCP
+  - name: prowlarr
+    port: 9696
+    protocol: TCP
+  - name: profilarr
+    port: 6868
+    protocol: TCP
+  - name: cleanuparr
+    port: 11011
+    protocol: TCP
+  - name: reclaimerr
+    port: 7474
+    protocol: TCP
+  - name: dispatcharr
+    port: 9191
     protocol: TCP
 endpoints:
   - addresses:
@@ -224,3 +266,126 @@ spec:
       backendRefs:
         - name: bifrost
           port: 3000
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: seerr
+  namespace: gateway
+spec:
+  parentRefs:
+    - name: internal
+      namespace: gateway
+  hostnames:
+    - seerr.internal
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: bifrost
+          port: 5055
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: prowlarr
+  namespace: gateway
+spec:
+  parentRefs:
+    - name: internal
+      namespace: gateway
+  hostnames:
+    - prowlarr.internal
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: bifrost
+          port: 9696
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: profilarr
+  namespace: gateway
+spec:
+  parentRefs:
+    - name: internal
+      namespace: gateway
+  hostnames:
+    - profilarr.internal
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: bifrost
+          port: 6868
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: cleanuparr
+  namespace: gateway
+spec:
+  parentRefs:
+    - name: internal
+      namespace: gateway
+  hostnames:
+    - cleanuparr.internal
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: bifrost
+          port: 11011
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: reclaimerr
+  namespace: gateway
+spec:
+  parentRefs:
+    - name: internal
+      namespace: gateway
+  hostnames:
+    - reclaimerr.internal
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: bifrost
+          port: 7474
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: dispatcharr
+  namespace: gateway
+spec:
+  parentRefs:
+    - name: internal
+      namespace: gateway
+  hostnames:
+    - dispatcharr.internal
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      timeouts:
+        request: 0s
+        backendRequest: 0s
+      backendRefs:
+        - name: bifrost
+          port: 9191
