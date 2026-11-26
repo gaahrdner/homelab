@@ -30,7 +30,7 @@ spec:
             limits:
               memory: 2Gi
           image:
-            tag: v0.13.4
+            tag: v0.13.5
             pullPolicy: IfNotPresent
           service:
             type: ClusterIP
