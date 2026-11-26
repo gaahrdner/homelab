@@ -136,7 +136,7 @@ spec:
               add:
                 - CAP_NET_BIND_SERVICE
         - name: samba-metrics
-          image: quay.io/samba.org/samba-metrics:latest@sha256:be5724fcab51c7b6a17fb29bdb1733e048a67e7c5f3b0b4c4f7b6d4b5c0d710a
+          image: quay.io/samba.org/samba-metrics:latest@sha256:7ab5f27f83ad43ebc06abce72254473fbd2772af277ba8340bf548cf605542b1
           ports:
             - name: metrics
               containerPort: 9922
