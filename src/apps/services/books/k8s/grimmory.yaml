@@ -82,7 +82,7 @@ spec:
                   name: grimmory-mariadb
                   key: password
             - name: DISK_TYPE
-              value: NETWORK
+              value: LOCAL
             - name: API_DOCS_ENABLED
               value: "false"
             - name: JDK_JAVA_OPTIONS
