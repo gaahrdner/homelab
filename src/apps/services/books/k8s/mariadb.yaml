@@ -66,6 +66,8 @@ spec:
             - name: mysql
               containerPort: 3306
           env:
+            - name: MARIADB_AUTO_UPGRADE
+              value: "1"
             - name: MARIADB_DATABASE
               value: grimmory
             - name: MARIADB_USER
