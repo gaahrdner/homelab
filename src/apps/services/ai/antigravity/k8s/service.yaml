@@ -21,7 +21,7 @@ metadata:
   name: antigravity
   namespace: antigravity
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: antigravity.internal
+    external-dns.kubernetes.io/hostname: antigravity.internal
   labels:
     app.kubernetes.io/name: antigravity
 spec:
