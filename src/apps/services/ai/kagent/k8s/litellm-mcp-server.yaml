@@ -13,6 +13,6 @@ spec:
   headersFrom:
     - name: Authorization
       valueFrom:
-        secretKeyRef:
-          name: litellm-master-key
-          key: master-key
+        type: Secret
+        name: litellm-master-key
+        key: master-key

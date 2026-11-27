@@ -6,7 +6,7 @@ metadata:
 data:
   config.yaml: |
     model:
-      default: "gx10-fast"
+      default: "auto_router"
       provider: "custom:litellm"
       base_url: "http://litellm.litellm.svc.cluster.local:4000/v1"
 
@@ -16,9 +16,11 @@ data:
         base_url: "http://litellm.litellm.svc.cluster.local:4000/v1"
         key_env: "OPENAI_API_KEY"
         api_mode: "chat_completions"
-        default_model: "gx10-fast"
+        default_model: "auto_router"
         discover_models: true
         models:
+          auto_router:
+            context_length: 262144
           gx10-fast:
             context_length: 262144
           gx10-coding:

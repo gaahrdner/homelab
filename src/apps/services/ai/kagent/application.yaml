@@ -26,7 +26,7 @@ spec:
             default: openAI
             openAI:
               provider: OpenAI
-              model: gx10-fast
+              model: auto_router
               apiKeySecretRef: litellm-master-key
               apiKeySecretKey: master-key
               config:

@@ -7,6 +7,13 @@ data:
   config.toml: |
     schema_version = 4
 
+    [providers.models.openai.auto_router]
+    model = "auto_router"
+    uri = "http://litellm.litellm.svc.cluster.local:4000/v1"
+    wire_api = "chat_completions"
+    context_window = 262144
+    temperature = 0.7
+
     [providers.models.openai.gx10_fast]
     model = "gx10-fast"
     uri = "http://litellm.litellm.svc.cluster.local:4000/v1"
@@ -86,7 +93,7 @@ data:
 
     [agents.default]
     enabled = true
-    model_provider = "openai.gx10_fast"
+    model_provider = "openai.auto_router"
     risk_profile = "default"
     runtime_profile = "default"
 

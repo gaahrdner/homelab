@@ -51,6 +51,8 @@ spec:
             capabilities:
               add:
                 - CHOWN
+                - DAC_OVERRIDE
+                - FOWNER
               drop:
                 - ALL
           volumeMounts:
@@ -80,6 +82,11 @@ spec:
               value: /zeroclaw-data/data
             - name: HOME
               value: /zeroclaw-data
+            - name: ZEROCLAW_providers__models__openai__auto_router__api_key
+              valueFrom:
+                secretKeyRef:
+                  name: litellm-master-key
+                  key: master-key
             - name: ZEROCLAW_providers__models__openai__gx10_fast__api_key
               valueFrom:
                 secretKeyRef:
