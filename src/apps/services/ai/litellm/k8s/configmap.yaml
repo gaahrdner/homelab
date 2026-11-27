@@ -98,6 +98,10 @@ data:
       master_key: os.environ/PROXY_MASTER_KEY
       database_url: os.environ/DATABASE_URL
       store_model_in_db: true
+    router_settings:
+      fallbacks:
+        - gx10-fast-abliterated: ["gx10-coding-abliterated"]
+        - gx10-fast: ["gx10-coding"]
     litellm_settings:
       drop_params: true
       callbacks: ["prometheus"]
