@@ -87,6 +87,8 @@ data:
           model: openai/Qwen/Qwen-Image-2.1-Turbo
           api_base: http://freki.internal:8091/v1
           api_key: "EMPTY"
+        model_info:
+          mode: image_generation
 
     # System 1 (Jev-like) decision endpoint (Laya — ModernBERT-large, <1.5 GB, ~5-20ms):
     #   POST http://freki.internal:8092/predict
