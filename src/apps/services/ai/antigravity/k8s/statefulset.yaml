@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: antigravity
+  namespace: antigravity
+  labels:
+    app.kubernetes.io/name: antigravity
+spec:
+  serviceName: antigravity-headless
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: antigravity
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: antigravity
+    spec:
+      automountServiceAccountToken: false
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              preference:
+                matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - urd
+                      - verdandi
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: antigravity
+          image: ghcr.io/gaahrdner/antigravity-dev:main
+          imagePullPolicy: Always
+          ports:
+            - name: ssh
+              containerPort: 22
+              protocol: TCP
+          volumeMounts:
+            - name: home
+              mountPath: /home/dev
+            - name: authorized-keys
+              mountPath: /etc/ssh/authorized_keys
+              readOnly: true
+          readinessProbe:
+            tcpSocket:
+              port: ssh
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+          livenessProbe:
+            tcpSocket:
+              port: ssh
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 3
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: 4000m
+              memory: 6Gi
+      volumes:
+        - name: home
+          persistentVolumeClaim:
+            claimName: antigravity-home
+        - name: authorized-keys
+          configMap:
+            name: antigravity-ssh-authorized-keys
+            defaultMode: 0644

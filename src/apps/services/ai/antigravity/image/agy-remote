@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SESSION_NAME="${1:-agy}"
+WORKDIR="${2:-$HOME/workspace}"
+mkdir -p "$WORKDIR"
+
+if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
+  exec tmux attach-session -t "$SESSION_NAME"
+fi
+
+exec tmux new-session -s "$SESSION_NAME" -c "$WORKDIR" "agy --remote-control; exec \$SHELL -l"

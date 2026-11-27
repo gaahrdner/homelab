@@ -41,7 +41,7 @@ This is a Kubernetes homelab cluster running on Talos Linux. The cluster is name
 - **Remote Access**: Tailscale Kubernetes operator with a connector that advertises cluster pod/service CIDRs to the tailnet
 - **Platform Services**: cert-manager (TLS), 1Password Connect (secrets), kube-prometheus-stack
 - **Applications**: texasdust.org (WordPress nonprofit site, exposed via Cloudflare Tunnel), Paperless-ngx (internal document archive), Keeper.sh (internal calendar sync at `keeper.internal`), Books stack — Grimmory (`books.internal`, `grimmory.internal`) + Shelfmark (`shelfmark.internal`)
-- **AI/Internal Tools**: LiteLLM (`litellm.internal`) + `gx10-mcp` (Go MCP server for Laya/Qwen-Image/GX10 status), `arr-mcp` (`arr-mcp.internal`), Open WebUI (`open-webui.internal`), Hermes (`hermes.internal`), kagent (`kagent.internal`), ZeroClaw (`zeroclaw.internal`), AWTRIX MQTT
+- **AI/Internal Tools**: LiteLLM (`litellm.internal`) + `gx10-mcp` (Go MCP server for Laya/Qwen-Image/GX10 status), `arr-mcp` (`arr-mcp.internal`), Antigravity remote dev pod (`antigravity.internal` SSH + `agy --remote-control`), Open WebUI (`open-webui.internal`), Hermes (`hermes.internal`), kagent (`kagent.internal`), ZeroClaw (`zeroclaw.internal`), AWTRIX MQTT
 
 ## Common Commands
 

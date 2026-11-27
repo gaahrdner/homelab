@@ -4,7 +4,9 @@ This directory is the internal and experimental AI tier for the homelab.
 
 ## Scope
 
-- `litellm`: internal model gateway (`http://litellm.internal`)
+- `litellm`: internal model gateway (`http://litellm.internal`) + `gx10-mcp`
+- `arr-mcp`: Sonarr/Radarr/Lidarr/Readarr MCP server (`http://arr-mcp.internal`)
+- `antigravity`: persistent remote dev pod (`antigravity.internal` SSH + `agy --remote-control`, with Go, Rust, Python/uv)
 - `open-webui`: internal chat UI (`http://open-webui.internal`)
 - `hermes`: always-on chat/API/Signal gateway (`http://hermes.internal`)
 - `kagent`: Kubernetes-native CRD agent platform (`http://kagent.internal`)
