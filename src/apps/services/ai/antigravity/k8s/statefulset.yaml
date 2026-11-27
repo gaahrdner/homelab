@@ -43,7 +43,8 @@ spec:
             - name: home
               mountPath: /home/dev
             - name: authorized-keys
-              mountPath: /etc/ssh/authorized_keys
+              mountPath: /etc/ssh/authorized_keys/dev
+              subPath: dev
               readOnly: true
           readinessProbe:
             tcpSocket:
