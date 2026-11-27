@@ -78,12 +78,32 @@ spec:
                 secretKeyRef:
                   name: litellm-master-key
                   key: master-key
+            - name: ZEROCLAW_providers__models__openai__gx10_coding_abliterated__api_key
+              valueFrom:
+                secretKeyRef:
+                  name: litellm-master-key
+                  key: master-key
+            - name: ZEROCLAW_providers__models__openai__gx10_fast_abliterated__api_key
+              valueFrom:
+                secretKeyRef:
+                  name: litellm-master-key
+                  key: master-key
+            - name: ZEROCLAW_providers__models__openai__gx10_huihui_abliterated__api_key
+              valueFrom:
+                secretKeyRef:
+                  name: litellm-master-key
+                  key: master-key
             - name: ZEROCLAW_providers__models__openai__gx10_nemotron__api_key
               valueFrom:
                 secretKeyRef:
                   name: litellm-master-key
                   key: master-key
             - name: ZEROCLAW_providers__models__openai__gx10_gemma4__api_key
+              valueFrom:
+                secretKeyRef:
+                  name: litellm-master-key
+                  key: master-key
+            - name: ZEROCLAW_providers__models__openai__gx10_qwen36_fast__api_key
               valueFrom:
                 secretKeyRef:
                   name: litellm-master-key
@@ -99,11 +119,6 @@ spec:
                   name: litellm-master-key
                   key: master-key
             - name: ZEROCLAW_providers__models__openai__gx10_glm53__api_key
-              valueFrom:
-                secretKeyRef:
-                  name: litellm-master-key
-                  key: master-key
-            - name: ZEROCLAW_providers__models__openai__gx10_inkling_small__api_key
               valueFrom:
                 secretKeyRef:
                   name: litellm-master-key

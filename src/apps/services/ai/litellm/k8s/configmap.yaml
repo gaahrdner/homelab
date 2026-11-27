@@ -24,6 +24,25 @@ data:
           api_base: http://freki.internal:8000/v1
           api_key: "EMPTY"
 
+      # --- Split Security & Uncensored (geri:8000 + freki:8000) ---
+      - model_name: gx10-coding-abliterated
+        litellm_params:
+          model: openai/HangGlidersRule/Darkstar-Qwen3.8-27B-Abliterated-ModelOpt-W4A16-NVFP4-Mixed-FP8
+          api_base: http://geri.internal:8000/v1
+          api_key: "EMPTY"
+
+      - model_name: gx10-fast-abliterated
+        litellm_params:
+          model: openai/mrfakename/Inkling-2-Mini-abliterated
+          api_base: http://freki.internal:8000/v1
+          api_key: "EMPTY"
+
+      - model_name: gx10-huihui-abliterated
+        litellm_params:
+          model: openai/sakamakismile/Huihui-Qwen3.8-27B-abliterated-NVFP4
+          api_base: http://geri.internal:8000/v1
+          api_key: "EMPTY"
+
       # --- Split Dual-Lane Alternates (when swapped via Web Control Panel) ---
       - model_name: gx10-nemotron
         litellm_params:
@@ -34,6 +53,12 @@ data:
       - model_name: gx10-gemma4
         litellm_params:
           model: openai/nvidia/Gemma-4-26B-A4B-NVFP4
+          api_base: http://freki.internal:8000/v1
+          api_key: "EMPTY"
+
+      - model_name: gx10-qwen36-fast
+        litellm_params:
+          model: openai/nvidia/Qwen3.6-35B-A3B-NVFP4
           api_base: http://freki.internal:8000/v1
           api_key: "EMPTY"
 
@@ -53,12 +78,6 @@ data:
       - model_name: gx10-glm53
         litellm_params:
           model: openai/nvidia/GLM-5.3-Flash-FP4-Local
-          api_base: http://freki.internal:8000/v1
-          api_key: "EMPTY"
-
-      - model_name: gx10-inkling-small
-        litellm_params:
-          model: openai/thinkingmachines/Inkling-Small-NVFP4
           api_base: http://freki.internal:8000/v1
           api_key: "EMPTY"
 

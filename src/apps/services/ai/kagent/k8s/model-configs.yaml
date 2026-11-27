@@ -18,6 +18,51 @@ spec:
 apiVersion: api.kagent.dev/v1alpha3
 kind: ModelConfig
 metadata:
+  name: gx10-coding-abliterated
+  namespace: kagent
+spec:
+  provider: OpenAI
+  model: gx10-coding-abliterated
+  apiKeySecret: litellm-master-key
+  apiKeySecretKey: master-key
+  stream: true
+  openAI:
+    apiFormat: chatCompletions
+    baseUrl: http://litellm.litellm.svc.cluster.local:4000/v1
+---
+apiVersion: api.kagent.dev/v1alpha3
+kind: ModelConfig
+metadata:
+  name: gx10-fast-abliterated
+  namespace: kagent
+spec:
+  provider: OpenAI
+  model: gx10-fast-abliterated
+  apiKeySecret: litellm-master-key
+  apiKeySecretKey: master-key
+  stream: true
+  openAI:
+    apiFormat: chatCompletions
+    baseUrl: http://litellm.litellm.svc.cluster.local:4000/v1
+---
+apiVersion: api.kagent.dev/v1alpha3
+kind: ModelConfig
+metadata:
+  name: gx10-huihui-abliterated
+  namespace: kagent
+spec:
+  provider: OpenAI
+  model: gx10-huihui-abliterated
+  apiKeySecret: litellm-master-key
+  apiKeySecretKey: master-key
+  stream: true
+  openAI:
+    apiFormat: chatCompletions
+    baseUrl: http://litellm.litellm.svc.cluster.local:4000/v1
+---
+apiVersion: api.kagent.dev/v1alpha3
+kind: ModelConfig
+metadata:
   name: gx10-nemotron
   namespace: kagent
 spec:
@@ -38,6 +83,21 @@ metadata:
 spec:
   provider: OpenAI
   model: gx10-gemma4
+  apiKeySecret: litellm-master-key
+  apiKeySecretKey: master-key
+  stream: true
+  openAI:
+    apiFormat: chatCompletions
+    baseUrl: http://litellm.litellm.svc.cluster.local:4000/v1
+---
+apiVersion: api.kagent.dev/v1alpha3
+kind: ModelConfig
+metadata:
+  name: gx10-qwen36-fast
+  namespace: kagent
+spec:
+  provider: OpenAI
+  model: gx10-qwen36-fast
   apiKeySecret: litellm-master-key
   apiKeySecretKey: master-key
   stream: true
@@ -83,21 +143,6 @@ metadata:
 spec:
   provider: OpenAI
   model: gx10-glm53
-  apiKeySecret: litellm-master-key
-  apiKeySecretKey: master-key
-  stream: true
-  openAI:
-    apiFormat: chatCompletions
-    baseUrl: http://litellm.litellm.svc.cluster.local:4000/v1
----
-apiVersion: api.kagent.dev/v1alpha3
-kind: ModelConfig
-metadata:
-  name: gx10-inkling-small
-  namespace: kagent
-spec:
-  provider: OpenAI
-  model: gx10-inkling-small
   apiKeySecret: litellm-master-key
   apiKeySecretKey: master-key
   stream: true
