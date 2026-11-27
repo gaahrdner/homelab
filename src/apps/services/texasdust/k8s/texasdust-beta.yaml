@@ -16,6 +16,8 @@ spec:
       labels:
         app: texasdust-beta
     spec:
+      imagePullSecrets:
+        - name: ghcr-pull-secret
       securityContext:
         runAsNonRoot: true
         runAsUser: 101
