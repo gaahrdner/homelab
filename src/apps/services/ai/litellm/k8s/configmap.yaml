@@ -99,4 +99,5 @@ data:
       database_url: os.environ/DATABASE_URL
       store_model_in_db: true
     litellm_settings:
+      drop_params: true
       callbacks: ["prometheus"]
