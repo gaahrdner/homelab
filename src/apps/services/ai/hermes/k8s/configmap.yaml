@@ -43,6 +43,8 @@ data:
             context_length: 512000
 
     mcp_servers:
-      gx10:
-        url: "http://gx10-mcp.litellm.svc.cluster.local:8080/mcp"
+      litellm:
+        url: "http://litellm.litellm.svc.cluster.local:4000/mcp/"
+        headers:
+          Authorization: "Bearer ${OPENAI_API_KEY}"
         timeout: 300

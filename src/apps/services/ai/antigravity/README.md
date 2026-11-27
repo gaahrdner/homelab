@@ -43,5 +43,6 @@ agy-remote
 From inside the pod, internal AI services are directly reachable over cluster DNS:
 
 - **LiteLLM (OpenAI-compatible):** `http://litellm.litellm.svc.cluster.local:4000/v1`
-- **GX10 MCP (`laya_predict`, `generate_image`, `gx10_status`):** `http://gx10-mcp.litellm.svc.cluster.local:8080/mcp`
-- **Arr MCP:** `http://arr-mcp.arr-mcp.svc.cluster.local:6060/mcp`
+- **LiteLLM MCP Gateway (unified `gx10` + `arr_mcp` + `fastlist`):** `http://litellm.litellm.svc.cluster.local:4000/mcp/` (auth: `Authorization: Bearer <litellm-master-key>`)
+- **GX10 MCP (direct):** `http://gx10-mcp.litellm.svc.cluster.local:8080/mcp`
+- **Arr MCP (direct):** `http://arr-mcp.arr-mcp.svc.cluster.local:6060/mcp`

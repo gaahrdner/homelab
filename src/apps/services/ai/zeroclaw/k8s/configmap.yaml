@@ -114,7 +114,8 @@ data:
     enabled = true
 
     [[mcp.servers]]
-    name = "gx10"
+    name = "litellm"
     transport = "http"
-    url = "http://gx10-mcp.litellm.svc.cluster.local:8080/mcp"
+    url = "http://litellm.litellm.svc.cluster.local:4000/mcp/"
+    headers = { Authorization = "Bearer __LITELLM_API_KEY__" }
     tool_timeout_secs = 300

@@ -35,7 +35,15 @@ spec:
             - -ec
             - |
               mkdir -p /zeroclaw-data/.zeroclaw /zeroclaw-data/data /zeroclaw-data/workspace
-              chown 65534:65534 /zeroclaw-data /zeroclaw-data/.zeroclaw /zeroclaw-data/data /zeroclaw-data/workspace
+              sed "s|__LITELLM_API_KEY__|${LITELLM_API_KEY}|g" /config-template/config.toml > /zeroclaw-data/.zeroclaw/config.toml
+              chmod 0600 /zeroclaw-data/.zeroclaw/config.toml
+              chown 65534:65534 /zeroclaw-data /zeroclaw-data/.zeroclaw /zeroclaw-data/.zeroclaw/config.toml /zeroclaw-data/data /zeroclaw-data/workspace
+          env:
+            - name: LITELLM_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: litellm-master-key
+                  key: master-key
           securityContext:
             runAsUser: 0
             runAsGroup: 0
@@ -48,6 +56,10 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /zeroclaw-data
+            - name: config
+              mountPath: /config-template/config.toml
+              subPath: config.toml
+              readOnly: true
       containers:
         - name: zeroclaw
           image: ghcr.io/zeroclaw-labs/zeroclaw:v0.9.0
@@ -126,10 +138,6 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /zeroclaw-data
-            - name: config
-              mountPath: /zeroclaw-data/.zeroclaw/config.toml
-              subPath: config.toml
-              readOnly: true
           readinessProbe:
             httpGet:
               path: /health
