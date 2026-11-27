@@ -21,6 +21,13 @@ data:
           httpHostHeader: texasdust.org
           originServerName: texasdust.org
 
+      # Route beta.texasdust.org to Astro + Pages CMS beta service
+      - hostname: beta.texasdust.org
+        service: http://texasdust-beta.texasdust:80
+        originRequest:
+          httpHostHeader: beta.texasdust.org
+          originServerName: beta.texasdust.org
+
       # Route Keeper through Cloudflare so Google OAuth can use an HTTPS callback
       - hostname: keeper.alderwood.house
         service: http://keeper.keeper:3000
