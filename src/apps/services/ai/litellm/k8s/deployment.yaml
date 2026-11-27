@@ -13,7 +13,7 @@ spec:
   template:
     metadata:
       annotations:
-        homelab.gaahrdner.com/config-revision: qwen-drop-20260919
+        homelab.gaahrdner.com/config-revision: mcp-gateway-20261127
         prometheus.io/scrape: "true"
         prometheus.io/port: "4000"
         prometheus.io/path: /metrics
@@ -53,6 +53,11 @@ spec:
                 secretKeyRef:
                   name: litellm-master-key
                   key: master-key
+            - name: ARR_MCP_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: arr-mcp-token
+                  key: token
             - name: LITELLM_LOG
               value: INFO
           envFrom:

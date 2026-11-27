@@ -105,3 +105,26 @@ data:
     litellm_settings:
       drop_params: true
       callbacks: ["prometheus"]
+
+    mcp_servers:
+      gx10:
+        url: "http://gx10-mcp.litellm.svc.cluster.local:8080/mcp"
+        transport: "http"
+        auth_type: "none"
+        description: "GX10 local tools (Laya decision model, Qwen-Image generation, GX10 GPU status)"
+        allow_all_keys: true
+
+      arr_mcp:
+        url: "http://arr-mcp.arr-mcp.svc.cluster.local:6060/mcp"
+        transport: "http"
+        auth_type: "bearer_token"
+        auth_value: os.environ/ARR_MCP_TOKEN
+        description: "Sonarr, Radarr, Lidarr, and Readarr media management"
+        allow_all_keys: true
+
+      fastlist:
+        url: "https://fastlist.org/mcp"
+        transport: "http"
+        auth_type: "none"
+        description: "FastList classifieds search and listing tools"
+        allow_all_keys: true
