@@ -29,7 +29,7 @@ spec:
               emptyDir: {}
           initContainers:
             - name: dump
-              image: mariadb:13.0
+              image: mariadb:13.1
               env:
                 - name: MYSQL_PWD
                   valueFrom:
